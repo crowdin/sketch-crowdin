@@ -3,15 +3,28 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "my-command",
-      "identifier": "my-command-identifier",
-      "script": "./my-command.js"
+      "name": "Set access token",
+      "identifier": "set-access-token",
+      "script": "./settings.js",
+      "handler": "setAccessToken"
+    },
+    {
+      "name": "Set project identifier",
+      "identifier": "set-project-id",
+      "script": "./settings.js",
+      "handler": "setProjectId"
     }
   ],
   "menu": {
-    "title": "sketch-crowdin",
+    "title": "Crowdin",
     "items": [
-      "my-command-identifier"
+      {
+        "title": "Configuration",
+        "items": [
+          "set-access-token",
+          "set-project-id"
+        ]
+      }
     ]
   }
 }
