@@ -15,6 +15,9 @@
     "start": "skpm-build --watch --run",
     "postinstall": "npm run build && skpm-link"
   },
+  "dependencies": {
+    "crowdin-sdk-2": "file:~/Code/crowdin-node-sdk-2"
+  },
   "devDependencies": {
     "@skpm/builder": "^0.4.2"
   }
