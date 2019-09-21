@@ -16,8 +16,8 @@ function test() {
         httpClient: httpClient
     });
     api.listProjects()
-        .then(resp => ui.message(`Found ${resp.data.length} projects`))
-        .catch(_error => ui.message('Failed to fetch projects'));
+        .then(resp => ui.message(`Found ${JSON.stringify(resp)} projects`))
+        .catch(_error => ui.message('Failed to fetch projects' + JSON.stringify(_error)));
 }
 
 export { test };
