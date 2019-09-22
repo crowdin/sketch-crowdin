@@ -1,7 +1,6 @@
 import ui from 'sketch/ui';
 import settings from 'sketch/settings';
 import * as crowdin from 'crowdin-sdk-2';
-import httpClient from './http';
 import { ACCESS_TOKEN_KEY, ORGANIZATION } from './constants';
 
 function test() {
@@ -13,7 +12,7 @@ function test() {
         token: settings.settingForKey(ACCESS_TOKEN_KEY),
         organization: settings.settingForKey(ORGANIZATION)
     }, {
-        httpClient: httpClient
+        httpClient: crowdin.HttpClientType.FETCH
     });
     api.listProjects()
         .then(resp => ui.message(`Found ${JSON.stringify(resp)} projects`))
