@@ -21,10 +21,10 @@
       "handler": "setOrganization"
     },
     {
-      "name": "Test",
-      "identifier": "test",
-      "script": "./test.js",
-      "handler": "test"
+      "name": "Selected Page",
+      "identifier": "send-page-text",
+      "script": "./plugin.js",
+      "handler": "sendPageStringsToCrowdin"
     }
   ],
   "menu": {
@@ -38,7 +38,12 @@
           "set-organization"
         ]
       },
-      "test"
+      {
+        "title": "Send text to Crowdin",
+        "items": [
+          "send-page-text"
+        ]
+      }
     ]
   }
 }
