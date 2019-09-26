@@ -9,7 +9,13 @@
       "handler": "setAccessToken"
     },
     {
-      "name": "Set project identifier",
+      "name": "Select from existing projects",
+      "identifier": "select-from-existing-projects",
+      "script": "./settings.js",
+      "handler": "setProjectIdFromExisting"
+    },
+    {
+      "name": "Set project id",
       "identifier": "set-project-id",
       "script": "./settings.js",
       "handler": "setProjectId"
@@ -25,6 +31,12 @@
       "identifier": "send-page-text",
       "script": "./plugin.js",
       "handler": "sendPageStringsToCrowdin"
+    },
+    {
+      "name": "Whole Document",
+      "identifier": "send-document-text",
+      "script": "./plugin.js",
+      "handler": "sendDocumentStringsToCrowdin"
     }
   ],
   "menu": {
@@ -34,14 +46,21 @@
         "title": "Configuration",
         "items": [
           "set-access-token",
-          "set-project-id",
-          "set-organization"
+          "set-organization",
+          {
+            "title": "Set Project",
+            "items": [
+              "select-from-existing-projects",
+              "set-project-id"
+            ]
+          }
         ]
       },
       {
         "title": "Send text to Crowdin",
         "items": [
-          "send-page-text"
+          "send-page-text",
+          "send-document-text"
         ]
       }
     ]

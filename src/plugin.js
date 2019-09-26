@@ -1,16 +1,40 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
-import * as crowdin from 'crowdin-sdk-2';
-import { ACCESS_TOKEN_KEY, ORGANIZATION, PROJECT_ID } from './constants';
+import { PROJECT_ID } from './constants';
+import { createClient, handleError } from './util';
+
+function sendDocumentStringsToCrowdin() {
+    try {
+        const selectedDocument = dom.getSelectedDocument();
+        const projectId = settings.settingForKey(PROJECT_ID);
+
+        if (!selectedDocument) {
+            throw 'Please select a document';
+        }
+        if (!projectId) {
+            throw 'Please set project id';
+        }
+
+        if (selectedDocument.pages === 0) {
+            throw 'Nothing to send to Crowdin system';
+        }
+
+        //just for validation
+        createClient();
+
+        const promises = selectedDocument.pages.map(page => sendPageStrings(page));
+        Promise.all(promises).finally(() => 'Strings were successfully pushed to Crowdin');
+    } catch (error) {
+        handleError(error);
+    }
+}
 
 async function sendPageStringsToCrowdin() {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
-        const token = settings.settingForKey(ACCESS_TOKEN_KEY);
         const projectId = settings.settingForKey(PROJECT_ID);
-        const organization = settings.settingForKey(ORGANIZATION);
 
         if (!selectedDocument) {
             throw 'Please select a document';
@@ -18,45 +42,46 @@ async function sendPageStringsToCrowdin() {
         if (!selectedPage) {
             throw 'Please select a page';
         }
-        if (!token || !projectId) {
-            throw 'Please configure plugin in plugin Configuration menu';
+        if (!projectId) {
+            throw 'Please set project id';
         }
 
-        const strings = dom.find('Text', selectedPage);
-
-        if (strings.length === 0) {
-            throw 'Nothing to send to Crowdin system';
-        }
-
-        const text = strings.map(t => t.text).join('\n\r');
-
-        const client = new crowdin.Client({ token, organization }, { httpClientType: crowdin.HttpClientType.FETCH });
-        const { sourceFilesApi, uploadStorageApi } = client;
-
-        //add proper pagination here
-        const fileName = `Sketch_${selectedPage.id}`;
-        const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, undefined, 500);
-        const file = projectFiles.data
-            .map(f => f.data)
-            .find(f => f.name === fileName);
-        const storage = await uploadStorageApi.addStorage('text/plain', text);
-        const storageId = storage.data.id;
-        if (!!file) {
-            await sourceFilesApi.updateFile(projectId, file.id, { storageId });
-        } else {
-            await sourceFilesApi.createFile(projectId, {
-                storageId: storageId,
-                name: fileName
-            });
-        }
+        await sendPageStrings(selectedPage);
         ui.message('Strings were successfully pushed to Crowdin');
     } catch (error) {
-        if (typeof error === 'string' || error instanceof String) {
-            ui.message(error);
-        } else {
-            ui.message(`An error occurred ${JSON.stringify(error)}`);
-        }
+        handleError(error);
     }
 }
 
-export { sendPageStringsToCrowdin };
+async function sendPageStrings(page) {
+    const projectId = settings.settingForKey(PROJECT_ID);
+
+    const strings = dom.find('Text', page);
+
+    if (strings.length === 0) {
+        throw 'Nothing to send to Crowdin system';
+    }
+
+    const text = strings.map(t => t.text).join('\n\r');
+
+    const { sourceFilesApi, uploadStorageApi } = createClient();
+
+    //add proper pagination here
+    const fileName = `Sketch_${page.id}`;
+    const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, undefined, 500);
+    const file = projectFiles.data
+        .map(f => f.data)
+        .find(f => f.name === fileName);
+    const storage = await uploadStorageApi.addStorage('text/plain', text);
+    const storageId = storage.data.id;
+    if (!!file) {
+        await sourceFilesApi.updateFile(projectId, file.id, { storageId });
+    } else {
+        await sourceFilesApi.createFile(projectId, {
+            storageId: storageId,
+            name: fileName
+        });
+    }
+}
+
+export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin };
