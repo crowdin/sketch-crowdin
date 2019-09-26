@@ -42,7 +42,7 @@ function setOrganization() {
         });
 }
 
-function setProjectIdFromExisting() {
+async function setProjectIdFromExisting() {
     try {
         if (!dom.getSelectedDocument()) {
             throw 'Please select a document';
@@ -53,7 +53,7 @@ function setProjectIdFromExisting() {
             throw 'Currently there is not projects to select';
         }
         ui.getInputFromUser('Projects', {
-            type: UI.INPUT_TYPE.selection,
+            type: ui.INPUT_TYPE.selection,
             possibleValues: projects.data.map(pr => pr.data.name)
         }, (err, value) => {
             if (err) {

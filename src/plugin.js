@@ -4,7 +4,7 @@ import settings from 'sketch/settings';
 import { PROJECT_ID } from './constants';
 import { createClient, handleError } from './util';
 
-function sendDocumentStringsToCrowdin() {
+async function sendDocumentStringsToCrowdin() {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const projectId = settings.settingForKey(PROJECT_ID);
@@ -24,7 +24,12 @@ function sendDocumentStringsToCrowdin() {
         createClient();
 
         const promises = selectedDocument.pages.map(page => sendPageStrings(page));
-        Promise.all(promises).finally(() => 'Strings were successfully pushed to Crowdin');
+        try {
+            await Promise.all(promises);
+            ui.message('Strings were successfully pushed to Crowdin');
+        } catch (error) {
+            ui.message('Processed with errors');
+        }
     } catch (error) {
         handleError(error);
     }
@@ -34,7 +39,7 @@ async function sendPageStringsToCrowdin() {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
-        const projectId = settings.settingForKey(PROJECT_ID);
+        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
 
         if (!selectedDocument) {
             throw 'Please select a document';
@@ -54,7 +59,7 @@ async function sendPageStringsToCrowdin() {
 }
 
 async function sendPageStrings(page) {
-    const projectId = settings.settingForKey(PROJECT_ID);
+    const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
 
     const strings = dom.find('Text', page);
 
