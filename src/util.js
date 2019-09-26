@@ -1,6 +1,6 @@
 import ui from 'sketch/ui';
 import settings from 'sketch/settings';
-import * as crowdin from 'crowdin-sdk-2';
+import crowdin from 'crowdin-api-client';
 import { ACCESS_TOKEN_KEY, ORGANIZATION } from './constants';
 
 function createClient() {
@@ -9,7 +9,7 @@ function createClient() {
     if (!token) {
         throw 'Please set access token';
     }
-    return new crowdin.Client({ token, organization }, { httpClientType: crowdin.HttpClientType.FETCH });
+    return new crowdin({ token, organization }, { httpClientType: crowdin.HttpClientType.FETCH });
 }
 
 function handleError(error) {
