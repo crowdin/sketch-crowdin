@@ -1,6 +1,7 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
+import AdmZip from './adm-zip';
 import { PROJECT_ID } from './constants';
 import { createClient, handleError } from './util';
 
@@ -89,4 +90,21 @@ async function sendPageStrings(page) {
     }
 }
 
-export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin };
+async function test() {
+    try {
+        const url = '';
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const buffer = require('@skpm/buffer').Buffer.from(blob);
+        console.log(buffer.byteLength);
+        const zip = new AdmZip(buffer);
+        zip.getEntries().forEach(entry => {
+            //entry.name === Sketch_page.id
+            console.log(entry.getData());
+        });
+    } catch (e) {
+        ui.message(JSON.stringify(e));
+    }
+}
+
+export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, test };

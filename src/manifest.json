@@ -37,6 +37,12 @@
       "identifier": "send-document-text",
       "script": "./plugin.js",
       "handler": "sendDocumentStringsToCrowdin"
+    },
+    {
+      "name": "Test",
+      "identifier": "test",
+      "script": "./plugin.js",
+      "handler": "test"
     }
   ],
   "menu": {
@@ -62,7 +68,8 @@
           "send-page-text",
           "send-document-text"
         ]
-      }
+      },
+      "test"
     ]
   }
 }

@@ -16,6 +16,7 @@
     "postinstall": "npm run build && skpm-link"
   },
   "dependencies": {
+    "@skpm/buffer": "^0.1.4",
     "crowdin-api-client": "file:~/Code/crowdin-node-sdk-2"
   },
   "devDependencies": {
