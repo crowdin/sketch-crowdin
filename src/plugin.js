@@ -90,21 +90,73 @@ async function sendPageStrings(page) {
     }
 }
 
-async function test() {
+async function translatePage() {
     try {
-        const url = '';
-        const resp = await fetch(url);
-        const blob = await resp.blob();
-        const buffer = require('@skpm/buffer').Buffer.from(blob);
-        console.log(buffer.byteLength);
-        const zip = new AdmZip(buffer);
-        zip.getEntries().forEach(entry => {
-            //entry.name === Sketch_page.id
-            console.log(entry.getData());
+        const selectedDocument = dom.getSelectedDocument();
+        const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
+        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
+
+        if (!selectedDocument) {
+            throw 'Please select a document';
+        }
+        if (!selectedPage) {
+            throw 'Please select a page';
+        }
+        if (!projectId) {
+            throw 'Please set project id';
+        }
+
+        const { projectsGroupsApi, languagesApi, translationsApi } = createClient();
+        const languages = await languagesApi.listSupportedLanguages(500);
+        const project = await projectsGroupsApi.getProject(projectId);
+        const targetLanguages = languages.data
+            .filter(l => project.data.targetLanguageIds.includes(l.data.id))
+            .map(l => l.data.name);
+        ui.getInputFromUser('Select language', {
+            type: ui.INPUT_TYPE.selection,
+            possibleValues: targetLanguages
+        }, async (err, value) => {
+            if (err) {
+                return;
+            }
+            const language = languages.data.find(l => l.data.name === value);
+            if (!!language) {
+                try {
+                    const languageId = language.data.id;
+                    const build = await translationsApi.buildProject(projectId, {
+                        targetLanguagesId: [languageId]
+                    });
+                    let finished = false;
+                    while (!finished) {
+                        const status = await translationsApi.checkBuildStatus(projectId, build.data.id);
+                        finished = status.data.status === 'finished';
+                    }
+                    const downloadLink = await translationsApi.downloadTranslations(projectId, build.data.id);
+                    const resp = await fetch(downloadLink.data.url);
+                    const blob = await resp.blob();
+                    //looks like BE returns old translations (some caching?)
+                    const translations = extractTranslations(blob, selectedPage.id);
+                    //TODO create copy of page, change text, mark page as temp
+                    ui.message(JSON.stringify(translations));
+                } catch (error) {
+                    handleError(error);
+                }
+            }
         });
-    } catch (e) {
-        ui.message(JSON.stringify(e));
+    } catch (error) {
+        handleError(error);
     }
 }
 
-export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, test };
+function extractTranslations(blob, pageId) {
+    const buffer = require('@skpm/buffer').Buffer.from(blob);
+    const zip = new AdmZip(buffer);
+    const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${pageId}`);
+    if (!!foundFile) {
+        return foundFile.getData().toString().split('\n\r');
+    } else {
+        throw 'Translations for page are missing';
+    }
+}
+
+export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, translatePage };

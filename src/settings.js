@@ -63,7 +63,7 @@ async function setProjectIdFromExisting() {
             if (!!selectedProject) {
                 settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, selectedProject.data.id);
             }
-        })
+        });
     } catch (error) {
         handleError(error);
     }

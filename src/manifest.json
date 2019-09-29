@@ -39,10 +39,10 @@
       "handler": "sendDocumentStringsToCrowdin"
     },
     {
-      "name": "Test",
-      "identifier": "test",
+      "name": "Translate selected page",
+      "identifier": "translate-page",
       "script": "./plugin.js",
-      "handler": "test"
+      "handler": "translatePage"
     }
   ],
   "menu": {
@@ -69,7 +69,7 @@
           "send-document-text"
         ]
       },
-      "test"
+      "translate-page"
     ]
   }
 }
