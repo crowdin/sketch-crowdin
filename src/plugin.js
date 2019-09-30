@@ -123,21 +123,25 @@ async function translatePage() {
             if (!!language) {
                 try {
                     const languageId = language.data.id;
+
                     const build = await translationsApi.buildProject(projectId, {
                         targetLanguagesId: [languageId]
                     });
+
                     let finished = false;
                     while (!finished) {
                         const status = await translationsApi.checkBuildStatus(projectId, build.data.id);
                         finished = status.data.status === 'finished';
                     }
+
                     const downloadLink = await translationsApi.downloadTranslations(projectId, build.data.id);
                     const resp = await fetch(downloadLink.data.url);
                     const blob = await resp.blob();
+
                     //looks like BE returns old translations (some caching?)
                     const translations = extractTranslations(blob, selectedPage.id);
-                    //TODO create copy of page, change text, mark page as temp
-                    ui.message(JSON.stringify(translations));
+
+                    createTranslatedPage(selectedDocument, selectedPage, translations, value);
                 } catch (error) {
                     handleError(error);
                 }
@@ -157,6 +161,18 @@ function extractTranslations(blob, pageId) {
     } else {
         throw 'Translations for page are missing';
     }
+}
+
+function createTranslatedPage(document, page, translations, languageName) {
+    const newPage = page.duplicate();
+    newPage.name = `${newPage.name} (${languageName})`;
+    const texts = dom.find('Text', newPage);
+    for (let i = 0; i < texts.length; i++) {
+        if (translations.length > i) {
+            texts[i].text = translations[i];
+        }
+    }
+    document.selectedPage = newPage;
 }
 
 export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, translatePage };
