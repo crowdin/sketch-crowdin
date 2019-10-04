@@ -52,17 +52,28 @@ async function setProjectIdFromExisting() {
         if (projects.data.length === 0) {
             throw 'Currently there is not projects to select';
         }
+        let projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+        let initValue = `${projects.data[0].data.name} [${projects.data[0].data.id}]`;
+        if (!!projectId) {
+            projectId = parseInt(projectId);
+            const selectedPr = projects.data.find(pr => pr.data.id === projectId);
+            if (!!selectedPr) {
+                initValue = `${selectedPr.data.name} [${selectedPr.data.id}]`;
+            }
+        }
         ui.getInputFromUser('Projects', {
             type: ui.INPUT_TYPE.selection,
-            possibleValues: projects.data.map(pr => pr.data.name)
+            possibleValues: projects.data.map(pr => `${pr.data.name} [${pr.data.id}]`),
+            initialValue: initValue
         }, (err, value) => {
             if (err) {
                 return;
             }
-            const selectedProject = projects.data.find(pr => pr.data.name === value);
-            if (!!selectedProject) {
-                settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, selectedProject.data.id);
-            }
+            const parts = value.split('[');
+            const part = parts[parts.length - 1];
+            const id = parseInt(part.substring(0, part.length - 1));
+            settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, id);
+            ui.message(id);
         });
     } catch (error) {
         handleError(error);

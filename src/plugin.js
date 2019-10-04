@@ -167,6 +167,7 @@ function createTranslatedPage(document, page, translations, languageName) {
     const newPage = page.duplicate();
     newPage.name = `${newPage.name} (${languageName})`;
     const texts = dom.find('Text', newPage);
+    //TODO fix case when single text element has multi line text content
     for (let i = 0; i < texts.length; i++) {
         if (translations.length > i) {
             texts[i].text = translations[i];
