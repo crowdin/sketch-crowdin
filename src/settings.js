@@ -73,7 +73,6 @@ async function setProjectIdFromExisting() {
             const part = parts[parts.length - 1];
             const id = parseInt(part.substring(0, part.length - 1));
             settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, id);
-            ui.message(id);
         });
     } catch (error) {
         handleError(error);
