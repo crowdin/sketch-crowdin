@@ -9,7 +9,7 @@
       "handler": "setAccessToken"
     },
     {
-      "name": "Select from existing projects",
+      "name": "Select project from existing projects",
       "identifier": "select-from-existing-projects",
       "script": "./settings.js",
       "handler": "setProjectIdFromExisting"
@@ -27,16 +27,22 @@
       "handler": "setOrganization"
     },
     {
-      "name": "Selected Page",
+      "name": "Send text of selected page",
       "identifier": "send-page-text",
       "script": "./plugin.js",
       "handler": "sendPageStringsToCrowdin"
     },
     {
-      "name": "Whole Document",
+      "name": "Send text of whole document",
       "identifier": "send-document-text",
       "script": "./plugin.js",
       "handler": "sendDocumentStringsToCrowdin"
+    },
+    {
+      "name": "Translate whole document",
+      "identifier": "translate-document",
+      "script": "./plugin.js",
+      "handler": "translateDocument"
     },
     {
       "name": "Translate selected page",
@@ -48,28 +54,16 @@
   "menu": {
     "title": "Crowdin",
     "items": [
-      {
-        "title": "Configuration",
-        "items": [
-          "set-access-token",
-          "set-organization",
-          {
-            "title": "Set Project",
-            "items": [
-              "select-from-existing-projects",
-              "set-project-id"
-            ]
-          }
-        ]
-      },
-      {
-        "title": "Send text to Crowdin",
-        "items": [
-          "send-page-text",
-          "send-document-text"
-        ]
-      },
-      "translate-page"
+      "set-access-token",
+      "set-organization",
+      "select-from-existing-projects",
+      "set-project-id",
+      "-",
+      "send-page-text",
+      "send-document-text",
+      "-",
+      "translate-page",
+      "translate-document"
     ]
   }
 }

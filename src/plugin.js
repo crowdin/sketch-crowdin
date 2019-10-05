@@ -5,6 +5,8 @@ import AdmZip from './adm-zip';
 import { PROJECT_ID } from './constants';
 import { createClient, handleError } from './util';
 
+//Push
+
 async function sendDocumentStringsToCrowdin() {
     try {
         const selectedDocument = dom.getSelectedDocument();
@@ -14,7 +16,7 @@ async function sendDocumentStringsToCrowdin() {
             throw 'Please select a document';
         }
         if (!projectId) {
-            throw 'Please set project id';
+            throw 'Please set project';
         }
 
         if (selectedDocument.pages === 0) {
@@ -49,7 +51,7 @@ async function sendPageStringsToCrowdin() {
             throw 'Please select a page';
         }
         if (!projectId) {
-            throw 'Please set project id';
+            throw 'Please set project';
         }
 
         await sendPageStrings(selectedPage);
@@ -90,7 +92,17 @@ async function sendPageStrings(page) {
     }
 }
 
+//Pull
+
+async function translateDocument() {
+    translate(true);
+}
+
 async function translatePage() {
+    translate(false);
+}
+
+async function translate(wholeDocument) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
@@ -99,11 +111,14 @@ async function translatePage() {
         if (!selectedDocument) {
             throw 'Please select a document';
         }
-        if (!selectedPage) {
+        if (!wholeDocument && !selectedPage) {
             throw 'Please select a page';
         }
+        if (wholeDocument && selectedDocument.pages === 0) {
+            throw 'Nothing to translate';
+        }
         if (!projectId) {
-            throw 'Please set project id';
+            throw 'Please set project';
         }
 
         const { projectsGroupsApi, languagesApi, translationsApi } = createClient();
@@ -133,15 +148,15 @@ async function translatePage() {
                         const status = await translationsApi.checkBuildStatus(projectId, build.data.id);
                         finished = status.data.status === 'finished';
                     }
-
+                    //looks like BE returns old translations (some caching?)
                     const downloadLink = await translationsApi.downloadTranslations(projectId, build.data.id);
                     const resp = await fetch(downloadLink.data.url);
                     const blob = await resp.blob();
+                    const buffer = require('@skpm/buffer').Buffer.from(blob);
+                    const zip = new AdmZip(buffer);
 
-                    //looks like BE returns old translations (some caching?)
-                    const translations = extractTranslations(blob, selectedPage.id);
-
-                    createTranslatedPage(selectedDocument, selectedPage, translations, value);
+                    const arr = wholeDocument ? selectedDocument.pages : [selectedPage];
+                    arr.forEach(pg => extractTranslations(selectedDocument, pg, value, zip));
                 } catch (error) {
                     handleError(error);
                 }
@@ -152,28 +167,47 @@ async function translatePage() {
     }
 }
 
-function extractTranslations(blob, pageId) {
-    const buffer = require('@skpm/buffer').Buffer.from(blob);
-    const zip = new AdmZip(buffer);
-    const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${pageId}`);
+function extractTranslations(document, page, languageName, zip) {
+    const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${page.id}`);
     if (!!foundFile) {
-        return foundFile.getData().toString().split('\n\r');
-    } else {
-        throw 'Translations for page are missing';
-    }
-}
-
-function createTranslatedPage(document, page, translations, languageName) {
-    const newPage = page.duplicate();
-    newPage.name = `${newPage.name} (${languageName})`;
-    const texts = dom.find('Text', newPage);
-    //TODO fix case when single text element has multi line text content
-    for (let i = 0; i < texts.length; i++) {
-        if (translations.length > i) {
-            texts[i].text = translations[i];
+        const translations = foundFile.getData().toString().split('\n\r');
+        const newPage = page.duplicate();
+        newPage.name = `${newPage.name} (${languageName})`;
+        const texts = dom.find('Text', newPage);
+        const map = texts.flatMap(txt => txt.text
+            .split('\n\r')
+            .map(e => {
+                return {
+                    txt: e,
+                    id: txt.id
+                };
+            })
+        );
+        for (let i = 0; i < map.length; i++) {
+            const e = map[i];
+            let translationText = e.txt;
+            if (translations.length > i) {
+                translationText = translations[i];
+            }
+            i++;
+            for (; i < map.length; i++) {
+                const e2 = map[i];
+                if (e2.id !== e.id) {
+                    i--;
+                    break;
+                } else if (translations.length > i) {
+                    translationText += '\n\r' + translations[i];;
+                } else {
+                    translationText += '\n\r' + e2.txt;
+                }
+            }
+            const text = texts.find(t => t.id === e.id);
+            if (text) {
+                text.text = translationText;
+            }
         }
+        document.selectedPage = newPage;
     }
-    document.selectedPage = newPage;
 }
 
-export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, translatePage };
+export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, translatePage, translateDocument };
