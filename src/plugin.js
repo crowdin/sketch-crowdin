@@ -207,6 +207,8 @@ function extractTranslations(document, page, languageName, zip) {
             }
         }
         document.selectedPage = newPage;
+    } else {
+        throw `There are no translations for page ${page.name}`;
     }
 }
 
