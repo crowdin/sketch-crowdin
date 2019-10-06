@@ -3,7 +3,7 @@ import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import AdmZip from './adm-zip';
 import { PROJECT_ID } from './constants';
-import { createClient, handleError } from './util';
+import { createClient, handleError, removeTranslatedPage, addTranslatedPage, getListOfTranslatedPages } from './util';
 
 //Push
 
@@ -26,7 +26,10 @@ async function sendDocumentStringsToCrowdin() {
         //just for validation
         createClient();
 
-        const promises = selectedDocument.pages.map(page => sendPageStrings(page));
+        const translatedPages = getListOfTranslatedPages(selectedDocument);
+        const promises = selectedDocument.pages
+            .filter(p => !translatedPages.includes(p.id))
+            .map(page => sendPageStrings(page));
         try {
             await Promise.all(promises);
             ui.message('Strings were successfully pushed to Crowdin');
@@ -54,6 +57,10 @@ async function sendPageStringsToCrowdin() {
             throw 'Please set project';
         }
 
+        const translatedPages = getListOfTranslatedPages(selectedDocument);
+        if (translatedPages.includes(selectedPage.id)) {
+            return;
+        }
         await sendPageStrings(selectedPage);
         ui.message('Strings were successfully pushed to Crowdin');
     } catch (error) {
@@ -87,7 +94,8 @@ async function sendPageStrings(page) {
     } else {
         await sourceFilesApi.createFile(projectId, {
             storageId: storageId,
-            name: fileName
+            name: fileName,
+            title: page.name
         });
     }
 }
@@ -171,7 +179,9 @@ function extractTranslations(document, page, languageName, zip) {
     const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${page.id}`);
     if (!!foundFile) {
         const translations = foundFile.getData().toString().split('\n\r');
+        removeTranslatedPage(document, page.id, languageName);
         const newPage = page.duplicate();
+        addTranslatedPage(document, page.id, newPage.id, languageName);
         newPage.name = `${newPage.name} (${languageName})`;
         const texts = dom.find('Text', newPage);
         const map = texts.flatMap(txt => txt.text
