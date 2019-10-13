@@ -1,0 +1,11 @@
+# build artefacts
+sketch-crowdin.sketchplugin/Contents/Sketch
+sketch-crowdin.sketchplugin/Contents/Resources/_webpack_resources
+
+# npm
+node_modules
+.npm
+npm-debug.log
+
+# mac
+.DS_Store

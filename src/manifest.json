@@ -1,0 +1,69 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "commands": [
+    {
+      "name": "Set access token",
+      "identifier": "set-access-token",
+      "script": "./settings.js",
+      "handler": "setAccessToken"
+    },
+    {
+      "name": "Select project from existing projects",
+      "identifier": "select-from-existing-projects",
+      "script": "./settings.js",
+      "handler": "setProjectIdFromExisting"
+    },
+    {
+      "name": "Set project id",
+      "identifier": "set-project-id",
+      "script": "./settings.js",
+      "handler": "setProjectId"
+    },
+    {
+      "name": "Set organization",
+      "identifier": "set-organization",
+      "script": "./settings.js",
+      "handler": "setOrganization"
+    },
+    {
+      "name": "Send text of selected page",
+      "identifier": "send-page-text",
+      "script": "./plugin.js",
+      "handler": "sendPageStringsToCrowdin"
+    },
+    {
+      "name": "Send text of whole document",
+      "identifier": "send-document-text",
+      "script": "./plugin.js",
+      "handler": "sendDocumentStringsToCrowdin"
+    },
+    {
+      "name": "Translate whole document",
+      "identifier": "translate-document",
+      "script": "./plugin.js",
+      "handler": "translateDocument"
+    },
+    {
+      "name": "Translate selected page",
+      "identifier": "translate-page",
+      "script": "./plugin.js",
+      "handler": "translatePage"
+    }
+  ],
+  "menu": {
+    "title": "Crowdin",
+    "items": [
+      "set-access-token",
+      "set-organization",
+      "select-from-existing-projects",
+      "set-project-id",
+      "-",
+      "send-page-text",
+      "send-document-text",
+      "-",
+      "translate-page",
+      "translate-document"
+    ]
+  }
+}
