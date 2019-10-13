@@ -1,56 +1,41 @@
-# sketch-crowdin
+[<p align='center'><img src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' data-canonical-src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' width='200' height='200' align='center'/></p>](https://crowdin.com)
 
-_This plugin was created using `skpm`. For a detailed explanation on how things work, checkout the [skpm Readme](https://github.com/skpm/skpm/blob/master/README.md)._
+# Crowdin Sketch plugin
 
-## CLI Commands
+This plugin lets you integrate your Sketch project with Crowdin. Once you finished with design you can push strings into the Crowdin and you also able to translate your project and fetch translations from Crowdin in order to review your design within different languages.
 
-``` bash
-# build with hot reload
-npm run watch
+## Requirements
 
-# build for production
-npm run build
-```
+In order to start working with this plugin you need to set following properties:
 
-## Custom Configuration
+1. Access token [Personal Access Token](https://support.crowdin.com/enterprise/personal-access-tokens/#creating-a-personal-access-token) or [OAuth Access Token](https://support.crowdin.com/enterprise/authorizing-oauth-apps/#make-requests-to-the-api-with-the-access-token-returned).
+2. Organization name (might be optional).
+3. Link to Crowdin project (you can choice in dropdown one of existing projects or specify id of the project).
 
-### Babel
+Access token and organization are global parameters which will be used across all Sketch projects. But Crowdin project should be defined per each Sketch project (also known as Sketch document).
 
-To customize Babel, you have two options:
+## Contribution
 
-* You may create a [`.babelrc`](https://babeljs.io/docs/usage/babelrc) file in your project's root directory. Any settings you define here will overwrite matching config-keys within skpm preset. For example, if you pass a "presets" object, it will replace & reset all Babel presets that skpm defaults to.
+We are happy to accept contributions to the Crowdin Sketch plugin. To contribute please do the following:
 
-* If you'd like to modify or add to the existing Babel config, you must use a `webpack.skpm.config.js` file. Visit the [Webpack](#webpack) section for more info.
+1. Fork the repository on GitHub.
+2. Decide which code you want to submit. Commit your changes and push to the new branch.
+3. Ensure that your code adheres to standard conventions, as used in the rest of the library.
+4. Ensure that there are unit tests for your code.
+5. Submit a pull request with your patch on Github.
 
-### Webpack
+## Seeking Assistance
 
-To customize webpack create `webpack.skpm.config.js` file which exports function that will change webpack's config.
+If you find any problems or would like to suggest a feature, please feel free to file an issue on Github at [Issues Page](https://github.com/crowdin/sketch-crowdin/issues).
 
-```js
-/**
- * Function that mutates original webpack config.
- * Supports asynchronous changes when promise is returned.
- *
- * @param {object} config - original webpack config.
- * @param {boolean} isPluginCommand - wether the config is for a plugin command or a resource
- **/
-module.exports = function (config, isPluginCommand) {
-  /** you can change config here **/
-}
-```
+If you've found an error in these samples, please [contact](https://crowdin.com/contacts) our Support Team.
 
-## Debugging
+## License
 
-To view the output of your `console.log`, you have a few different options:
-* Open `Console.app` and look for the sketch logs
-* Use Safari's web inspector to debug your plugin's javascript context
-* Look at the `~/Library/Logs/com.bohemiancoding.sketch3/Plugin Output.log` file
+<pre>
+Copyright © 2019 Crowdin
 
-Skpm provides a convenient way to do the latter:
-
-```bash
-skpm log
-```
-
-The `-f` option causes `skpm log` to not stop when the end of logs is reached, but rather to wait for additional data to be appended to the input
-
+The Crowdin Sketch plugni is licensed under the MIT License.
+See the LICENSE.md file distributed with this work for additional
+information regarding copyright ownership.
+</pre>

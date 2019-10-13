@@ -1,8 +1,22 @@
 {
   "name": "sketch-crowdin",
-  "version": "0.1.0",
+  "displayName": "Crowdin",
+  "description": "Crowdin Sketch plugin",
+  "publisher": "Crowdin",
+  "version": "1.0.0",
   "engines": {
     "sketch": ">=3.0"
+  },
+  "keywords": [
+    "Crowdin",
+    "Localization"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/crowdin/sketch-crowdin.git"
   },
   "skpm": {
     "name": "sketch-crowdin",
