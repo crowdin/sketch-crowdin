@@ -115,6 +115,7 @@ async function translate(wholeDocument) {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
+        const translatedPages = getListOfTranslatedPages(selectedDocument);
 
         if (!selectedDocument) {
             throw 'Please select a document';
@@ -127,6 +128,9 @@ async function translate(wholeDocument) {
         }
         if (!projectId) {
             throw 'Please set project';
+        }
+        if (!wholeDocument && translatedPages.includes(selectedPage.id)) {
+            throw 'Generated page cannot be translated';
         }
 
         const { projectsGroupsApi, languagesApi, translationsApi } = createClient();
@@ -164,7 +168,9 @@ async function translate(wholeDocument) {
                     const zip = new AdmZip(buffer);
 
                     const arr = wholeDocument ? selectedDocument.pages : [selectedPage];
-                    arr.forEach(pg => extractTranslations(selectedDocument, pg, value, zip));
+                    arr
+                        .filter(p => !translatedPages.includes(p.id))
+                        .forEach(pg => extractTranslations(selectedDocument, pg, value, zip));
                 } catch (error) {
                     handleError(error);
                 }
