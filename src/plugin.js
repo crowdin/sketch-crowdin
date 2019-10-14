@@ -10,7 +10,7 @@ import { createClient, handleError, removeTranslatedPage, addTranslatedPage, get
 async function sendDocumentStringsToCrowdin() {
     try {
         const selectedDocument = dom.getSelectedDocument();
-        const projectId = settings.settingForKey(PROJECT_ID);
+        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
 
         if (!selectedDocument) {
             throw 'Please select a document';
