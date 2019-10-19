@@ -4,49 +4,52 @@ import settings from 'sketch/settings';
 import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION } from './constants';
 import { handleError, createClient } from './util';
 
+async function connectToCrowdin() {
+    await setOrganization();
+    await setAccessToken();
+}
+
 function setAccessToken() {
-    return ui.getInputFromUser('Personal Access Token', (err, value) => {
-        if (err) {
-            return;
-        }
-        settings.setSettingForKey(ACCESS_TOKEN_KEY, value);
+    return new Promise((res, _rej) => {
+        ui.getInputFromUser('Personal Access Token',
+            {
+                initValue: settings.settingForKey(ACCESS_TOKEN_KEY)
+            },
+            (err, value) => {
+                if (err) {
+                    return res();
+                }
+                settings.setSettingForKey(ACCESS_TOKEN_KEY, value);
+                res();
+            });
     });
 }
 
-function setProjectId() {
-    if (!dom.getSelectedDocument()) {
-        return ui.message('Please select a document');
-    }
-    return ui.getInputFromUser('Project identifier',
-        {
-            initialValue: settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID)
-        },
-        (err, value) => {
-            if (err) {
-                return;
-            }
-            settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, value);
-        });
-}
-
 function setOrganization() {
-    return ui.getInputFromUser('Organization',
-        {
-            initialValue: settings.settingForKey(ORGANIZATION)
-        },
-        (err, value) => {
-            if (err) {
-                return;
-            }
-            settings.setSettingForKey(ORGANIZATION, value);
-        });
+    return new Promise((res, _rej) => {
+        ui.getInputFromUser('Organization',
+            {
+                initialValue: settings.settingForKey(ORGANIZATION)
+            },
+            (err, value) => {
+                if (err) {
+                    return res();
+                }
+                settings.setSettingForKey(ORGANIZATION, value);
+                res();
+            });
+    });
 }
 
 async function setProjectIdFromExisting() {
     try {
+        if (!settings.settingForKey(ORGANIZATION) || !settings.settingForKey(ACCESS_TOKEN_KEY)) {
+            await connectToCrowdin();
+        }
         if (!dom.getSelectedDocument()) {
             throw 'Please select a document';
         }
+        ui.message('Loading projects');
         const { projectsGroupsApi } = createClient();
         const projects = await projectsGroupsApi.listProjects(undefined, undefined, 500);
         if (projects.data.length === 0) {
@@ -79,4 +82,10 @@ async function setProjectIdFromExisting() {
     }
 }
 
-export { setAccessToken, setProjectId, setOrganization, setProjectIdFromExisting };
+function test() {
+    settings.setSettingForKey(ACCESS_TOKEN_KEY, undefined);
+    settings.setSettingForKey(ORGANIZATION, undefined);
+    settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, undefined);
+}
+
+export { connectToCrowdin, setProjectIdFromExisting, test };

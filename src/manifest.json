@@ -3,22 +3,16 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "Set access token",
-      "identifier": "set-access-token",
+      "name": "Connect to Crowdin",
+      "identifier": "connect-to-crowdin",
       "script": "./settings.js",
-      "handler": "setAccessToken"
+      "handler": "connectToCrowdin"
     },
     {
-      "name": "Select project from existing projects",
-      "identifier": "select-from-existing-projects",
+      "name": "Select project",
+      "identifier": "select-project",
       "script": "./settings.js",
       "handler": "setProjectIdFromExisting"
-    },
-    {
-      "name": "Set project id",
-      "identifier": "set-project-id",
-      "script": "./settings.js",
-      "handler": "setProjectId"
     },
     {
       "name": "Set organization",
@@ -33,31 +27,35 @@
       "handler": "sendPageStringsToCrowdin"
     },
     {
-      "name": "Send text of whole document",
+      "name": "Send text of the whole document",
       "identifier": "send-document-text",
       "script": "./plugin.js",
       "handler": "sendDocumentStringsToCrowdin"
     },
     {
-      "name": "Translate whole document",
+      "name": "Pull translations for the whole document",
       "identifier": "translate-document",
       "script": "./plugin.js",
       "handler": "translateDocument"
     },
     {
-      "name": "Translate selected page",
+      "name": "Pull translations for selected page",
       "identifier": "translate-page",
       "script": "./plugin.js",
       "handler": "translatePage"
+    },
+    {
+      "name": "Tets",
+      "identifier": "test",
+      "script": "./settings.js",
+      "handler": "test"
     }
   ],
   "menu": {
     "title": "Crowdin",
     "items": [
-      "set-access-token",
-      "set-organization",
-      "select-from-existing-projects",
-      "set-project-id",
+      "connect-to-crowdin",
+      "select-project",
       "-",
       "send-page-text",
       "send-document-text",

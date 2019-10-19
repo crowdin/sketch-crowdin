@@ -90,8 +90,10 @@ async function sendPageStrings(page) {
     const storage = await uploadStorageApi.addStorage('text/plain', text);
     const storageId = storage.data.id;
     if (!!file) {
+        ui.message(`Updating existing file for page ${page.name}`);
         await sourceFilesApi.updateFile(projectId, file.id, { storageId });
     } else {
+        ui.message(`Creating new file for page ${page.name}`);
         await sourceFilesApi.createFile(projectId, {
             storageId: storageId,
             name: fileName,
@@ -134,6 +136,7 @@ async function translate(wholeDocument) {
         }
 
         const { projectsGroupsApi, languagesApi, translationsApi } = createClient();
+        ui.message('Loading list of languages');
         const languages = await languagesApi.listSupportedLanguages(500);
         const project = await projectsGroupsApi.getProject(projectId);
         const targetLanguages = languages.data
@@ -151,6 +154,7 @@ async function translate(wholeDocument) {
                 try {
                     const languageId = language.data.id;
 
+                    ui.message('Building project translations');
                     const build = await translationsApi.buildProject(projectId, {
                         targetLanguagesId: [languageId]
                     });
@@ -160,6 +164,7 @@ async function translate(wholeDocument) {
                         const status = await translationsApi.checkBuildStatus(projectId, build.data.id);
                         finished = status.data.status === 'finished';
                     }
+                    ui.message('Downloading translations');
                     //looks like BE returns old translations (some caching?)
                     const downloadLink = await translationsApi.downloadTranslations(projectId, build.data.id);
                     const resp = await fetch(downloadLink.data.url);
