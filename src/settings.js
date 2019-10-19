@@ -88,9 +88,12 @@ async function setProjectIdFromExisting() {
 }
 
 function test() {
-    settings.setSettingForKey(ACCESS_TOKEN_KEY, undefined);
-    settings.setSettingForKey(ORGANIZATION, undefined);
-    settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, undefined);
+    const selectedPage = dom.getSelectedDocument().selectedPage;
+    const artboard = dom.find('Artboard', selectedPage)[0];
+    const buffer = dom.export(artboard, {
+        output: false
+    });
+    console.log(buffer.toString('base64'));
 }
 
 export { connectToCrowdin, setProjectIdFromExisting, test };
