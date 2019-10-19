@@ -11,12 +11,17 @@ async function connectToCrowdin() {
 
 function setAccessToken() {
     return new Promise((res, _rej) => {
+        const token = settings.settingForKey(ACCESS_TOKEN_KEY);
+        let initValue = undefined;
+        if (!!token && token.length > 3) {
+            initValue = token.substring(0, 3) + '...';
+        }
         ui.getInputFromUser('Personal Access Token',
             {
-                initValue: settings.settingForKey(ACCESS_TOKEN_KEY)
+                initialValue: initValue
             },
             (err, value) => {
-                if (err) {
+                if (err || value === initValue) {
                     return res();
                 }
                 settings.setSettingForKey(ACCESS_TOKEN_KEY, value);
