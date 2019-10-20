@@ -88,12 +88,7 @@ async function setProjectIdFromExisting() {
 }
 
 function test() {
-    const selectedPage = dom.getSelectedDocument().selectedPage;
-    const artboard = dom.find('Artboard', selectedPage)[0];
-    const buffer = dom.export(artboard, {
-        output: false
-    });
-    console.log(buffer.toString('base64'));
+    ui.message('Test');
 }
 
 export { connectToCrowdin, setProjectIdFromExisting, test };

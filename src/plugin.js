@@ -233,4 +233,50 @@ function extractTranslations(document, page, languageName, zip) {
     }
 }
 
+function buildHtmlForCrowdin(page) {
+    const buffer = dom.export(page, {
+        output: false
+    });
+    const pageImage = buffer.toString('base64');
+    const layersCoordinates = page.layers
+        .map(l => l.frame)
+        .map(l => {
+            const x = l.x + l.width;
+            const y = l.y + l.height;
+            return { x, y };
+        });
+    const maxX = layersCoordinates.reduce(function (prev, current) {
+        return (prev.x > current.x) ? prev : current
+    }).x;
+    const maxY = layersCoordinates.reduce(function (prev, current) {
+        return (prev.y > current.y) ? prev : current
+    }).y;
+    const textElements = dom.find('Text', page).map(e => {
+        const textId = e.id;
+        const text = e.text;
+        let el = e;
+        let id = el.id;
+        let x = el.frame.x;
+        let y = el.frame.y;
+        while (id !== page.id) {
+            el = el.parent;
+            id = el.id;
+            x += el.frame.x;
+            y += el.frame.y;
+        }
+        const right = Math.round((1 - (x / maxX)) * 100);
+        const bottom = Math.round((1 - (y / maxY)) * 100);
+        return { bottom, right, textId, text };
+    });
+    let html = '<html>';
+    html += '<body>';
+    html += '<div style="position: relative;text-align: center;">';
+    html += `<img style="width:100%;" src="data:image/png;base64,${pageImage}">`;
+    textElements.forEach(t => html += `<div id="${t.textId}" style="position: absolute;bottom:${t.bottom}%;right:${t.right}%;">${t.text}</div>`);
+    html += '</div>';
+    html += '</body>';
+    html += '</html>';
+    return html;
+}
+
 export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, translatePage, translateDocument };
