@@ -2,6 +2,7 @@ import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import AdmZip from './adm-zip';
+import cheerio from 'cheerio';
 import { PROJECT_ID } from './constants';
 import { createClient, handleError, removeTranslatedPage, addTranslatedPage, getListOfTranslatedPages } from './util';
 
@@ -277,6 +278,20 @@ function buildHtmlForCrowdin(page) {
     html += '</body>';
     html += '</html>';
     return html;
+}
+
+function parseHtmlForText(html) {
+    const $ = cheerio.load(html);
+    const strings = $('div[id]');
+    let result = [];
+    for (let i = 0; i < strings.length; i++) {
+        const string = strings[i];
+        result.push({
+            id: string.attribs.id,
+            text: cheerio.text($(string))
+        });
+    }
+    return result;
 }
 
 export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, translatePage, translateDocument };
