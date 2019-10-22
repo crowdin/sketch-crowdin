@@ -78,17 +78,17 @@ async function sendPageStrings(page) {
         throw 'Nothing to send to Crowdin system';
     }
 
-    const text = strings.map(t => t.text).join('\n\r');
+    const text = buildHtmlForCrowdin(page);
 
     const { sourceFilesApi, uploadStorageApi } = createClient();
 
     //add proper pagination here
-    const fileName = `Sketch_${page.id}`;
+    const fileName = `Sketch_${page.id}.html`;
     const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, undefined, 500);
     const file = projectFiles.data
         .map(f => f.data)
         .find(f => f.name === fileName);
-    const storage = await uploadStorageApi.addStorage('text/plain', text);
+    const storage = await uploadStorageApi.addStorage('text/html', text);
     const storageId = storage.data.id;
     if (!!file) {
         ui.message(`Updating existing file for page ${page.name}`);
@@ -188,46 +188,23 @@ async function translate(wholeDocument) {
 }
 
 function extractTranslations(document, page, languageName, zip) {
-    const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${page.id}`);
+    const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${page.id}.html`);
     if (!!foundFile) {
-        const translations = foundFile.getData().toString().split('\n\r');
+        const translations = parseHtmlForText(foundFile.getData().toString());
         removeTranslatedPage(document, page.id, languageName);
         const newPage = page.duplicate();
         addTranslatedPage(document, page.id, newPage.id, languageName);
         newPage.name = `${newPage.name} (${languageName})`;
+        const originalStrings = dom.find('Text', page);
         const texts = dom.find('Text', newPage);
-        const map = texts.flatMap(txt => txt.text
-            .split('\n\r')
-            .map(e => {
-                return {
-                    txt: e,
-                    id: txt.id
-                };
-            })
-        );
-        for (let i = 0; i < map.length; i++) {
-            const e = map[i];
-            let translationText = e.txt;
-            if (translations.length > i) {
-                translationText = translations[i];
-            }
-            i++;
-            for (; i < map.length; i++) {
-                const e2 = map[i];
-                if (e2.id !== e.id) {
-                    i--;
-                    break;
-                } else if (translations.length > i) {
-                    translationText += '\n\r' + translations[i];;
-                } else {
-                    translationText += '\n\r' + e2.txt;
+        translations.forEach(translation => {
+            for (let i = 0; i < originalStrings.length; i++) {
+                const originalString = originalStrings[i];
+                if (originalString.id === translation.id && i < texts.length) {
+                    texts[i].text = translation.text;
                 }
             }
-            const text = texts.find(t => t.id === e.id);
-            if (text) {
-                text.text = translationText;
-            }
-        }
+        });
         document.selectedPage = newPage;
     } else {
         throw `There are no translations for page ${page.name}`;
