@@ -157,7 +157,7 @@ async function translate(wholeDocument) {
 
                     ui.message('Building project translations');
                     const build = await translationsApi.buildProject(projectId, {
-                        targetLanguagesId: [languageId]
+                        targetLanguageIds: [languageId]
                     });
 
                     let finished = false;
