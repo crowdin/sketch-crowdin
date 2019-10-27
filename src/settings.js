@@ -87,8 +87,4 @@ async function setProjectIdFromExisting() {
     }
 }
 
-function test() {
-    ui.message('Test');
-}
-
-export { connectToCrowdin, setProjectIdFromExisting, test };
+export { connectToCrowdin, setProjectIdFromExisting };
