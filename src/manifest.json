@@ -61,7 +61,9 @@
       "send-document-text",
       "-",
       "translate-page",
-      "translate-document"
+      "translate-document",
+      "-",
+      "test"
     ]
   }
 }
