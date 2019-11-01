@@ -4,43 +4,9 @@ import settings from 'sketch/settings';
 import AdmZip from './adm-zip';
 import cheerio from 'cheerio';
 import { PROJECT_ID } from './constants';
-import { createClient, handleError, removeTranslatedPage, addTranslatedPage, getListOfTranslatedPages } from './util';
+import * as util from './util';
 
 //Push
-
-async function sendDocumentStringsToCrowdin() {
-    try {
-        const selectedDocument = dom.getSelectedDocument();
-        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
-
-        if (!selectedDocument) {
-            throw 'Please select a document';
-        }
-        if (!projectId) {
-            throw 'Please set project';
-        }
-
-        if (selectedDocument.pages === 0) {
-            throw 'Nothing to send to Crowdin system';
-        }
-
-        //just for validation
-        createClient();
-
-        const translatedPages = getListOfTranslatedPages(selectedDocument);
-        const promises = selectedDocument.pages
-            .filter(p => !translatedPages.includes(p.id))
-            .map(page => sendPageStrings(page));
-        try {
-            await Promise.all(promises);
-            ui.message('Strings were successfully pushed to Crowdin');
-        } catch (error) {
-            ui.message('Processed with errors');
-        }
-    } catch (error) {
-        handleError(error);
-    }
-}
 
 async function sendPageStringsToCrowdin() {
     try {
@@ -58,33 +24,64 @@ async function sendPageStringsToCrowdin() {
             throw 'Please set project';
         }
 
-        const translatedPages = getListOfTranslatedPages(selectedDocument);
+        const translatedPages = util.getListOfTranslatedPages(selectedDocument);
         if (translatedPages.includes(selectedPage.id)) {
             return;
         }
         await sendPageStrings(selectedPage);
         ui.message('Strings were successfully pushed to Crowdin');
     } catch (error) {
-        handleError(error);
+        util.handleError(error);
     }
 }
 
 async function sendPageStrings(page) {
     const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+    const { sourceFilesApi, uploadStorageApi } = util.createClient();
 
-    const strings = dom.find('Text', page);
-
-    if (strings.length === 0) {
-        throw 'Nothing to send to Crowdin system';
+    const directories = await sourceFilesApi.listProjectDirectories(projectId, undefined, undefined, 500);
+    let directory = directories.data.find(d => d.data.name === `Sketch_${page.id}`);
+    if (!directory) {
+        ui.message('Creating new directory');
+        directory = await sourceFilesApi.createDirectory(projectId, {
+            name: `Sketch_${page.id}`,
+            title: page.name
+        });
     }
 
-    const text = buildHtmlForCrowdin(page);
+    const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
+    const artboards = dom.find('Artboard', page);
+    const promises = artboards.map(artboard => uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, artboard, projectId, directory.data.id));
+    promises.push(uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directory.data.id));
 
-    const { sourceFilesApi, uploadStorageApi } = createClient();
+    await Promise.all(promises);
+}
 
-    //add proper pagination here
+async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, artboard, projectId, directoryId) {
+    const html = util.convertArtboardToHtml(artboard);
+    const fileName = `Sketch_${artboard.id}.html`;
+    const file = projectFiles.data
+        .map(f => f.data)
+        .find(f => f.name === fileName);
+    const storage = await uploadStorageApi.addStorage('text/html', html);
+    const storageId = storage.data.id;
+    if (!!file) {
+        ui.message(`Updating existing file for artboard ${artboard.name}`);
+        await sourceFilesApi.updateFile(projectId, file.id, { storageId });
+    } else {
+        ui.message(`Creating new file for artboard ${artboard.name}`);
+        await sourceFilesApi.createFile(projectId, {
+            storageId: storageId,
+            name: fileName,
+            title: artboard.name,
+            directoryId: directoryId
+        });
+    }
+}
+
+async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directoryId) {
+    const text = util.convertOutsideTextToHtml(page);
     const fileName = `Sketch_${page.id}.html`;
-    const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, undefined, 500);
     const file = projectFiles.data
         .map(f => f.data)
         .find(f => f.name === fileName);
@@ -98,45 +95,38 @@ async function sendPageStrings(page) {
         await sourceFilesApi.createFile(projectId, {
             storageId: storageId,
             name: fileName,
-            title: page.name
+            title: page.name,
+            directoryId: directoryId
         });
     }
 }
 
 //Pull
 
-async function translateDocument() {
-    translate(true);
-}
-
 async function translatePage() {
-    translate(false);
-}
-
-async function translate(wholeDocument) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
-        const translatedPages = getListOfTranslatedPages(selectedDocument);
+        const translatedPages = util.getListOfTranslatedPages(selectedDocument);
 
         if (!selectedDocument) {
             throw 'Please select a document';
         }
-        if (!wholeDocument && !selectedPage) {
+        if (!selectedPage) {
             throw 'Please select a page';
         }
-        if (wholeDocument && selectedDocument.pages === 0) {
+        if (selectedDocument.pages === 0) {
             throw 'Nothing to translate';
         }
         if (!projectId) {
             throw 'Please set project';
         }
-        if (!wholeDocument && translatedPages.includes(selectedPage.id)) {
+        if (translatedPages.includes(selectedPage.id)) {
             throw 'Generated page cannot be translated';
         }
 
-        const { projectsGroupsApi, languagesApi, translationsApi } = createClient();
+        const { projectsGroupsApi, languagesApi, translationsApi } = util.createClient();
         ui.message('Loading list of languages');
         const languages = await languagesApi.listSupportedLanguages(500);
         const project = await projectsGroupsApi.getProject(projectId);
@@ -173,27 +163,25 @@ async function translate(wholeDocument) {
                     const buffer = require('@skpm/buffer').Buffer.from(blob);
                     const zip = new AdmZip(buffer);
 
-                    const arr = wholeDocument ? selectedDocument.pages : [selectedPage];
-                    arr
-                        .filter(p => !translatedPages.includes(p.id))
-                        .forEach(pg => extractTranslations(selectedDocument, pg, value, zip));
+                    extractTranslations(selectedDocument, selectedPage, value, zip);
                 } catch (error) {
-                    handleError(error);
+                    util.handleError(error);
                 }
             }
         });
     } catch (error) {
-        handleError(error);
+        util.handleError(error);
     }
 }
 
 function extractTranslations(document, page, languageName, zip) {
+    //entry.entryName === page.id + / + artboard.id or page.id + .html
     const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${page.id}.html`);
     if (!!foundFile) {
         const translations = parseHtmlForText(foundFile.getData().toString());
-        removeTranslatedPage(document, page.id, languageName);
+        util.removeTranslatedPage(document, page.id, languageName);
         const newPage = page.duplicate();
-        addTranslatedPage(document, page.id, newPage.id, languageName);
+        util.addTranslatedPage(document, page.id, newPage.id, languageName);
         newPage.name = `${newPage.name} (${languageName})`;
         const originalStrings = dom.find('Text', page);
         const texts = dom.find('Text', newPage);
@@ -211,52 +199,6 @@ function extractTranslations(document, page, languageName, zip) {
     }
 }
 
-function buildHtmlForCrowdin(page) {
-    const buffer = dom.export(page, {
-        output: false
-    });
-    const pageImage = buffer.toString('base64');
-    const layersCoordinates = page.layers
-        .map(l => l.frame)
-        .map(l => {
-            const x = l.x + l.width;
-            const y = l.y + l.height;
-            return { x, y };
-        });
-    const maxX = layersCoordinates.reduce(function (prev, current) {
-        return (prev.x > current.x) ? prev : current
-    }).x;
-    const maxY = layersCoordinates.reduce(function (prev, current) {
-        return (prev.y > current.y) ? prev : current
-    }).y;
-    const textElements = dom.find('Text', page).map(e => {
-        const textId = e.id;
-        const text = e.text;
-        let el = e;
-        let id = el.id;
-        let x = el.frame.x;
-        let y = el.frame.y;
-        while (id !== page.id) {
-            el = el.parent;
-            id = el.id;
-            x += el.frame.x;
-            y += el.frame.y;
-        }
-        const right = Math.round((1 - (x / maxX)) * 100);
-        const bottom = Math.round((1 - (y / maxY)) * 100);
-        return { bottom, right, textId, text };
-    });
-    let html = '<html>';
-    html += '<body>';
-    html += '<div style="position: relative;text-align: center;">';
-    html += `<img style="width:100%;" src="data:image/png;base64,${pageImage}">`;
-    textElements.forEach(t => html += `<div id="${t.textId}" style="position: absolute;bottom:${t.bottom}%;right:${t.right}%;">${t.text}</div>`);
-    html += '</div>';
-    html += '</body>';
-    html += '</html>';
-    return html;
-}
-
 function parseHtmlForText(html) {
     const $ = cheerio.load(html);
     const strings = $('div[id]');
@@ -271,4 +213,4 @@ function parseHtmlForText(html) {
     return result;
 }
 
-export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, translatePage, translateDocument };
+export { sendPageStringsToCrowdin, translatePage };

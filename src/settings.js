@@ -87,43 +87,4 @@ async function setProjectIdFromExisting() {
     }
 }
 
-function test() {
-    const selectedPage = dom.getSelectedDocument().selectedPage;
-    const artBoards = dom.find('Artboard', selectedPage);
-    const artBoard = artBoards[40];
-    const buffer = dom.export(artBoard, {
-        output: false
-    });
-    const artBoardImage = buffer.toString('base64');
-    const container = {
-        x: artBoard.frame.width,
-        y: artBoard.frame.height
-    };
-    const textElements = dom.find('Text', artBoard).map(e => {
-        const textId = e.id;
-        const text = e.text;
-        let parent = e.parent;
-        let parentId = parent.id;
-        let x = e.frame.x;
-        let y = e.frame.y;
-        while (parentId !== artBoard.id) {
-            x += parent.frame.x;
-            y += parent.frame.y;
-            parent = parent.parent;
-            parentId = parent.id;
-        }
-        return { x, y, textId, text };
-    });
-    let html = '<html>';
-    html += '<body>';
-    html += '<div style="position: relative;">';
-    html += `<img style="width:${container.x}px;height:${container.y}px;" src="data:image/png;base64,${artBoardImage}">`;
-    textElements.forEach(t => html += `<div id="${t.textId}" style="position: absolute;top:${t.y}px;left:${t.x}px;">${t.text}</div>`);
-    html += '</div>';
-    html += '</body>';
-    html += '</html>';
-    console.log(html);
-    ui.message('Test func');
-}
-
-export { connectToCrowdin, setProjectIdFromExisting, test };
+export { connectToCrowdin, setProjectIdFromExisting };

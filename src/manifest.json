@@ -27,28 +27,10 @@
       "handler": "sendPageStringsToCrowdin"
     },
     {
-      "name": "Send text of the whole document",
-      "identifier": "send-document-text",
-      "script": "./plugin.js",
-      "handler": "sendDocumentStringsToCrowdin"
-    },
-    {
-      "name": "Pull translations for the whole document",
-      "identifier": "translate-document",
-      "script": "./plugin.js",
-      "handler": "translateDocument"
-    },
-    {
       "name": "Pull translations for selected page",
       "identifier": "translate-page",
       "script": "./plugin.js",
       "handler": "translatePage"
-    },
-    {
-      "name": "Tets",
-      "identifier": "test",
-      "script": "./settings.js",
-      "handler": "test"
     }
   ],
   "menu": {
@@ -58,12 +40,8 @@
       "select-project",
       "-",
       "send-page-text",
-      "send-document-text",
       "-",
-      "translate-page",
-      "translate-document",
-      "-",
-      "test"
+      "translate-page"
     ]
   }
 }
