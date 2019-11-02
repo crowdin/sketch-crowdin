@@ -21,11 +21,11 @@ function handleError(error) {
     }
 }
 
-function removeTranslatedPage(doc, sourcePageId, languageName) {
-    const pages = settings.documentSettingForKey(doc, `crowdin-${languageName}-pages`);
-    const translatedPages = settings.documentSettingForKey(doc, `crowdin-translated-pages`);
-    if (!!pages) {
-        let arr = pages
+function removeTranslatedElement(doc, sourceElementId, languageName, type) {
+    const elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-${type}s`);
+    const translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-${type}s`);
+    if (!!elements) {
+        let arr = elements
             .split(',')
             .map(p => {
                 const parts = p.split('=>');
@@ -34,45 +34,62 @@ function removeTranslatedPage(doc, sourcePageId, languageName) {
                     translatedId: parts[1]
                 }
             });
-        const foundRecord = arr.find(p => p.sourceId === sourcePageId);
+        const foundRecord = arr.find(p => p.sourceId === sourceElementId);
         if (!!foundRecord) {
-            const pageToRemove = doc.pages.find(p => p.id === foundRecord.translatedId);
-            if (!!pageToRemove) {
-                pageToRemove.remove();
+            let elementToRemove;
+            if (type === 'page') {
+                elementToRemove = doc.pages.find(p => p.id === foundRecord.translatedId);
+            } else if (type === 'artboard') {
+                for (let i = 0; i < doc.pages.length; i++) {
+                    const page = doc.pages[i];
+                    const artboards = dom.find('Artboard', page);
+                    for (let j = 0; j < artboards.length; j++) {
+                        if (artboards[j].id === foundRecord.translatedId) {
+                            elementToRemove = artboards[j];
+                            break;
+                        }
+                    }
+                    if (!!elementToRemove) {
+                        break;
+                    }
+                }
             }
-            if (!!translatedPages) {
-                const translatedPagesNew = translatedPages.split(',').filter(p => p !== foundRecord.translatedId).join(',');
-                settings.setDocumentSettingForKey(doc, `crowdin-translated-pages`, translatedPagesNew);
+            if (!!elementToRemove) {
+                elementToRemove.remove();
+            }
+            if (!!translatedElements) {
+                const translatedElementsNew = translatedElements.split(',').filter(p => p !== foundRecord.translatedId).join(',');
+                settings.setDocumentSettingForKey(doc, `crowdin-translated-${type}s`, translatedElementsNew);
             }
         }
         const newValue = arr
-            .filter(p => p.sourceId !== sourcePageId)
+            .filter(p => p.sourceId !== sourceElementId)
             .map(p => `${p.sourceId}=>${p.translatedId}`)
             .join(',');
-        settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-pages`, newValue);
+        settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-${type}s`, newValue);
     }
 }
 
-function addTranslatedPage(doc, sourcePageId, translatedId, languageName) {
-    let pages = settings.documentSettingForKey(doc, `crowdin-${languageName}-pages`);
-    let translatedPages = settings.documentSettingForKey(doc, `crowdin-translated-pages`);
-    if (!pages) {
-        pages = `${sourcePageId}=>${translatedId}`;
-        translatedPages = translatedId;
+function addTranslatedElement(doc, sourceElementId, translatedId, languageName, type) {
+    let elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-${type}s`);
+    let translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-${type}s`);
+    if (!elements) {
+        elements = `${sourceElementId}=>${translatedId}`;
+        translatedElements = translatedId;
     } else {
-        pages += `,${sourcePageId}=>${translatedId}`;
-        translatedPages += `,${translatedId}`;
+        elements += `,${sourceElementId}=>${translatedId}`;
+        translatedElements += `,${translatedId}`;
     }
-    settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-pages`, pages);
-    settings.setDocumentSettingForKey(doc, `crowdin-translated-pages`, translatedPages);
+    settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-${type}s`, elements);
+    settings.setDocumentSettingForKey(doc, `crowdin-translated-${type}s`, translatedElements);
 }
 
-function getListOfTranslatedPages(doc) {
-    const translatedPages = settings.documentSettingForKey(doc, `crowdin-translated-pages`);
-    if (!translatedPages) {
+function getListOfTranslatedElements(doc, type) {
+    const translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-${type}s`);
+    if (!translatedElements) {
         return [];
     }
-    return translatedPages.split(',');
+    return translatedElements.split(',');
 }
 
 function getSelectedArtboard(page) {
@@ -131,7 +148,7 @@ function convertArtboardToHtml(artboard) {
 }
 
 export {
-    createClient, handleError, removeTranslatedPage, addTranslatedPage,
-    getListOfTranslatedPages, convertArtboardToHtml, convertOutsideTextToHtml,
+    createClient, handleError, removeTranslatedElement, addTranslatedElement,
+    getListOfTranslatedElements, convertArtboardToHtml, convertOutsideTextToHtml,
     getSelectedArtboard
 };

@@ -8,7 +8,15 @@ import * as util from './util';
 
 //Push
 
-async function sendPageStringsToCrowdin() {
+async function sendPageStrings() {
+    await sendStringsAction(true);
+}
+
+async function sendArtboardStrings() {
+    await sendStringsAction(false);
+}
+
+async function sendStringsAction(wholePage) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
@@ -24,18 +32,31 @@ async function sendPageStringsToCrowdin() {
             throw 'Please set project';
         }
 
-        const translatedPages = util.getListOfTranslatedPages(selectedDocument);
-        if (translatedPages.includes(selectedPage.id)) {
-            return;
+        if (!!wholePage) {
+            const translatedPages = util.getListOfTranslatedElements(selectedDocument, 'page');
+            if (translatedPages.includes(selectedPage.id)) {
+                return;
+            }
+            await uploadStrings(selectedPage);
+        } else {
+            const artboard = util.getSelectedArtboard(selectedPage);
+            if (!artboard) {
+                throw 'Please select an artboard';
+            }
+            const translatedArtboards = util.getListOfTranslatedElements(selectedDocument, 'artboard');
+            if (translatedArtboards.includes(artboard.id)) {
+                return;
+            }
+            await uploadStrings(selectedPage, artboard);
         }
-        await sendPageStrings(selectedPage);
+
         ui.message('Strings were successfully pushed to Crowdin');
     } catch (error) {
         util.handleError(error);
     }
 }
 
-async function sendPageStrings(page) {
+async function uploadStrings(page, artboard) {
     const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
     const { sourceFilesApi, uploadStorageApi } = util.createClient();
 
@@ -50,8 +71,15 @@ async function sendPageStrings(page) {
     }
 
     const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
+    if (!!artboard) {
+        await uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, artboard, projectId, directory.data.id);
+        return;
+    }
     const artboards = dom.find('Artboard', page);
-    const promises = artboards.map(artboard => uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, artboard, projectId, directory.data.id));
+    const translatedArtboards = util.getListOfTranslatedElements(dom.getSelectedDocument(), 'artboard');
+    const promises = artboards
+        .filter(artboard => !translatedArtboards.includes(artboard.id))
+        .map(artboard => uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, artboard, projectId, directory.data.id));
     promises.push(uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directory.data.id));
 
     await Promise.all(promises);
@@ -104,11 +132,19 @@ async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, p
 //Pull
 
 async function translatePage() {
+    await translate(true);
+}
+
+async function translateArtboard() {
+    await translate(false);
+}
+
+async function translate(wholePage) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
-        const translatedPages = util.getListOfTranslatedPages(selectedDocument);
+        let artboard;
 
         if (!selectedDocument) {
             throw 'Please select a document';
@@ -122,8 +158,20 @@ async function translatePage() {
         if (!projectId) {
             throw 'Please set project';
         }
-        if (translatedPages.includes(selectedPage.id)) {
-            throw 'Generated page cannot be translated';
+        if (!!wholePage) {
+            const translatedPages = util.getListOfTranslatedElements(selectedDocument, 'page');
+            if (translatedPages.includes(selectedPage.id)) {
+                throw 'Generated page cannot be translated';
+            }
+        } else {
+            artboard = util.getSelectedArtboard(selectedPage);
+            if (!artboard) {
+                throw 'Please select an artboard';
+            }
+            const translatedArtboard = util.getListOfTranslatedElements(selectedDocument, 'artboard');
+            if (translatedArtboard.includes(artboard.id)) {
+                throw 'Generated artboard cannot be translated';
+            }
         }
 
         const { projectsGroupsApi, languagesApi, translationsApi } = util.createClient();
@@ -154,6 +202,9 @@ async function translatePage() {
                     while (!finished) {
                         const status = await translationsApi.checkBuildStatus(projectId, build.data.id);
                         finished = status.data.status === 'finished';
+                        if (!finished) {
+                            ui.message(`Build status ${status.data.progress.percent}%`);
+                        }
                     }
                     ui.message('Downloading translations');
                     //looks like BE returns old translations (some caching?)
@@ -162,8 +213,11 @@ async function translatePage() {
                     const blob = await resp.blob();
                     const buffer = require('@skpm/buffer').Buffer.from(blob);
                     const zip = new AdmZip(buffer);
-
-                    extractTranslations(selectedDocument, selectedPage, value, zip);
+                    if (wholePage) {
+                        extractPageTranslations(selectedDocument, selectedPage, value, zip);
+                    } else {
+                        extractArtboardTranslations(selectedDocument, selectedPage, artboard, value, zip);
+                    }
                 } catch (error) {
                     util.handleError(error);
                 }
@@ -174,14 +228,40 @@ async function translatePage() {
     }
 }
 
-function extractTranslations(document, page, languageName, zip) {
-    //entry.entryName === page.id + / + artboard.id or page.id + .html
-    const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${page.id}.html`);
+function extractArtboardTranslations(document, page, artboard, languageName, zip) {
+    const foundFile = zip.getEntries().find(entry => entry.entryName.includes(`${page.id}/Sketch_${artboard.id}.html`));
     if (!!foundFile) {
         const translations = parseHtmlForText(foundFile.getData().toString());
-        util.removeTranslatedPage(document, page.id, languageName);
+        util.removeTranslatedElement(document, artboard.id, languageName, 'artboard');
+        const newArtboard = artboard.duplicate();
+        util.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
+        newArtboard.name = `${newArtboard.name} (${languageName})`;
+        newArtboard.selected = true;
+        artboard.selected = false;
+        //by default duplicate will appear in the same place as original
+        newArtboard.frame.offset(0, - (newArtboard.frame.height + 100));
+        const originalStrings = dom.find('Text', artboard);
+        const texts = dom.find('Text', newArtboard);
+        translations.forEach(translation => {
+            for (let i = 0; i < originalStrings.length; i++) {
+                const originalString = originalStrings[i];
+                if (originalString.id === translation.id && i < texts.length) {
+                    texts[i].text = translation.text;
+                }
+            }
+        });
+    } else {
+        throw `There are no translations for artboard ${artboard.name}`;
+    }
+}
+
+function extractPageTranslations(document, page, languageName, zip) {
+    const foundFiles = zip.getEntries().filter(entry => entry.entryName.includes(`Sketch_${page.id}`));
+    if (foundFiles.length > 0) {
+        const translations = foundFiles.flatMap(foundFile => parseHtmlForText(foundFile.getData().toString()));
+        util.removeTranslatedElement(document, page.id, languageName, 'page');
         const newPage = page.duplicate();
-        util.addTranslatedPage(document, page.id, newPage.id, languageName);
+        util.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
         newPage.name = `${newPage.name} (${languageName})`;
         const originalStrings = dom.find('Text', page);
         const texts = dom.find('Text', newPage);
@@ -213,4 +293,4 @@ function parseHtmlForText(html) {
     return result;
 }
 
-export { sendPageStringsToCrowdin, translatePage };
+export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard };

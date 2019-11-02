@@ -24,13 +24,25 @@
       "name": "Send text of selected page",
       "identifier": "send-page-text",
       "script": "./plugin.js",
-      "handler": "sendPageStringsToCrowdin"
+      "handler": "sendPageStrings"
+    },
+    {
+      "name": "Send text of selected artboard",
+      "identifier": "send-artboard-text",
+      "script": "./plugin.js",
+      "handler": "sendArtboardStrings"
     },
     {
       "name": "Pull translations for selected page",
       "identifier": "translate-page",
       "script": "./plugin.js",
       "handler": "translatePage"
+    },
+    {
+      "name": "Pull translations for selected artboard",
+      "identifier": "translate-artboard",
+      "script": "./plugin.js",
+      "handler": "translateArtboard"
     }
   ],
   "menu": {
@@ -40,8 +52,10 @@
       "select-project",
       "-",
       "send-page-text",
+      "send-artboard-text",
       "-",
-      "translate-page"
+      "translate-page",
+      "translate-artboard"
     ]
   }
 }
