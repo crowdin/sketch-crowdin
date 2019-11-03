@@ -3,8 +3,9 @@ import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import AdmZip from './adm-zip';
 import cheerio from 'cheerio';
-import { PROJECT_ID } from './constants';
+import { PROJECT_ID, ACCESS_TOKEN_KEY } from './constants';
 import * as util from './util';
+import { connectToCrowdin, setProjectIdFromExisting } from './settings';
 
 //Push
 
@@ -28,8 +29,11 @@ async function sendStringsAction(wholePage) {
         if (!selectedPage) {
             throw 'Please select a page';
         }
+        if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
+            await connectToCrowdin();
+        }
         if (!projectId) {
-            throw 'Please set project';
+            await setProjectIdFromExisting();
         }
 
         if (!!wholePage) {
@@ -155,8 +159,11 @@ async function translate(wholePage) {
         if (selectedDocument.pages === 0) {
             throw 'Nothing to translate';
         }
+        if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
+            await connectToCrowdin();
+        }
         if (!projectId) {
-            throw 'Please set project';
+            await setProjectIdFromExisting();
         }
         if (!!wholePage) {
             const translatedPages = util.getListOfTranslatedElements(selectedDocument, 'page');
@@ -261,6 +268,7 @@ function extractPageTranslations(document, page, languageName, zip) {
         const translations = foundFiles.flatMap(foundFile => parseHtmlForText(foundFile.getData().toString()));
         util.removeTranslatedElement(document, page.id, languageName, 'page');
         const newPage = page.duplicate();
+        removeGeneratedArtboards(document, page, newPage, languageName);
         util.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
         newPage.name = `${newPage.name} (${languageName})`;
         const originalStrings = dom.find('Text', page);
@@ -291,6 +299,18 @@ function parseHtmlForText(html) {
         });
     }
     return result;
+}
+
+function removeGeneratedArtboards(document, sourcePage, duplicatePage, languageName) {
+    const generatedArtboards = util.getListOfTranslatedElements(document, 'artboard');
+    const sourceArtboards = dom.find('Artboard', sourcePage);
+    const duplicateArtboards = dom.find('Artboard', duplicatePage);
+    for (let i = 0; i < sourceArtboards.length; i++) {
+        const sourceArtboard = sourceArtboards[i];
+        if (generatedArtboards.includes(sourceArtboard.id) && i < duplicateArtboards.length) {
+            duplicateArtboards[i].remove();
+        }
+    }
 }
 
 export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard };
