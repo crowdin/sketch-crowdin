@@ -268,7 +268,6 @@ function extractPageTranslations(document, page, languageName, zip) {
         const translations = foundFiles.flatMap(foundFile => parseHtmlForText(foundFile.getData().toString()));
         util.removeTranslatedElement(document, page.id, languageName, 'page');
         const newPage = page.duplicate();
-        removeGeneratedArtboards(document, page, newPage, languageName);
         util.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
         newPage.name = `${newPage.name} (${languageName})`;
         const originalStrings = dom.find('Text', page);
@@ -281,6 +280,7 @@ function extractPageTranslations(document, page, languageName, zip) {
                 }
             }
         });
+        removeGeneratedArtboards(document, page, newPage, languageName);
         document.selectedPage = newPage;
     } else {
         throw `There are no translations for page ${page.name}`;
