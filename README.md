@@ -10,7 +10,7 @@ In order to start working with this plugin you need to set following properties:
 
 1. Access token [Personal Access Token](https://support.crowdin.com/enterprise/personal-access-tokens/#creating-a-personal-access-token) or [OAuth Access Token](https://support.crowdin.com/enterprise/authorizing-oauth-apps/#make-requests-to-the-api-with-the-access-token-returned).
 2. Organization name (might be optional).
-3. Link to Crowdin project (you can choice in dropdown one of existing projects or specify id of the project).
+3. Link to Crowdin project.
 
 Access token and organization are global parameters which will be used across all Sketch projects. But Crowdin project should be defined per each Sketch project (also known as Sketch document).
 

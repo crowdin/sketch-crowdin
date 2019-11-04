@@ -76,21 +76,21 @@ async function uploadStrings(page, artboard) {
 
     const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
     if (!!artboard) {
-        await uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, artboard, projectId, directory.data.id);
+        await uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directory.data.id);
         return;
     }
     const artboards = dom.find('Artboard', page);
     const translatedArtboards = util.getListOfTranslatedElements(dom.getSelectedDocument(), 'artboard');
     const promises = artboards
         .filter(artboard => !translatedArtboards.includes(artboard.id))
-        .map(artboard => uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, artboard, projectId, directory.data.id));
+        .map(artboard => uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directory.data.id));
     promises.push(uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directory.data.id));
 
     await Promise.all(promises);
 }
 
-async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, artboard, projectId, directoryId) {
-    const html = util.convertArtboardToHtml(artboard);
+async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directoryId) {
+    const html = util.convertArtboardToHtml(page, artboard);
     const fileName = `Sketch_${artboard.id}.html`;
     const file = projectFiles.data
         .map(f => f.data)
@@ -246,7 +246,7 @@ function extractArtboardTranslations(document, page, artboard, languageName, zip
         newArtboard.selected = true;
         artboard.selected = false;
         //by default duplicate will appear in the same place as original
-        newArtboard.frame.offset(0, - (newArtboard.frame.height + 100));
+        util.offsetArtboard(page, newArtboard);
         const originalStrings = dom.find('Text', artboard);
         const texts = dom.find('Text', newArtboard);
         translations.forEach(translation => {
