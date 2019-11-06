@@ -2,46 +2,22 @@ import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import AdmZip from './adm-zip';
-import { PROJECT_ID } from './constants';
-import { createClient, handleError, removeTranslatedPage, addTranslatedPage, getListOfTranslatedPages } from './util';
+import cheerio from 'cheerio';
+import { PROJECT_ID, ACCESS_TOKEN_KEY } from './constants';
+import * as util from './util';
+import { connectToCrowdin, setProjectIdFromExisting } from './settings';
 
 //Push
 
-async function sendDocumentStringsToCrowdin() {
-    try {
-        const selectedDocument = dom.getSelectedDocument();
-        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
-
-        if (!selectedDocument) {
-            throw 'Please select a document';
-        }
-        if (!projectId) {
-            throw 'Please set project';
-        }
-
-        if (selectedDocument.pages === 0) {
-            throw 'Nothing to send to Crowdin system';
-        }
-
-        //just for validation
-        createClient();
-
-        const translatedPages = getListOfTranslatedPages(selectedDocument);
-        const promises = selectedDocument.pages
-            .filter(p => !translatedPages.includes(p.id))
-            .map(page => sendPageStrings(page));
-        try {
-            await Promise.all(promises);
-            ui.message('Strings were successfully pushed to Crowdin');
-        } catch (error) {
-            ui.message('Processed with errors');
-        }
-    } catch (error) {
-        handleError(error);
-    }
+async function sendPageStrings() {
+    await sendStringsAction(true);
 }
 
-async function sendPageStringsToCrowdin() {
+async function sendArtboardStrings() {
+    await sendStringsAction(false);
+}
+
+async function sendStringsAction(wholePage) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
@@ -53,41 +29,95 @@ async function sendPageStringsToCrowdin() {
         if (!selectedPage) {
             throw 'Please select a page';
         }
+        if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
+            await connectToCrowdin();
+        }
         if (!projectId) {
-            throw 'Please set project';
+            await setProjectIdFromExisting();
         }
 
-        const translatedPages = getListOfTranslatedPages(selectedDocument);
-        if (translatedPages.includes(selectedPage.id)) {
-            return;
+        if (!!wholePage) {
+            const translatedPages = util.getListOfTranslatedElements(selectedDocument, 'page');
+            if (translatedPages.includes(selectedPage.id)) {
+                return;
+            }
+            await uploadStrings(selectedPage);
+        } else {
+            const artboard = util.getSelectedArtboard(selectedPage);
+            if (!artboard) {
+                throw 'Please select an artboard';
+            }
+            const translatedArtboards = util.getListOfTranslatedElements(selectedDocument, 'artboard');
+            if (translatedArtboards.includes(artboard.id)) {
+                return;
+            }
+            await uploadStrings(selectedPage, artboard);
         }
-        await sendPageStrings(selectedPage);
+
         ui.message('Strings were successfully pushed to Crowdin');
     } catch (error) {
-        handleError(error);
+        util.handleError(error);
     }
 }
 
-async function sendPageStrings(page) {
+async function uploadStrings(page, artboard) {
     const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+    const { sourceFilesApi, uploadStorageApi } = util.createClient();
 
-    const strings = dom.find('Text', page);
-
-    if (strings.length === 0) {
-        throw 'Nothing to send to Crowdin system';
+    const directories = await sourceFilesApi.listProjectDirectories(projectId, undefined, undefined, 500);
+    let directory = directories.data.find(d => d.data.name === `Sketch_${page.id}`);
+    if (!directory) {
+        ui.message('Creating new directory');
+        directory = await sourceFilesApi.createDirectory(projectId, {
+            name: `Sketch_${page.id}`,
+            title: page.name
+        });
     }
 
-    const text = strings.map(t => t.text).join('\n\r');
+    const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
+    if (!!artboard) {
+        await uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directory.data.id);
+        return;
+    }
+    const artboards = dom.find('Artboard', page);
+    const translatedArtboards = util.getListOfTranslatedElements(dom.getSelectedDocument(), 'artboard');
+    const promises = artboards
+        .filter(artboard => !translatedArtboards.includes(artboard.id))
+        .map(artboard => uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directory.data.id));
+    promises.push(uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directory.data.id));
 
-    const { sourceFilesApi, uploadStorageApi } = createClient();
+    await Promise.all(promises);
+}
 
-    //add proper pagination here
-    const fileName = `Sketch_${page.id}`;
-    const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, undefined, 500);
+async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directoryId) {
+    const html = util.convertArtboardToHtml(page, artboard);
+    const fileName = `Sketch_${artboard.id}.html`;
     const file = projectFiles.data
         .map(f => f.data)
         .find(f => f.name === fileName);
-    const storage = await uploadStorageApi.addStorage('text/plain', text);
+    const storage = await uploadStorageApi.addStorage('text/html', html);
+    const storageId = storage.data.id;
+    if (!!file) {
+        ui.message(`Updating existing file for artboard ${artboard.name}`);
+        await sourceFilesApi.updateFile(projectId, file.id, { storageId });
+    } else {
+        ui.message(`Creating new file for artboard ${artboard.name}`);
+        await sourceFilesApi.createFile(projectId, {
+            storageId: storageId,
+            name: fileName,
+            title: artboard.name,
+            directoryId: directoryId
+        });
+    }
+}
+
+async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directoryId) {
+    const text = util.convertOutsideTextToHtml(page);
+    const fileName = `Sketch_${page.id}.html`;
+    const file = projectFiles.data
+        .map(f => f.data)
+        .find(f => f.name === fileName);
+    const storage = await uploadStorageApi.addStorage('text/html', text);
     const storageId = storage.data.id;
     if (!!file) {
         ui.message(`Updating existing file for page ${page.name}`);
@@ -97,45 +127,61 @@ async function sendPageStrings(page) {
         await sourceFilesApi.createFile(projectId, {
             storageId: storageId,
             name: fileName,
-            title: page.name
+            title: page.name,
+            directoryId: directoryId
         });
     }
 }
 
 //Pull
 
-async function translateDocument() {
-    translate(true);
-}
-
 async function translatePage() {
-    translate(false);
+    await translate(true);
 }
 
-async function translate(wholeDocument) {
+async function translateArtboard() {
+    await translate(false);
+}
+
+async function translate(wholePage) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
-        const translatedPages = getListOfTranslatedPages(selectedDocument);
+        let artboard;
 
         if (!selectedDocument) {
             throw 'Please select a document';
         }
-        if (!wholeDocument && !selectedPage) {
+        if (!selectedPage) {
             throw 'Please select a page';
         }
-        if (wholeDocument && selectedDocument.pages === 0) {
+        if (selectedDocument.pages === 0) {
             throw 'Nothing to translate';
         }
-        if (!projectId) {
-            throw 'Please set project';
+        if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
+            await connectToCrowdin();
         }
-        if (!wholeDocument && translatedPages.includes(selectedPage.id)) {
-            throw 'Generated page cannot be translated';
+        if (!projectId) {
+            await setProjectIdFromExisting();
+        }
+        if (!!wholePage) {
+            const translatedPages = util.getListOfTranslatedElements(selectedDocument, 'page');
+            if (translatedPages.includes(selectedPage.id)) {
+                throw 'Generated page cannot be translated';
+            }
+        } else {
+            artboard = util.getSelectedArtboard(selectedPage);
+            if (!artboard) {
+                throw 'Please select an artboard';
+            }
+            const translatedArtboard = util.getListOfTranslatedElements(selectedDocument, 'artboard');
+            if (translatedArtboard.includes(artboard.id)) {
+                throw 'Generated artboard cannot be translated';
+            }
         }
 
-        const { projectsGroupsApi, languagesApi, translationsApi } = createClient();
+        const { projectsGroupsApi, languagesApi, translationsApi } = util.createClient();
         ui.message('Loading list of languages');
         const languages = await languagesApi.listSupportedLanguages(500);
         const project = await projectsGroupsApi.getProject(projectId);
@@ -156,13 +202,16 @@ async function translate(wholeDocument) {
 
                     ui.message('Building project translations');
                     const build = await translationsApi.buildProject(projectId, {
-                        targetLanguagesId: [languageId]
+                        targetLanguageIds: [languageId]
                     });
 
                     let finished = false;
                     while (!finished) {
                         const status = await translationsApi.checkBuildStatus(projectId, build.data.id);
                         finished = status.data.status === 'finished';
+                        if (!finished) {
+                            ui.message(`Build status ${status.data.progress.percent}%`);
+                        }
                     }
                     ui.message('Downloading translations');
                     //looks like BE returns old translations (some caching?)
@@ -171,66 +220,97 @@ async function translate(wholeDocument) {
                     const blob = await resp.blob();
                     const buffer = require('@skpm/buffer').Buffer.from(blob);
                     const zip = new AdmZip(buffer);
-
-                    const arr = wholeDocument ? selectedDocument.pages : [selectedPage];
-                    arr
-                        .filter(p => !translatedPages.includes(p.id))
-                        .forEach(pg => extractTranslations(selectedDocument, pg, value, zip));
+                    if (wholePage) {
+                        extractPageTranslations(selectedDocument, selectedPage, value, zip);
+                    } else {
+                        extractArtboardTranslations(selectedDocument, selectedPage, artboard, value, zip);
+                    }
                 } catch (error) {
-                    handleError(error);
+                    util.handleError(error);
                 }
             }
         });
     } catch (error) {
-        handleError(error);
+        util.handleError(error);
     }
 }
 
-function extractTranslations(document, page, languageName, zip) {
-    const foundFile = zip.getEntries().find(entry => entry.name === `Sketch_${page.id}`);
+function extractArtboardTranslations(document, page, artboard, languageName, zip) {
+    const foundFile = zip.getEntries().find(entry => entry.entryName.includes(`${page.id}/Sketch_${artboard.id}.html`));
     if (!!foundFile) {
-        const translations = foundFile.getData().toString().split('\n\r');
-        removeTranslatedPage(document, page.id, languageName);
-        const newPage = page.duplicate();
-        addTranslatedPage(document, page.id, newPage.id, languageName);
-        newPage.name = `${newPage.name} (${languageName})`;
-        const texts = dom.find('Text', newPage);
-        const map = texts.flatMap(txt => txt.text
-            .split('\n\r')
-            .map(e => {
-                return {
-                    txt: e,
-                    id: txt.id
-                };
-            })
-        );
-        for (let i = 0; i < map.length; i++) {
-            const e = map[i];
-            let translationText = e.txt;
-            if (translations.length > i) {
-                translationText = translations[i];
-            }
-            i++;
-            for (; i < map.length; i++) {
-                const e2 = map[i];
-                if (e2.id !== e.id) {
-                    i--;
-                    break;
-                } else if (translations.length > i) {
-                    translationText += '\n\r' + translations[i];;
-                } else {
-                    translationText += '\n\r' + e2.txt;
+        const translations = parseHtmlForText(foundFile.getData().toString());
+        util.removeTranslatedElement(document, artboard.id, languageName, 'artboard');
+        const newArtboard = artboard.duplicate();
+        util.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
+        newArtboard.name = `${newArtboard.name} (${languageName})`;
+        newArtboard.selected = true;
+        artboard.selected = false;
+        //by default duplicate will appear in the same place as original
+        util.offsetArtboard(page, newArtboard);
+        const originalStrings = dom.find('Text', artboard);
+        const texts = dom.find('Text', newArtboard);
+        translations.forEach(translation => {
+            for (let i = 0; i < originalStrings.length; i++) {
+                const originalString = originalStrings[i];
+                if (originalString.id === translation.id && i < texts.length) {
+                    texts[i].text = translation.text;
                 }
             }
-            const text = texts.find(t => t.id === e.id);
-            if (text) {
-                text.text = translationText;
+        });
+    } else {
+        throw `There are no translations for artboard ${artboard.name}`;
+    }
+}
+
+function extractPageTranslations(document, page, languageName, zip) {
+    const foundFiles = zip.getEntries().filter(entry => entry.entryName.includes(`Sketch_${page.id}`));
+    if (foundFiles.length > 0) {
+        const translations = foundFiles.flatMap(foundFile => parseHtmlForText(foundFile.getData().toString()));
+        util.removeTranslatedElement(document, page.id, languageName, 'page');
+        const newPage = page.duplicate();
+        util.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
+        newPage.name = `${newPage.name} (${languageName})`;
+        const originalStrings = dom.find('Text', page);
+        const texts = dom.find('Text', newPage);
+        translations.forEach(translation => {
+            for (let i = 0; i < originalStrings.length; i++) {
+                const originalString = originalStrings[i];
+                if (originalString.id === translation.id && i < texts.length) {
+                    texts[i].text = translation.text;
+                }
             }
-        }
+        });
+        removeGeneratedArtboards(document, page, newPage, languageName);
         document.selectedPage = newPage;
     } else {
         throw `There are no translations for page ${page.name}`;
     }
 }
 
-export { sendPageStringsToCrowdin, sendDocumentStringsToCrowdin, translatePage, translateDocument };
+function parseHtmlForText(html) {
+    const $ = cheerio.load(html);
+    const strings = $('div[id]');
+    let result = [];
+    for (let i = 0; i < strings.length; i++) {
+        const string = strings[i];
+        result.push({
+            id: string.attribs.id,
+            text: cheerio.text($(string))
+        });
+    }
+    return result;
+}
+
+function removeGeneratedArtboards(document, sourcePage, duplicatePage, languageName) {
+    const generatedArtboards = util.getListOfTranslatedElements(document, 'artboard');
+    const sourceArtboards = dom.find('Artboard', sourcePage);
+    const duplicateArtboards = dom.find('Artboard', duplicatePage);
+    for (let i = 0; i < sourceArtboards.length; i++) {
+        const sourceArtboard = sourceArtboards[i];
+        if (generatedArtboards.includes(sourceArtboard.id) && i < duplicateArtboards.length) {
+            duplicateArtboards[i].remove();
+        }
+    }
+}
+
+export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard };
