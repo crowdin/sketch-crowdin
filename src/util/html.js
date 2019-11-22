@@ -12,7 +12,7 @@ function convertOutsideTextToHtml(page) {
     const outsideText = dom.find('Text', page).filter(t => !stringsInArtboards.includes(t.id));
     let html = '<html>';
     html += '<body>';
-    outsideText.forEach(t => html += `<div id="${t.textId}">${t.text}</div>`);
+    outsideText.forEach(t => html += `<div id="${t.id}">${t.text}</div>`);
     html += '</body>';
     html += '</html>';
     return html;

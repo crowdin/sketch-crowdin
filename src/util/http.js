@@ -1,4 +1,5 @@
 import ui from 'sketch/ui';
+import settings from 'sketch/settings';
 import crowdin, { HttpClientType } from '@crowdin/crowdin-api-client';
 import { ACCESS_TOKEN_KEY, ORGANIZATION } from '../constants';
 

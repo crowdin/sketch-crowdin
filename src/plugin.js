@@ -241,9 +241,9 @@ function extractArtboardTranslations(document, page, artboard, languageName, zip
     const foundFile = zip.getEntries().find(entry => entry.entryName.includes(`${page.id}/Sketch_${artboard.id}.html`));
     if (!!foundFile) {
         const translations = htmlUtil.parseHtmlForText(foundFile.getData().toString());
-        translations.removeTranslatedElement(document, artboard.id, languageName, 'artboard');
+        translationsUtil.removeTranslatedElement(document, artboard.id, languageName, 'artboard');
         const newArtboard = artboard.duplicate();
-        translations.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
+        translationsUtil.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
         newArtboard.name = `${newArtboard.name} (${languageName})`;
         newArtboard.selected = true;
         artboard.selected = false;
@@ -268,9 +268,9 @@ function extractPageTranslations(document, page, languageName, zip) {
     const foundFiles = zip.getEntries().filter(entry => entry.entryName.includes(`Sketch_${page.id}`));
     if (foundFiles.length > 0) {
         const translations = foundFiles.flatMap(foundFile => htmlUtil.parseHtmlForText(foundFile.getData().toString()));
-        translations.removeTranslatedElement(document, page.id, languageName, 'page');
+        translationsUtil.removeTranslatedElement(document, page.id, languageName, 'page');
         const newPage = page.duplicate();
-        translations.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
+        translationsUtil.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
         newPage.name = `${newPage.name} (${languageName})`;
         const originalStrings = dom.find('Text', page);
         const texts = dom.find('Text', newPage);
