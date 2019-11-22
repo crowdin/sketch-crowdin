@@ -2,7 +2,7 @@ import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION } from './constants';
-import { handleError, createClient } from './util';
+import { handleError, createClient } from './util/http';
 
 async function connectToCrowdin() {
     await setOrganization();
