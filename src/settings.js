@@ -16,7 +16,7 @@ function setAccessToken() {
         if (!!token && token.length > 3) {
             initValue = token.substring(0, 3) + '...';
         }
-        ui.getInputFromUser('Add Access Token\nGo to Crowdin Enterprise → Account Settings → Access Tokens → New Token',
+        ui.getInputFromUser('Add Personal Access Token.\nYou can generate it in your Crowdin Account Settings',
             {
                 initialValue: initValue
             },
@@ -32,7 +32,7 @@ function setAccessToken() {
 
 function setOrganization() {
     return new Promise((res, _rej) => {
-        ui.getInputFromUser('Define Organization\nInsert the domain name of your Crowdin Enterprise Organization',
+        ui.getInputFromUser('Specify organization domain name (for Crowdin Enterprise only).\nIf you connect Crowdin account, leave the field empty and click OK to proceed',
             {
                 initialValue: settings.settingForKey(ORGANIZATION)
             },
@@ -69,7 +69,7 @@ async function setProjectIdFromExisting() {
                 initValue = `${selectedPr.data.name} [${selectedPr.data.id}]`;
             }
         }
-        ui.getInputFromUser('Choose the project in your Crowdin Enterprise Organization:', {
+        ui.getInputFromUser('Choose the project', {
             type: ui.INPUT_TYPE.selection,
             possibleValues: projects.data.map(pr => `${pr.data.name} [${pr.data.id}]`),
             initialValue: initValue

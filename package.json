@@ -1,7 +1,7 @@
 {
   "name": "sketch-crowdin",
-  "displayName": "Crowdin",
-  "description": "Crowdin Sketch plugin",
+  "displayName": "Crowdin for Sketch",
+  "description": "Localize the UI before programming starts. Translate and preview any design with ease",
   "publisher": "Crowdin",
   "version": "1.0.0",
   "engines": {
@@ -21,7 +21,10 @@
   "skpm": {
     "name": "sketch-crowdin",
     "manifest": "src/manifest.json",
-    "main": "sketch-crowdin.sketchplugin"
+    "main": "sketch-crowdin.sketchplugin",
+    "assets": [
+      "assets/**/*"
+    ]
   },
   "scripts": {
     "build": "skpm-build",
