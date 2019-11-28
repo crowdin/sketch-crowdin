@@ -1,6 +1,6 @@
 [<p align='center'><img src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' data-canonical-src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' width='200' height='200' align='center'/></p>](https://crowdin.com)
 
-# Crowdin Sketch plugin
+# Crowdin for Sketch plugin
 
 This plugin lets you connect your [Sketch](https://www.sketch.com/) and [Crowdin](https://crowdin.com/) projects together.
 Localize the UI and review your design within different languages before programming starts.
