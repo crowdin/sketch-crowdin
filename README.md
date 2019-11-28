@@ -12,9 +12,9 @@ This plugin can be installed with [Sketch Runner](https://sketchrunner.com/).
 
 Otherwise, you can install it manually:
 
-1. [Download](https://github.com/crowdin/sketch-crowdin/releases/latest/download/sketch-crowdin.sketchplugin.zip)
-2. Un-zip
-3. Double-click on `sketch-crowdin.sketchplugin`
+1. [Download](https://github.com/crowdin/sketch-crowdin/releases/latest/download/sketch-crowdin.sketchplugin.zip).
+2. Un-zip.
+3. Double-click on `sketch-crowdin.sketchplugin`.
 
 ### Requirements
 To start working with the plugin set the following properties:
