@@ -2,6 +2,10 @@
 
 # Crowdin for Sketch plugin
 
+[![GitHub All Releases](https://img.shields.io/github/downloads/crowdin/sketch-crowdin/total?cacheSeconds=1800)](https://github.com/crowdin/sketch-crowdin/releases)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/crowdin/sketch-crowdin?cacheSeconds=5000)](https://github.com/crowdin/sketch-crowdin/releases/latest)
+[![GitHub Release Date](https://img.shields.io/github/release-date/crowdin/sketch-crowdin?cacheSeconds=1800)](https://github.com/crowdin/sketch-crowdin/releases/latest)
+
 This plugin lets you connect your [Sketch](https://www.sketch.com/) and [Crowdin](https://crowdin.com/) projects together.
 Localize the UI and review your design within different languages before programming starts.
 Send the whole page or separate artboards for translation to Crowdin in a click and fetch translations back to Sketch. Preview and customize the translated copy directly in Sketch. 
