@@ -46,6 +46,12 @@
       "identifier": "translate-artboard",
       "script": "./plugin.js",
       "handler": "translateArtboard"
+    },
+    {
+      "name": "Contact Us",
+      "identifier": "contact-us",
+      "script": "./settings.js",
+      "handler": "openContactUs"
     }
   ],
   "menu": {
@@ -58,7 +64,9 @@
       "send-artboard-text",
       "-",
       "translate-page",
-      "translate-artboard"
+      "translate-artboard",
+      "-",
+      "contact-us"
     ]
   }
 }
