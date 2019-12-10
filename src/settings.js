@@ -87,4 +87,8 @@ async function setProjectIdFromExisting() {
     }
 }
 
-export { connectToCrowdin, setProjectIdFromExisting };
+function openContactUs() {
+    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://crowdin.com/contacts"));
+}
+
+export { connectToCrowdin, setProjectIdFromExisting, openContactUs };

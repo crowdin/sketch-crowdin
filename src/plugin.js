@@ -38,10 +38,10 @@ async function sendStringsAction(wholePage) {
             await setProjectIdFromExisting();
         }
 
+        const translatedPages = translationsUtil.getListOfTranslatedElements(selectedDocument, 'page');
         if (!!wholePage) {
-            const translatedPages = translationsUtil.getListOfTranslatedElements(selectedDocument, 'page');
             if (translatedPages.includes(selectedPage.id)) {
-                return;
+                throw 'Generated page cannot be translated';
             }
             await uploadStrings(selectedPage);
         } else {
@@ -50,8 +50,8 @@ async function sendStringsAction(wholePage) {
                 throw 'Please select an artboard';
             }
             const translatedArtboards = translationsUtil.getListOfTranslatedElements(selectedDocument, 'artboard');
-            if (translatedArtboards.includes(artboard.id)) {
-                return;
+            if (translatedArtboards.includes(artboard.id) || translatedPages.includes(artboard.parent.id)) {
+                throw 'Generated artboard cannot be translated';
             }
             await uploadStrings(selectedPage, artboard);
         }
@@ -167,8 +167,8 @@ async function translate(wholePage) {
         if (!projectId) {
             await setProjectIdFromExisting();
         }
+        const translatedPages = translationsUtil.getListOfTranslatedElements(selectedDocument, 'page');
         if (!!wholePage) {
-            const translatedPages = translationsUtil.getListOfTranslatedElements(selectedDocument, 'page');
             if (translatedPages.includes(selectedPage.id)) {
                 throw 'Generated page cannot be translated';
             }
@@ -178,7 +178,7 @@ async function translate(wholePage) {
                 throw 'Please select an artboard';
             }
             const translatedArtboard = translationsUtil.getListOfTranslatedElements(selectedDocument, 'artboard');
-            if (translatedArtboard.includes(artboard.id)) {
+            if (translatedArtboard.includes(artboard.id) || translatedPages.includes(artboard.parent.id)) {
                 throw 'Generated artboard cannot be translated';
             }
         }
