@@ -4,6 +4,7 @@
   "description": "Localize the UI before programming starts. Translate and preview any design with ease",
   "publisher": "Crowdin",
   "version": "1.0.0",
+  "license": "MIT",
   "engines": {
     "sketch": ">=3.0"
   },
@@ -38,6 +39,6 @@
     "cheerio": "^1.0.0-rc.3"
   },
   "devDependencies": {
-    "@skpm/builder": "^0.4.2"
+    "@skpm/builder": "^0.6.0"
   }
 }
