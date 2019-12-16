@@ -36,13 +36,13 @@
       "handler": "sendArtboardStrings"
     },
     {
-      "name": "Pull translations for selected page",
+      "name": "Get translations for selected page",
       "identifier": "translate-page",
       "script": "./plugin.js",
       "handler": "translatePage"
     },
     {
-      "name": "Pull translations for selected artboard",
+      "name": "Get translations for selected artboard",
       "identifier": "translate-artboard",
       "script": "./plugin.js",
       "handler": "translateArtboard"
