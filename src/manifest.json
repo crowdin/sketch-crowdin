@@ -24,13 +24,13 @@
       "handler": "setOrganization"
     },
     {
-      "name": "Send text of selected page",
+      "name": "Send texts of selected page",
       "identifier": "send-page-text",
       "script": "./plugin.js",
       "handler": "sendPageStrings"
     },
     {
-      "name": "Send text of selected artboard",
+      "name": "Send texts of selected artboard",
       "identifier": "send-artboard-text",
       "script": "./plugin.js",
       "handler": "sendArtboardStrings"
