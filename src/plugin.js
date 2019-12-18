@@ -289,4 +289,12 @@ function extractPageTranslations(document, page, languageName, zip) {
     }
 }
 
-export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard };
+function test() {
+    const el = dom.find('SymbolInstance', dom.getSelectedDocument());
+    el.forEach(e => e.overrides.forEach(l => console.log(l.affectedLayer.type)));
+    // const text = symbolInstance.overrides[0].value;
+    // console.log(JSON.stringify(symbolInstance.overrides[0].affectedLayer.frame));
+    // console.log(JSON.stringify(symbolInstance.overrides[1].affectedLayer.frame));
+}
+
+export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard, test };

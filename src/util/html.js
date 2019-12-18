@@ -2,20 +2,34 @@ import dom from 'sketch/dom';
 import cheerio from 'cheerio';
 import * as domUtil from './dom';
 
+const symbolOverrideType = 'symbol-override';
+
 function convertOutsideTextToHtml(page) {
-    const artboards = dom.find('Artboard', page);
-    let stringsInArtboards = [];
-    artboards.forEach(artboard => {
-        const ids = dom.find('Text', artboard).map(t => t.id);
-        stringsInArtboards = stringsInArtboards.concat(ids);
-    })
-    const outsideText = dom.find('Text', page).filter(t => !stringsInArtboards.includes(t.id));
+    const outsideText = domUtil.getNonArtboardTexts(page);
+    const outsideSymbols = domUtil.getNonArtboardSymbols(page);
     let html = '<html>';
     html += '<body>';
     outsideText.forEach(t => html += `<div id="${t.id}">${t.text}</div>`);
+    outsideSymbols.forEach(outsideSymbol => {
+        getSymbolTexts(outsideSymbol)
+            .forEach(override => {
+                html += `<div id="${override.id}" type="${symbolOverrideType}">${override.text}</div>`
+            });
+    });
     html += '</body>';
     html += '</html>';
     return html;
+}
+
+function getSymbolTexts(symbol) {
+    return symbol.overrides
+        .filter(override => override.affectedLayer.type === 'Text')
+        .map(override => {
+            return {
+                id: override.id,
+                text: override.value
+            };
+        });
 }
 
 function convertArtboardToHtml(page, artboard) {
