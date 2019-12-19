@@ -16,6 +16,7 @@ function handleError(error) {
     if (typeof error === 'string' || error instanceof String) {
         return ui.message(error);
     } else {
+        console.log(JSON.stringify(error))
         if (error.error) {
             const httpError = error.error;
             if (httpError.code && httpError.code === 403) {
