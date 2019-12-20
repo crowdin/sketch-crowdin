@@ -50,14 +50,21 @@ function convertArtboardToHtml(page, artboard) {
                 x += parent.frame.x;
                 y += parent.frame.y;
                 parent = parent.parent;
+                if (!parent) {
+                    return null;
+                }
                 parentId = parent.id;
             }
             return { x, y, textId, text, e };
         });
-    const textsFromSymbols = dom.find('SymbolInstance', artboard)
+    const res = getArtboardSymbols(artboard);
+    const processedSymbolElements = [];
+    const textsFromSymbols = res.result
         .map(symbol => {
             return symbol.overrides
                 .filter(override => override.affectedLayer.type === 'Text')
+                .filter(override => !res.doNotTuch.includes(`${symbol.id}=>${override.affectedLayer.id}`))
+                .filter(override => !processedSymbolElements.includes(override.affectedLayer.id))
                 .map(override => {
                     const textId = override.id;
                     const text = override.value;
@@ -72,20 +79,19 @@ function convertArtboardToHtml(page, artboard) {
                         let current = parent;
                         parent = parent.parent;
                         if (parent.type === 'SymbolMaster') {
-                            //TODO fix coordinates
-                            parent = getSymbolIstance(artboard, current.id, parentId);
-                            if (parent === null) {
-                                return null;
-                            }
+                            parent = getSymbolIstance(res.result, current.id, parent.id);
+                        }
+                        if (!parent) {
+                            return null;
                         }
                         parentId = parent.id;
                     }
+                    processedSymbolElements.push(override.affectedLayer.id);
                     return { x, y, textId, text, e, type: symbolOverrideType };
-                })
-                .filter(el => el !== null);
+                });
         })
         .reduce((x, y) => x.concat(y), []);
-    const allTexts = textElements.concat(textsFromSymbols);
+    const allTexts = textElements.concat(textsFromSymbols).filter(el => el !== null);
     let textHtml = '';
     allTexts.forEach(t => {
         let style = `position: absolute;top:${t.y}px;left:${t.x}px;`;
@@ -143,18 +149,48 @@ function convertArtboardToHtml(page, artboard) {
     return html;
 }
 
+//when executing dom.find under specific artboard it will not return nested symbols
+//therefore dom.find is executed under whole document and then not valid symbols are filtered out
+//also in order to find correct coordinates of texts we need to find exact symbol (overrides can have texts from child symbols)
+function getArtboardSymbols(artboard) {
+    const allSymbols = dom.find('SymbolInstance', dom.getSelectedDocument());
+    const artboardSymbols = dom.find('SymbolInstance', artboard);
+    let result = [];
+    let doNotTuch = [];
+    allSymbols.forEach(s => {
+        artboardSymbols.forEach(s2 => {
+            if (s.id === s2.id) {
+                result.push(s);
+            } else {
+                s2.overrides.forEach(override => {
+                    if (override.affectedLayer.id === s.id) {
+                        result.push(s);
+                        s2.overrides.forEach(ov => {
+                            s.overrides.forEach(ov2 => {
+                                if (ov.affectedLayer.id === ov2.affectedLayer.id) {
+                                    doNotTuch.push(`${s2.id}=>${ov.affectedLayer.id}`);
+                                }
+                            });
+                        });
+                    }
+                });
+            }
+        });
+    });
+    return { result, doNotTuch };
+}
+
 //for nested symbols Sketch API returns SymbolMaster instead of SymbolInstance as a parent group
 //and therefore we cannot calculate (x,y) of the text
 //this function is a workaround to find proper parent element
 //https://github.com/sketch-hq/SketchAPI/issues/689
-function getSymbolIstance(artboard, symbolInstanceChildId, symbolMasterParentId) {
-    const symbols = dom.find('SymbolInstance', artboard);
+function getSymbolIstance(symbols, symbolInstanceChildId, symbolMasterParentId) {
     for (let i = 0; i < symbols.length; i++) {
         const symbol = symbols[i];
         if (symbol.master.id === symbolMasterParentId) {
             for (let j = 0; j < symbol.overrides.length; j++) {
                 const override = symbol.overrides[j];
-                if (override.affectedLayer.type === 'SymbolInstance' && override.affectedLayer.id === symbolInstanceChildId) {
+                if (override.affectedLayer.id === symbolInstanceChildId) {
                     return symbol;
                 }
             }

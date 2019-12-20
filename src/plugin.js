@@ -292,10 +292,11 @@ function extractPageTranslations(document, page, languageName, zip) {
 function test() {
     // console.log(`page id ${dom.getSelectedDocument().selectedPage.id}`);
     // dom.find('Artboard', dom.getSelectedDocument()).forEach(artboard => console.log(`${artboard.name} ${artboard.id}`));
-    const symbolInstance = dom.find('SymbolInstance', dom.getSelectedDocument())[0];
+    const symbolInstances = dom.find('SymbolInstance', dom.getSelectedDocument().selectedPage);
     // symbolInstance.overrides[0].value = 'World 1';
     // console.log(JSON.stringify(symb.parent.type))
-    symbolInstance.overrides[0].value = ' ';
+    // console.log(JSON.stringify(symbolInstances[1].overrides[2].affectedLayer.frame));
+    symbolInstances.forEach(s => console.log(`${s.id} => ${s.name} => ${s.overrides.length}`));
     // console.log(JSON.stringify(symbolInstance.overrides[0].affectedLayer.frame));
     // console.log(JSON.stringify(symbolInstance.overrides[1].affectedLayer.frame));
 }
