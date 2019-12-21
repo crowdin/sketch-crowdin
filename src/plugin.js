@@ -2,7 +2,7 @@ import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import AdmZip from './adm-zip';
-import { PROJECT_ID, ACCESS_TOKEN_KEY } from './constants';
+import { PROJECT_ID, ACCESS_TOKEN_KEY, TEXT_TYPE, SYMBOL_TYPE } from './constants';
 import * as domUtil from './util/dom';
 import * as httpUtil from './util/http';
 import * as translationsUtil from './util/translations';
@@ -251,14 +251,34 @@ function extractArtboardTranslations(document, page, artboard, languageName, zip
         domUtil.offsetArtboard(page, newArtboard);
         const originalStrings = dom.find('Text', artboard);
         const texts = dom.find('Text', newArtboard);
-        translations.forEach(translation => {
-            for (let i = 0; i < originalStrings.length; i++) {
-                const originalString = originalStrings[i];
-                if (originalString.id === translation.id && i < texts.length) {
-                    texts[i].text = translation.text;
+        const originalSymbols = dom.find('SymbolInstance', artboard);
+        const symbols = dom.find('SymbolInstance', newArtboard);
+        translations
+            .filter(tr => tr.type === TEXT_TYPE)
+            .forEach(translation => {
+                for (let i = 0; i < originalStrings.length; i++) {
+                    const originalString = originalStrings[i];
+                    if (originalString.id === translation.id && i < texts.length) {
+                        texts[i].text = translation.text;
+                    }
                 }
-            }
-        });
+            });
+        translations
+            .filter(tr => tr.type === SYMBOL_TYPE)
+            .forEach(translation => {
+                const symbolId = translation.symbol;
+                const textId = translation.id
+                for (let i = 0; i < originalSymbols.length; i++) {
+                    const originalSymbol = originalSymbols[i];
+                    for (let j = 0; j < originalSymbol.overrides.length; j++) {
+                        const override = originalSymbol.overrides[j];
+                        if (originalSymbol.id + '/' + override.id === textId) {
+                            symbols[i].overrides[j].value = translation.text;
+                            break;
+                        }
+                    }
+                }
+            });
     } else {
         throw `There are no translations for artboard ${artboard.name}`;
     }
@@ -274,14 +294,34 @@ function extractPageTranslations(document, page, languageName, zip) {
         newPage.name = `${newPage.name} (${languageName})`;
         const originalStrings = dom.find('Text', page);
         const texts = dom.find('Text', newPage);
-        translations.forEach(translation => {
-            for (let i = 0; i < originalStrings.length; i++) {
-                const originalString = originalStrings[i];
-                if (originalString.id === translation.id && i < texts.length) {
-                    texts[i].text = translation.text;
+        const originalSymbols = dom.find('SymbolInstance', page);
+        const symbols = dom.find('SymbolInstance', newPage);
+        translations
+            .filter(tr => tr.type === TEXT_TYPE)
+            .forEach(translation => {
+                for (let i = 0; i < originalStrings.length; i++) {
+                    const originalString = originalStrings[i];
+                    if (originalString.id === translation.id && i < texts.length) {
+                        texts[i].text = translation.text;
+                    }
                 }
-            }
-        });
+            });
+        translations
+            .filter(tr => tr.type === SYMBOL_TYPE)
+            .forEach(translation => {
+                const symbolId = translation.symbol;
+                const textId = translation.id
+                for (let i = 0; i < originalSymbols.length; i++) {
+                    const originalSymbol = originalSymbols[i];
+                    for (let j = 0; j < originalSymbol.overrides.length; j++) {
+                        const override = originalSymbol.overrides[j];
+                        if (originalSymbol.id + '/' + override.id === textId) {
+                            symbols[i].overrides[j].value = translation.text;
+                            break;
+                        }
+                    }
+                }
+            });
         domUtil.removeGeneratedArtboards(document, page, newPage);
         document.selectedPage = newPage;
     } else {
@@ -289,16 +329,4 @@ function extractPageTranslations(document, page, languageName, zip) {
     }
 }
 
-function test() {
-    // console.log(`page id ${dom.getSelectedDocument().selectedPage.id}`);
-    // dom.find('Artboard', dom.getSelectedDocument()).forEach(artboard => console.log(`${artboard.name} ${artboard.id}`));
-    const symbolInstances = dom.find('SymbolInstance', dom.getSelectedDocument().selectedPage);
-    // symbolInstance.overrides[0].value = 'World 1';
-    // console.log(JSON.stringify(symb.parent.type))
-    // console.log(JSON.stringify(symbolInstances[1].overrides[2].affectedLayer.frame));
-    symbolInstances.forEach(s => console.log(`${s.id} => ${s.name} => ${s.overrides.length}`));
-    // console.log(JSON.stringify(symbolInstance.overrides[0].affectedLayer.frame));
-    // console.log(JSON.stringify(symbolInstance.overrides[1].affectedLayer.frame));
-}
-
-export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard, test };
+export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard };

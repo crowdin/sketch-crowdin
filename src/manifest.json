@@ -48,12 +48,6 @@
       "handler": "translateArtboard"
     },
     {
-      "name": "test",
-      "identifier": "test",
-      "script": "./plugin.js",
-      "handler": "test"
-    },
-    {
       "name": "Contact Us",
       "identifier": "contact-us",
       "script": "./settings.js",
@@ -72,9 +66,7 @@
       "translate-page",
       "translate-artboard",
       "-",
-      "contact-us",
-      "-",
-      "test"
+      "contact-us"
     ]
   }
 }

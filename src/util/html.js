@@ -1,20 +1,18 @@
 import dom from 'sketch/dom';
 import cheerio from 'cheerio';
 import * as domUtil from './dom';
-
-const symbolOverrideType = 'symbol-override';
-const textType = 'text';
+import { SYMBOL_TYPE, TEXT_TYPE } from '../constants';
 
 function convertOutsideTextToHtml(page) {
     const outsideText = domUtil.getNonArtboardTexts(page);
     const outsideSymbols = domUtil.getNonArtboardSymbols(page);
     let html = '<html>';
     html += '<body>';
-    outsideText.forEach(t => html += `<div id="${t.id}" type="${textType}">${t.text}</div>`);
+    outsideText.forEach(t => html += `<div id="${t.id}" stype="${TEXT_TYPE}">${t.text}</div>`);
     outsideSymbols.forEach(outsideSymbol => {
         getSymbolTexts(outsideSymbol)
             .forEach(override => {
-                html += `<div id="${override.id}" type="${symbolOverrideType}">${override.text}</div>`
+                html += `<div id="${outsideSymbol.id + '/' + override.id}" stype="${SYMBOL_TYPE}">${override.text}</div>`
             });
     });
     html += '</body>';
@@ -55,24 +53,23 @@ function convertArtboardToHtml(page, artboard) {
                 }
                 parentId = parent.id;
             }
-            return { x, y, textId, text, e };
+            return { x, y, textId, text, e, type: TEXT_TYPE };
         });
     const res = getArtboardSymbols(artboard);
-    const processedSymbolElements = [];
     const textsFromSymbols = res.result
         .map(symbol => {
             return symbol.overrides
                 .filter(override => override.affectedLayer.type === 'Text')
                 .filter(override => !res.doNotTuch.includes(`${symbol.id}=>${override.affectedLayer.id}`))
-                .filter(override => !processedSymbolElements.includes(override.affectedLayer.id))
                 .map(override => {
-                    const textId = override.id;
                     const text = override.value;
                     const e = override.affectedLayer;
                     let parent = symbol;
                     let parentId = parent.id;
                     let x = e.frame.x;
                     let y = e.frame.y;
+                    const parentSymbols = [];
+                    parentSymbols.push(symbol.id);
                     while (parentId !== artboard.id) {
                         x += parent.frame.x;
                         y += parent.frame.y;
@@ -80,14 +77,16 @@ function convertArtboardToHtml(page, artboard) {
                         parent = parent.parent;
                         if (parent.type === 'SymbolMaster') {
                             parent = getSymbolIstance(res.result, current.id, parent.id);
+                            if (parent !== null) {
+                                parentSymbols.push(parent.id);
+                            }
                         }
                         if (!parent) {
                             return null;
                         }
                         parentId = parent.id;
                     }
-                    processedSymbolElements.push(override.affectedLayer.id);
-                    return { x, y, textId, text, e, type: symbolOverrideType };
+                    return { x, y, textId: parentSymbols.reverse().join('/') + '/' + override.id, text, e, type: SYMBOL_TYPE };
                 });
         })
         .reduce((x, y) => x.concat(y), []);
@@ -122,7 +121,11 @@ function convertArtboardToHtml(page, artboard) {
                 style += `font-stretch:${t.e.style.fontStretch};`;
             }
         }
-        textHtml += `<div id="${t.textId}" type="${t.type}" style="${style}">${t.text}</div>`;
+        textHtml += `<div id="${t.textId}" stype="${t.type}" style="${style}"`;
+        if (t.symbolId) {
+            textHtml += ` symbol="${t.symbolId}"`;
+        }
+        textHtml += `>${t.text}</div>`;
     });
     //creating temp artboard with empty texts for exporting
     const copy = artboard.duplicate();
@@ -207,7 +210,8 @@ function parseHtmlForText(html) {
         const string = strings[i];
         result.push({
             id: string.attribs.id,
-            text: cheerio.text($(string))
+            text: cheerio.text($(string)),
+            type: string.attribs.stype || TEXT_TYPE
         });
     }
     return result;
