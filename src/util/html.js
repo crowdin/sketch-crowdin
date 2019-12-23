@@ -67,9 +67,6 @@ function convertArtboardToHtml(page, artboard) {
                     let parentId = parent.id;
                     let x = e.frame.x;
                     let y = e.frame.y;
-                    if (x === 0 && y === 0) {
-                        console.log(symbol.master.overrides);
-                    }
                     const parentSymbols = [];
                     parentSymbols.push(symbol.id);
                     while (parentId !== artboard.id) {
