@@ -13,6 +13,7 @@ function createClient() {
 }
 
 function handleError(error) {
+    console.log(JSON.stringify(error));
     if (typeof error === 'string' || error instanceof String) {
         return ui.message(error);
     } else {
