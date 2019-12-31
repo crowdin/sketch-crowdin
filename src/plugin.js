@@ -97,7 +97,7 @@ async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, pa
     const file = projectFiles.data
         .map(f => f.data)
         .find(f => f.name === fileName);
-    const storage = await uploadStorageApi.addStorage('text/html', html);
+    const storage = await uploadStorageApi.addStorage(fileName, html);
     const storageId = storage.data.id;
     if (!!file) {
         ui.message(`Updating existing file for artboard ${artboard.name}`);
@@ -119,7 +119,7 @@ async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, p
     const file = projectFiles.data
         .map(f => f.data)
         .find(f => f.name === fileName);
-    const storage = await uploadStorageApi.addStorage('text/html', text);
+    const storage = await uploadStorageApi.addStorage(fileName, text);
     const storageId = storage.data.id;
     if (!!file) {
         ui.message(`Updating existing file for page ${page.name}`);
@@ -212,7 +212,7 @@ async function translate(wholePage) {
                         const status = await translationsApi.checkBuildStatus(projectId, build.data.id);
                         finished = status.data.status === 'finished';
                         if (!finished) {
-                            ui.message(`Build status ${status.data.progress.percent}%`);
+                            ui.message(`Build status ${status.data.progress}%`);
                         }
                     }
                     ui.message('Downloading translations');
