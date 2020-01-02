@@ -49,7 +49,7 @@ Need help working with Crowdin Sketch plugin or have any questions? [Contact](ht
 ### License
 
 <pre>
-Copyright © 2019 Crowdin
+Copyright © 2020 Crowdin
 
 The Crowdin Sketch plugin is licensed under the MIT License.
 See the LICENSE file distributed with this work for additional
