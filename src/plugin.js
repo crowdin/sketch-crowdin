@@ -1,7 +1,6 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
-import AdmZip from './adm-zip';
 import { PROJECT_ID, ACCESS_TOKEN_KEY, TEXT_TYPE, SYMBOL_TYPE } from './constants';
 import * as domUtil from './util/dom';
 import * as httpUtil from './util/http';
@@ -67,11 +66,11 @@ async function uploadStrings(page, artboard) {
     const { sourceFilesApi, uploadStorageApi } = httpUtil.createClient();
 
     const directories = await sourceFilesApi.listProjectDirectories(projectId, undefined, undefined, 500);
-    let directory = directories.data.find(d => d.data.name === `Sketch_${page.id}`);
+    let directory = directories.data.find(d => d.data.name === getDirectoryName(page));
     if (!directory) {
         ui.message('Creating new directory');
         directory = await sourceFilesApi.createDirectory(projectId, {
-            name: `Sketch_${page.id}`,
+            name: getDirectoryName(page),
             title: page.name
         });
     }
@@ -93,7 +92,7 @@ async function uploadStrings(page, artboard) {
 
 async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directoryId) {
     const html = htmlUtil.convertArtboardToHtml(page, artboard);
-    const fileName = `Sketch_${artboard.id}.html`;
+    const fileName = getFileName(artboard);
     const file = projectFiles.data
         .map(f => f.data)
         .find(f => f.name === fileName);
@@ -115,7 +114,7 @@ async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, pa
 
 async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directoryId) {
     const text = htmlUtil.convertOutsideTextToHtml(page);
-    const fileName = `Sketch_${page.id}.html`;
+    const fileName = getFileName(page);
     const file = projectFiles.data
         .map(f => f.data)
         .find(f => f.name === fileName);
@@ -183,7 +182,7 @@ async function translate(wholePage) {
             }
         }
 
-        const { projectsGroupsApi, languagesApi, translationsApi } = httpUtil.createClient();
+        const { projectsGroupsApi, languagesApi, translationsApi, sourceFilesApi } = httpUtil.createClient();
         ui.message('Loading list of languages');
         const languages = await languagesApi.listSupportedLanguages(500);
         const project = await projectsGroupsApi.getProject(projectId);
@@ -201,31 +200,17 @@ async function translate(wholePage) {
             if (!!language) {
                 try {
                     const languageId = language.data.id;
-
-                    ui.message('Building project translations');
-                    const build = await translationsApi.buildProject(projectId, {
-                        targetLanguageIds: [languageId]
-                    });
-
-                    let finished = false;
-                    while (!finished) {
-                        const status = await translationsApi.checkBuildStatus(projectId, build.data.id);
-                        finished = status.data.status === 'finished';
-                        if (!finished) {
-                            ui.message(`Build status ${status.data.progress}%`);
-                        }
+                    const directories = await sourceFilesApi.listProjectDirectories(projectId, undefined, undefined, 500);
+                    const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
+                    if (!directory) {
+                        throw 'There are no translations for ' + (wholePage ? `page ${selectedPage.name}` : `artboard ${artboard.name}`);
                     }
+                    const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
                     ui.message('Downloading translations');
-                    //looks like BE returns old translations (some caching?)
-                    const downloadLink = await translationsApi.downloadTranslations(projectId, build.data.id);
-                    const resp = await fetch(downloadLink.data.url);
-                    const blob = await resp.blob();
-                    const buffer = require('@skpm/buffer').Buffer.from(blob);
-                    const zip = new AdmZip(buffer);
                     if (wholePage) {
-                        extractPageTranslations(selectedDocument, selectedPage, value, zip);
+                        await extractPageTranslations(projectId, languageId, translationsApi, selectedDocument, selectedPage, value, projectFiles);
                     } else {
-                        extractArtboardTranslations(selectedDocument, selectedPage, artboard, value, zip);
+                        await extractArtboardTranslations(projectId, languageId, translationsApi, selectedDocument, selectedPage, artboard, value, projectFiles);
                     }
                 } catch (error) {
                     httpUtil.handleError(error);
@@ -237,10 +222,11 @@ async function translate(wholePage) {
     }
 }
 
-function extractArtboardTranslations(document, page, artboard, languageName, zip) {
-    const foundFile = zip.getEntries().find(entry => entry.entryName.includes(`${page.id}/Sketch_${artboard.id}.html`));
+async function extractArtboardTranslations(projectId, targetLanguageId, translationsApi, document, page, artboard, languageName, projectFiles) {
+    const foundFile = projectFiles.data.find(file => file.data.name === getFileName(artboard));
     if (!!foundFile) {
-        const translations = htmlUtil.parseHtmlForText(foundFile.getData().toString());
+        const html = await getFile(translationsApi, projectId, foundFile.data.id, targetLanguageId);
+        const translations = htmlUtil.parseHtmlForText(html);
         translationsUtil.removeTranslatedElement(document, artboard.id, languageName, 'artboard');
         const newArtboard = artboard.duplicate();
         translationsUtil.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
@@ -284,10 +270,12 @@ function extractArtboardTranslations(document, page, artboard, languageName, zip
     }
 }
 
-function extractPageTranslations(document, page, languageName, zip) {
-    const foundFiles = zip.getEntries().filter(entry => entry.entryName.includes(`Sketch_${page.id}`));
-    if (foundFiles.length > 0) {
-        const translations = foundFiles.flatMap(foundFile => htmlUtil.parseHtmlForText(foundFile.getData().toString()));
+async function extractPageTranslations(projectId, targetLanguageId, translationsApi, document, page, languageName, projectFiles) {
+    if (projectFiles.data.length > 0) {
+        const files = await Promise.all(
+            projectFiles.data.map(file => getFile(translationsApi, projectId, file.data.id, targetLanguageId))
+        );
+        const translations = files.flatMap(file => htmlUtil.parseHtmlForText(file));
         translationsUtil.removeTranslatedElement(document, page.id, languageName, 'page');
         const newPage = page.duplicate();
         translationsUtil.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
@@ -327,6 +315,22 @@ function extractPageTranslations(document, page, languageName, zip) {
     } else {
         throw `There are no translations for page ${page.name}`;
     }
+}
+
+async function getFile(translationsApi, projectId, fileId, targetLanguageId) {
+    const downloadLink = await translationsApi.buildProjectFileTranslation(projectId, fileId, { targetLanguageId });
+    const resp = await fetch(downloadLink.data.url);
+    const blob = await resp.blob();
+    const html = NSString.alloc().initWithData_encoding(blob, NSUTF8StringEncoding);
+    return html.trim();
+}
+
+function getFileName(element) {
+    return `Sketch_${element.id}.html`;
+}
+
+function getDirectoryName(page) {
+    return `Sketch_${page.id}`;
 }
 
 export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard };
