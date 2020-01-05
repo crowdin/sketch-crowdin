@@ -100,7 +100,7 @@ async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, pa
     const storageId = storage.data.id;
     if (!!file) {
         ui.message(`Updating existing file for artboard ${artboard.name}`);
-        await sourceFilesApi.updateFile(projectId, file.id, { storageId });
+        await sourceFilesApi.updateOrRestoreFile(projectId, file.id, { storageId });
     } else {
         ui.message(`Creating new file for artboard ${artboard.name}`);
         await sourceFilesApi.createFile(projectId, {
@@ -122,7 +122,7 @@ async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, p
     const storageId = storage.data.id;
     if (!!file) {
         ui.message(`Updating existing file for page ${page.name}`);
-        await sourceFilesApi.updateFile(projectId, file.id, { storageId });
+        await sourceFilesApi.updateOrRestoreFile(projectId, file.id, { storageId });
     } else {
         ui.message(`Creating new file for page ${page.name}`);
         await sourceFilesApi.createFile(projectId, {
