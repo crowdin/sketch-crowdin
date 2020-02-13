@@ -1,15 +1,25 @@
 import ui from 'sketch/ui';
 import settings from 'sketch/settings';
 import crowdin, { HttpClientType } from '@crowdin/crowdin-api-client';
-import { ACCESS_TOKEN_KEY, ORGANIZATION } from '../constants';
+import { ACCESS_TOKEN_KEY, ORGANIZATION, PLUGIN_VERSION } from '../constants';
 
 function createClient() {
     const token = settings.settingForKey(ACCESS_TOKEN_KEY);
     const organization = settings.settingForKey(ORGANIZATION);
+    const sketchVersion = NSBundle.mainBundle().infoDictionary()['CFBundleShortVersionString'];
     if (!token) {
         throw 'Please set access token';
     }
-    return new crowdin({ token, organization }, { httpClientType: HttpClientType.FETCH });
+    return new crowdin(
+        {
+            token,
+            organization
+        },
+        {
+            httpClientType: HttpClientType.FETCH,
+            userAgent: `crowdin-sketch-plugin/${PLUGIN_VERSION} sketch/${sketchVersion}`
+        }
+    );
 }
 
 function handleError(error) {
