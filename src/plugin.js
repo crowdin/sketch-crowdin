@@ -32,9 +32,11 @@ async function sendStringsAction(wholePage) {
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
             await connectToCrowdin();
+            return;
         }
         if (!projectId) {
             await setProjectIdFromExisting();
+            return;
         }
 
         const translatedPages = translationsUtil.getListOfTranslatedElements(selectedDocument, 'page');
@@ -162,9 +164,11 @@ async function translate(wholePage) {
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
             await connectToCrowdin();
+            return;
         }
         if (!projectId) {
             await setProjectIdFromExisting();
+            return;
         }
         const translatedPages = translationsUtil.getListOfTranslatedElements(selectedDocument, 'page');
         if (!!wholePage) {
@@ -365,4 +369,98 @@ function getDirectoryName(page) {
     return `Sketch_${page.id}`;
 }
 
-export { sendPageStrings, sendArtboardStrings, translatePage, translateArtboard };
+// strings mode
+
+async function crowdinStrings() {
+    try {
+        const selectedDocument = dom.getSelectedDocument();
+        const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
+        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
+
+        if (!selectedDocument) {
+            throw 'Please select a document';
+        }
+        if (!selectedPage) {
+            throw 'Please select a page';
+        }
+        const selectedText = domUtil.getSelectedText(selectedPage);
+        const selectedSymbolText = domUtil.getSelectedSymbolText(selectedPage);
+        if (!selectedText && !selectedSymbolText) {
+            throw 'Please select a text element';
+        }
+        if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
+            await connectToCrowdin();
+            return;
+        }
+        if (!projectId) {
+            await setProjectIdFromExisting();
+            return;
+        }
+
+        const { sourceStringsApi } = httpUtil.createClient();
+        ui.message('Loading strings');
+        let strings = await fetchAllStrings(projectId, sourceStringsApi);
+        ui.message(`Loaded ${strings.length} strings`);
+        strings = convertCrowdinStringsToStrings(strings);
+
+        if (strings.length === 0) {
+            return ui.message('There are no strings in Crowdin yet');
+        }
+
+        ui.getInputFromUser('Select text', {
+            type: ui.INPUT_TYPE.selection,
+            possibleValues: strings
+        }, (err, value) => {
+            if (err) {
+                return;
+            }
+            if (selectedText) {
+                selectedText.text = value;
+            } else {
+                selectedSymbolText.value = value;
+            }
+        });
+    } catch (error) {
+        httpUtil.handleError(error);
+    }
+}
+
+async function fetchAllStrings(projectId, sourceStringsApi, offset) {
+    offset = !offset ? 0 : offset;
+    const limit = 500;
+    const maxAmount = 4000;
+    const res = await sourceStringsApi.listProjectStrings(projectId, null, limit, offset);
+    if ((res.data && res.data.length < limit) || offset > maxAmount) {
+        return res.data;
+    } else {
+        const result = await fetchAllStrings(projectId, sourceStringsApi, offset + limit);
+        return [...res.data, ...result];
+    }
+}
+
+function convertCrowdinStringsToStrings(crowdinStrings) {
+    return crowdinStrings
+        .map(str => str.data.text)
+        .map(text => {
+            if (typeof text === 'string' || text instanceof String) {
+                return text;
+            } else {
+                return text.one ||
+                    text.zero ||
+                    text.two ||
+                    text.few ||
+                    text.many ||
+                    text.other || '';
+            }
+        })
+        .filter(text => text.length > 0);
+}
+
+
+export {
+    sendPageStrings,
+    sendArtboardStrings,
+    translatePage,
+    translateArtboard,
+    crowdinStrings
+};

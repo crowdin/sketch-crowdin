@@ -52,6 +52,13 @@
       "identifier": "contact-us",
       "script": "./settings.js",
       "handler": "openContactUs"
+    },
+    {
+      "name": "Crowdin Strings",
+      "identifier": "crowdin-strings",
+      "script": "./plugin.js",
+      "handler": "crowdinStrings",
+      "shortcut": "ctrl shift c"
     }
   ],
   "menu": {
@@ -59,6 +66,8 @@
     "items": [
       "connect-to-crowdin",
       "select-project",
+      "-",
+      "crowdin-strings",
       "-",
       "send-page-text",
       "send-artboard-text",

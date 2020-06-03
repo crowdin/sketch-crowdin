@@ -5,6 +5,19 @@ function getSelectedArtboard(page) {
     return dom.find('Artboard', page).find(e => e.selected);
 }
 
+function getSelectedText(page) {
+    return dom.find('Text', page).find(e => e.selected);
+}
+
+function getSelectedSymbolText(page) {
+    const symbols = dom.find('SymbolInstance, [selected=true]', page);
+    if (symbols.length > 0) {
+        return symbols[0].overrides
+            .filter(o => o.selected)
+            .find(override => override.affectedLayer.type === 'Text' && override.property === 'stringValue');
+    }
+}
+
 function getNonArtboardTexts(page) {
     const artboards = dom.find('Artboard', page);
     let stringsInArtboards = [];
@@ -52,5 +65,11 @@ function removeGeneratedArtboards(document, sourcePage, duplicatePage) {
 }
 
 export {
-    getSelectedArtboard, offsetArtboard, removeGeneratedArtboards, getNonArtboardSymbols, getNonArtboardTexts
+    getSelectedArtboard,
+    offsetArtboard,
+    removeGeneratedArtboards,
+    getNonArtboardSymbols,
+    getNonArtboardTexts,
+    getSelectedText,
+    getSelectedSymbolText
 };
