@@ -24,41 +24,47 @@
       "handler": "setOrganization"
     },
     {
-      "name": "Send texts of selected page",
-      "identifier": "send-page-text",
-      "script": "./plugin.js",
-      "handler": "sendPageStrings"
-    },
-    {
-      "name": "Send texts of selected artboard",
-      "identifier": "send-artboard-text",
-      "script": "./plugin.js",
-      "handler": "sendArtboardStrings"
-    },
-    {
-      "name": "Get translations for selected page",
-      "identifier": "translate-page",
-      "script": "./plugin.js",
-      "handler": "translatePage"
-    },
-    {
-      "name": "Get translations for selected artboard",
-      "identifier": "translate-artboard",
-      "script": "./plugin.js",
-      "handler": "translateArtboard"
-    },
-    {
       "name": "Contact Us",
       "identifier": "contact-us",
       "script": "./settings.js",
       "handler": "openContactUs"
     },
     {
+      "name": "Send texts of selected page",
+      "identifier": "send-page-text",
+      "script": "./action/send-strings.js",
+      "handler": "sendPageStrings"
+    },
+    {
+      "name": "Send texts of selected artboard",
+      "identifier": "send-artboard-text",
+      "script": "./action/send-strings.js",
+      "handler": "sendArtboardStrings"
+    },
+    {
+      "name": "Get translations for selected page",
+      "identifier": "translate-page",
+      "script": "./action/translate.js",
+      "handler": "translatePage"
+    },
+    {
+      "name": "Get translations for selected artboard",
+      "identifier": "translate-artboard",
+      "script": "./action/translate.js",
+      "handler": "translateArtboard"
+    },
+    {
       "name": "Crowdin Strings",
       "identifier": "crowdin-strings",
-      "script": "./plugin.js",
+      "script": "./action/source-strings.js",
       "handler": "crowdinStrings",
       "shortcut": "ctrl shift c"
+    },
+    {
+      "name": "Upload Artboard Screenshots",
+      "identifier": "upload-screenshots",
+      "script": "./action/upload-screenshots.js",
+      "handler": "uploadScreenshots"
     }
   ],
   "menu": {
@@ -68,6 +74,7 @@
       "select-project",
       "-",
       "crowdin-strings",
+      "upload-screenshots",
       "-",
       "send-page-text",
       "send-artboard-text",

@@ -1,5 +1,5 @@
 import dom from 'sketch/dom';
-import * as translationsUtil from './translations';
+import * as translationsUtil from './local-storage';
 
 function getSelectedArtboard(page) {
     return dom.find('Artboard', page).find(e => e.selected);
