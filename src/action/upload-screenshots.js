@@ -36,8 +36,15 @@ async function uploadScreenshots() {
         const artboardIds = artboards.map(e => e.id);
 
         //removing obsolete tags
-        const strings = await fetchAllStrings(projectId, httpUtil.createClient().sourceStringsApi);
+        const { sourceStringsApi, screenshotsApi } = httpUtil.createClient();
+        const strings = await fetchAllStrings(projectId, sourceStringsApi);
         const stringsIds = strings.map(st => st.id)
+
+        const artboardIdsBefore = [];
+        tags
+            .map(t => t.artboardId)
+            .filter(artboardId => !artboardIdsBefore.includes(artboardId))
+            .forEach(artboardId => artboardIdsBefore.push(artboardId));
 
         tags = tags
             .filter(t => stringsIds.includes(t.stringId))
@@ -81,22 +88,42 @@ async function uploadScreenshots() {
             return accumulator;
         }, {});
 
-        const promises = [];
+        const screenshots = await screenshotsApi.listScreenshots(projectId, 500);
+
+        const artboardIdsAfter = [];
+        tags
+            .map(t => t.artboardId)
+            .filter(artboardId => !artboardIdsAfter.includes(artboardId))
+            .forEach(artboardId => artboardIdsAfter.push(artboardId));
+
+        //removing obsolete screenshots
+        const promises = artboardIdsBefore
+            .filter(artboardId => !artboardIdsAfter.includes(artboardId))
+            .map(artboardId => __buildScreenshotName(artboardId, selectedPage.id))
+            .map(async screenshotName => {
+                const screenshot = screenshots.data.find(sc => sc.data.name === screenshotName);
+                if (!!screenshot) {
+                    ui.message(`Removing screenshot ${screenshot.data.name}`);
+                    await screenshotsApi.deleteScreenshot(projectId, screenshot.data.id);
+                }
+            })
+
         for (let key in groupedTags) {
             if (groupedTags.hasOwnProperty(key)) {
-                promises.push(sendTagsGroup(groupedTags[key], selectedPage, projectId));
+                promises.push(sendTagsGroup(groupedTags[key], selectedPage, projectId, screenshots));
             }
         }
 
         await Promise.all(promises);
 
         localStorage.saveTags(selectedDocument, tags);
+        ui.message('Screenshots were successfully pushed to Crowdin');
     } catch (error) {
         httpUtil.handleError(error);
     }
 }
 
-async function sendTagsGroup(tagsGroup, page, projectId) {
+async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
     const artboard = tagsGroup.artboard;
     const tags = tagsGroup.tags;
     const b = dom.export(artboard, {
@@ -105,20 +132,17 @@ async function sendTagsGroup(tagsGroup, page, projectId) {
     });
     ui.message(`Sending screenshot for ${artboard.name} Artboard`);
     const { screenshotsApi, uploadStorageApi } = httpUtil.createClient();
-    const screenshotName = `Sketch_${page.id}_Artboard_${artboard.id}`;
+    const screenshotName = __buildScreenshotName(artboard.id, page.id);
     const storageRecord = await uploadStorageApi.addStorage(`${screenshotName}.png`, b.slice(b.byteOffset, b.byteOffset + b.byteLength));
-    const screenshots = await screenshotsApi.listScreenshots(projectId, 500);
 
     let screenshot = screenshots.data.find(sc => sc.data.name === screenshotName);
 
     if (!screenshot) {
-        ui.message(`Screenshot for ${artboard.name} Artboard created`);
         screenshot = await screenshotsApi.addScreenshot(projectId, {
             storageId: storageRecord.data.id,
             name: screenshotName
         });
     } else {
-        ui.message(`Screenshot for ${artboard.name} Artboard updated`);
         screenshot = await screenshotsApi.updateScreenshot(projectId, screenshot.data.id, {
             storageId: storageRecord.data.id,
             name: screenshotName
@@ -126,9 +150,8 @@ async function sendTagsGroup(tagsGroup, page, projectId) {
     }
     const screenshotId = screenshot.data.id;
 
-    //TODO fix fetch client for methods when no response is returned
-    await screenshotsApi.clearTags(projectId, screenshotId);
     ui.message(`Adding tags to screenshot for ${artboard.name} Artboard`);
+    await screenshotsApi.clearTags(projectId, screenshotId);
 
     const tagsRequest = tags.map(tag => {
         return {
@@ -144,6 +167,10 @@ async function sendTagsGroup(tagsGroup, page, projectId) {
 
     await screenshotsApi.addTag(projectId, screenshotId, tagsRequest);
     ui.message(`Screenshot for ${artboard.name} Artboard successfully pushed to Crowdin`);
+}
+
+function __buildScreenshotName(artboardId, pageId) {
+    return `Sketch_${pageId}_Artboard_${artboardId}`;
 }
 
 export { uploadScreenshots };

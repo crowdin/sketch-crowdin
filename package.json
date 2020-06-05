@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
-    "@crowdin/crowdin-api-client": "1.8.2",
+    "@crowdin/crowdin-api-client": "1.8.4",
     "cheerio": "^1.0.0-rc.3"
   },
   "devDependencies": {
