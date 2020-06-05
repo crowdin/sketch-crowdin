@@ -61,7 +61,7 @@
       "shortcut": "ctrl shift c"
     },
     {
-      "name": "Upload Artboard Screenshots",
+      "name": "Upload Artboard Screenshots for selected page",
       "identifier": "upload-screenshots",
       "script": "./action/upload-screenshots.js",
       "handler": "uploadScreenshots"

@@ -10,7 +10,7 @@ function convertOutsideTextToHtml(page) {
     html += '<body>';
     outsideText.forEach(t => html += `<div id="${t.id}" stype="${TEXT_TYPE}">${t.text}</div>`);
     outsideSymbols.forEach(outsideSymbol => {
-        getSymbolTexts(outsideSymbol)
+        domUtil.getSymbolTexts(outsideSymbol)
             .forEach(override => {
                 html += `<div id="${outsideSymbol.id + '/' + override.id}" stype="${SYMBOL_TYPE}">${override.text}</div>`
             });
@@ -20,23 +20,12 @@ function convertOutsideTextToHtml(page) {
     return html;
 }
 
-function getSymbolTexts(symbol) {
-    return symbol.overrides
-        .filter(override => override.affectedLayer.type === 'Text' && override.property === 'stringValue')
-        .map(override => {
-            return {
-                id: override.id,
-                text: override.value
-            };
-        });
-}
-
 function convertArtboardToHtml(page, artboard) {
     const container = {
         x: artboard.frame.width,
         y: artboard.frame.height
     };
-    const allTexts = getTextElementsInArtboard(artboard);
+    const allTexts = domUtil.getTextElementsInArtboard(artboard);
     let textHtml = '';
     allTexts.forEach(t => {
         let style = `position: absolute;top:${t.y}px;left:${t.x}px;`;
@@ -98,82 +87,6 @@ function convertArtboardToHtml(page, artboard) {
     return html;
 }
 
-function getTextElementsInArtboard(artboard) {
-    const textElements = dom.find('Text', artboard)
-        .map(e => {
-            const textId = e.id;
-            const text = e.text;
-            let parent = e.parent;
-            let parentId = parent.id;
-            let x = e.frame.x;
-            let y = e.frame.y;
-            while (parentId !== artboard.id) {
-                x += parent.frame.x;
-                y += parent.frame.y;
-                parent = parent.parent;
-                if (!parent) {
-                    return null;
-                }
-                parentId = parent.id;
-            }
-            return { x, y, textId, text, e, type: TEXT_TYPE };
-        });
-    const artboardSymbols = dom.find('SymbolInstance', artboard);
-    const textsFromSymbols = artboardSymbols
-        .map(symbol => {
-            return symbol.overrides
-                .filter(override => override.affectedLayer.type === 'Text' && override.property === 'stringValue')
-                .map(override => {
-                    const text = override.value;
-                    const e = override.affectedLayer;
-                    let parent = symbol;
-                    let parentId = parent.id;
-                    let x = e.frame.x;
-                    let y = e.frame.y;
-                    const parentSymbols = [];
-                    parentSymbols.push(symbol.id);
-                    while (parentId !== artboard.id) {
-                        x += parent.frame.x;
-                        y += parent.frame.y;
-                        let current = parent;
-                        parent = parent.parent;
-                        if (parent.type === 'SymbolMaster') {
-                            parent = getSymbolIstance(artboardSymbols, current.id, parent.id);
-                            if (parent !== null) {
-                                parentSymbols.push(parent.id);
-                            }
-                        }
-                        if (!parent) {
-                            return null;
-                        }
-                        parentId = parent.id;
-                    }
-                    return { x, y, textId: parentSymbols.reverse().join('/') + '/' + override.id, text, e, type: SYMBOL_TYPE };
-                });
-        })
-        .reduce((x, y) => x.concat(y), []);
-    return textElements.concat(textsFromSymbols).filter(el => el !== null);
-}
-
-//for nested symbols Sketch API returns SymbolMaster instead of SymbolInstance as a parent group
-//and therefore we cannot calculate (x,y) of the text
-//this function is a workaround to find proper parent element
-//https://github.com/sketch-hq/SketchAPI/issues/689
-function getSymbolIstance(symbols, symbolInstanceChildId, symbolMasterParentId) {
-    for (let i = 0; i < symbols.length; i++) {
-        const symbol = symbols[i];
-        if (symbol.master.id === symbolMasterParentId) {
-            for (let j = 0; j < symbol.overrides.length; j++) {
-                const override = symbol.overrides[j];
-                if (override.affectedLayer.id === symbolInstanceChildId) {
-                    return symbol;
-                }
-            }
-        }
-    }
-    return null;
-}
-
 function parseHtmlForText(html) {
     const $ = cheerio.load(html);
     const strings = $('div[id]');
@@ -189,4 +102,4 @@ function parseHtmlForText(html) {
     return result;
 }
 
-export { convertArtboardToHtml, convertOutsideTextToHtml, parseHtmlForText, getTextElementsInArtboard };
+export { convertArtboardToHtml, convertOutsideTextToHtml, parseHtmlForText };

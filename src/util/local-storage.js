@@ -72,4 +72,16 @@ function getListOfTranslatedElements(doc, type) {
     return translatedElements.split(',');
 }
 
-export { removeTranslatedElement, addTranslatedElement, getListOfTranslatedElements };
+function getTags(doc) {
+    const json = settings.documentSettingForKey(doc, 'crowdin-tags');
+    if (!json) {
+        return [];
+    }
+    return JSON.parse(json);
+}
+
+function saveTags(doc, tags) {
+    settings.setDocumentSettingForKey(doc, 'crowdin-tags', JSON.stringify(tags || []));
+}
+
+export { removeTranslatedElement, addTranslatedElement, getListOfTranslatedElements, getTags, saveTags };

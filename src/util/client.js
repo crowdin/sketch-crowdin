@@ -4,15 +4,15 @@ async function fetchAllStrings(projectId, sourceStringsApi, offset) {
     const maxAmount = 4000;
     const res = await sourceStringsApi.listProjectStrings(projectId, null, limit, offset);
     if ((res.data && res.data.length < limit) || offset > maxAmount) {
-        return convertCrowdinStringsToStrings(res.data);
+        return __convertCrowdinStringsToStrings(res.data);
     } else {
         const result = await fetchAllStrings(projectId, sourceStringsApi, offset + limit);
-        const resStrings = convertCrowdinStringsToStrings(res.data);
+        const resStrings = __convertCrowdinStringsToStrings(res.data);
         return [...resStrings, ...result];
     }
 }
 
-function convertCrowdinStringsToStrings(crowdinStrings) {
+function __convertCrowdinStringsToStrings(crowdinStrings) {
     return crowdinStrings
         .map(str => str.data)
         .map(e => {
