@@ -40,11 +40,11 @@ async function uploadScreenshots() {
         const strings = await fetchAllStrings(projectId, sourceStringsApi);
         const stringsIds = strings.map(st => st.id)
 
-        const artboardIdsBefore = [];
+        const screenshotsBefore = [];
         tags
-            .map(t => t.artboardId)
-            .filter(artboardId => !artboardIdsBefore.includes(artboardId))
-            .forEach(artboardId => artboardIdsBefore.push(artboardId));
+            .map(t => __buildScreenshotName(t.artboardId, t.pageId))
+            .filter(id => !screenshotsBefore.includes(id))
+            .forEach(id => screenshotsBefore.push(id));
 
         tags = tags
             .filter(t => stringsIds.includes(t.stringId))
@@ -90,16 +90,15 @@ async function uploadScreenshots() {
 
         const screenshots = await screenshotsApi.listScreenshots(projectId, 500);
 
-        const artboardIdsAfter = [];
+        const screenshotsAfter = [];
         tags
-            .map(t => t.artboardId)
-            .filter(artboardId => !artboardIdsAfter.includes(artboardId))
-            .forEach(artboardId => artboardIdsAfter.push(artboardId));
+            .map(t => __buildScreenshotName(t.artboardId, t.pageId))
+            .filter(id => !screenshotsAfter.includes(id))
+            .forEach(id => screenshotsAfter.push(id));
 
         //removing obsolete screenshots
-        const promises = artboardIdsBefore
-            .filter(artboardId => !artboardIdsAfter.includes(artboardId))
-            .map(artboardId => __buildScreenshotName(artboardId, selectedPage.id))
+        const promises = screenshotsBefore
+            .filter(id => !screenshotsAfter.includes(id))
             .map(async screenshotName => {
                 const screenshot = screenshots.data.find(sc => sc.data.name === screenshotName);
                 if (!!screenshot) {
