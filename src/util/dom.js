@@ -104,6 +104,10 @@ function removeGeneratedArtboards(document, sourcePage, duplicatePage) {
 }
 
 function getTextElementsInArtboard(artboard) {
+    const container = {
+        x: artboard.frame.width,
+        y: artboard.frame.height
+    };
     const textElements = dom.find('Text', artboard)
         .map(e => {
             const textId = e.id;
@@ -131,15 +135,23 @@ function getTextElementsInArtboard(artboard) {
                 .map(override => {
                     const text = override.value;
                     const e = override.affectedLayer;
+                    const rect = new dom.Rectangle(0, 0, 0, 0);
+                    const newRect = rect.changeBasis({
+                        from: symbol,
+                        to: artboard
+                    });
                     let parent = symbol;
                     let parentId = parent.id;
-                    let x = e.frame.x;
-                    let y = e.frame.y;
+                    let x = e.frame.x + newRect.x;
+                    let y = e.frame.y + newRect.y;
+                    const nestedSymbol = symbol.overrides.find(ov => __isSymbolOverrideSymbolInstance(ov) && override.path.startsWith(ov.path + '/'));
+                    if (!!nestedSymbol) {
+                        x += nestedSymbol.affectedLayer.frame.x;
+                        y += nestedSymbol.affectedLayer.frame.y;
+                    }
                     const parentSymbols = [];
                     parentSymbols.push(symbol.id);
                     while (parentId !== artboard.id) {
-                        x += parent.frame.x;
-                        y += parent.frame.y;
                         let current = parent;
                         parent = parent.parent;
                         if (parent.type === 'SymbolMaster') {
@@ -152,6 +164,12 @@ function getTextElementsInArtboard(artboard) {
                             return null;
                         }
                         parentId = parent.id;
+                    }
+                    if (x >= container.x) {
+                        x = container.x - e.frame.width;
+                    }
+                    if (y >= container.y) {
+                        y = container.y - e.frame.height;
                     }
                     return { x, y, textId: parentSymbols.reverse().join('/') + '/' + override.id, text, e, type: SYMBOL_TYPE, override };
                 });
@@ -173,6 +191,10 @@ function getSymbolTexts(symbol) {
 
 function __isSymbolOverrideText(override) {
     return override.affectedLayer.type === 'Text' && override.property === 'stringValue';
+}
+
+function __isSymbolOverrideSymbolInstance(override) {
+    return override.affectedLayer.type === 'SymbolInstance' && override.property === 'symbolID';
 }
 
 //for nested symbols Sketch API returns SymbolMaster instead of SymbolInstance as a parent group
