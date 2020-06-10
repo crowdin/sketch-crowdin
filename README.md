@@ -2,6 +2,7 @@
 
 # Crowdin for Sketch plugin
 
+[![Build Status](https://dev.azure.com/crowdin/sketch-plugin/_apis/build/status/Build?branchName=master)](https://dev.azure.com/crowdin/sketch-plugin/_build/latest?definitionId=25&branchName=master)
 [![GitHub All Releases](https://img.shields.io/github/downloads/crowdin/sketch-crowdin/total?cacheSeconds=1800)](https://github.com/crowdin/sketch-crowdin/releases)
 [![GitHub Releases](https://img.shields.io/github/downloads/crowdin/sketch-crowdin/latest/total?cacheSeconds=1800)](https://github.com/crowdin/sketch-crowdin/releases/latest)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/crowdin/sketch-crowdin?cacheSeconds=5000)](https://github.com/crowdin/sketch-crowdin/releases/latest)
