@@ -25,7 +25,7 @@ steps:
 
 - script: |
     npm install
-    npm run build
+    npm run build --run
   displayName: 'npm install and build'
 
 - task: ArchiveFiles@2
