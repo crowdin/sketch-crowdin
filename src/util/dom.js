@@ -165,10 +165,10 @@ function getTextElementsInArtboard(artboard) {
                         }
                         parentId = parent.id;
                     }
-                    if (x >= container.x) {
+                    if (x + e.frame.width >= container.x) {
                         x = container.x - e.frame.width;
                     }
-                    if (y >= container.y) {
+                    if (y + e.frame.height >= container.y) {
                         y = container.y - e.frame.height;
                     }
                     return { x, y, textId: parentSymbols.reverse().join('/') + '/' + override.id, text, e, type: SYMBOL_TYPE, override };
