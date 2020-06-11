@@ -125,7 +125,14 @@ function getTextElementsInArtboard(artboard) {
                 }
                 parentId = parent.id;
             }
-            return { x, y, textId, text, e, type: TEXT_TYPE };
+            const frame = { ...e.frame };
+            if (x + e.frame.width >= container.x) {
+                frame.width = container.x - x;
+            }
+            if (y + e.frame.height >= container.y) {
+                y = container.y - e.frame.height;
+            }
+            return { x, y, textId, text, e, type: TEXT_TYPE, frame };
         });
     const artboardSymbols = dom.find('SymbolInstance', artboard);
     const textsFromSymbols = artboardSymbols
@@ -165,13 +172,14 @@ function getTextElementsInArtboard(artboard) {
                         }
                         parentId = parent.id;
                     }
+                    const frame = { ...e.frame };
                     if (x + e.frame.width >= container.x) {
-                        x = container.x - e.frame.width;
+                        frame.width = container.x - x;
                     }
                     if (y + e.frame.height >= container.y) {
                         y = container.y - e.frame.height;
                     }
-                    return { x, y, textId: parentSymbols.reverse().join('/') + '/' + override.id, text, e, type: SYMBOL_TYPE, override };
+                    return { x, y, textId: parentSymbols.reverse().join('/') + '/' + override.id, text, e, frame, type: SYMBOL_TYPE, override };
                 });
         })
         .reduce((x, y) => x.concat(y), []);

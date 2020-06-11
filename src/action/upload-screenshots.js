@@ -158,8 +158,8 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
             position: {
                 x: tag.textElement.x,
                 y: tag.textElement.y,
-                width: tag.textElement.e.frame.width,
-                height: tag.textElement.e.frame.height
+                width: tag.textElement.frame.width,
+                height: tag.textElement.frame.height
             }
         };
     });

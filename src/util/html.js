@@ -29,7 +29,7 @@ function convertArtboardToHtml(page, artboard) {
     let textHtml = '';
     allTexts.forEach(t => {
         let style = `position: absolute;top:${t.y}px;left:${t.x}px;`;
-        style += `width:${t.e.frame.width}px;`;
+        style += `width:${t.frame.width}px;`;
         if (!!t.e.style) {
             if (!!t.e.style.fontFamily) {
                 style += `font-family:${t.e.style.fontFamily};`;
