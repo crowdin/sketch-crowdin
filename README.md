@@ -11,6 +11,7 @@
 This plugin lets you connect your [Sketch](https://www.sketch.com/) and [Crowdin](https://crowdin.com/) projects together.
 Localize the UI and review your design within different languages before programming starts.
 Send the whole page or separate artboards for translation to Crowdin in a click and fetch translations back to Sketch. Preview and customize the translated copy directly in Sketch. 
+Also it gives ability to use source strings from Crowdin in your Sketch project and upload artborad screenshots. 
 
 [<p align='center'><img src='https://github.com/crowdin/sketch-crowdin/blob/master/images/sketch.gif' width='700'/></p>](https://blog.crowdin.com/2019/12/02/crowdin-for-sketch-plugin-design-for-a-global-audience/)
 
