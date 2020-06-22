@@ -65,11 +65,18 @@
       "identifier": "upload-screenshots",
       "script": "./action/upload-screenshots.js",
       "handler": "uploadScreenshots"
+    },
+    {
+      "name": "Plugin",
+      "identifier": "plugin",
+      "script": "./plugin.js",
+      "handler": "start"
     }
   ],
   "menu": {
     "title": "Crowdin",
     "items": [
+      "plugin",
       "connect-to-crowdin",
       "select-project",
       "-",

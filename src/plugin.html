@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js"></script>
+</head>
+
+<style>
+    html {
+        --control-background: #FFF;
+        --control-border: #D4D4D4;
+    }
+
+    body {
+        background: #F2F2F2;
+        font-family: -apple-system;
+        margin: 10px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: default;
+    }
+
+    h1,
+    h2 {
+        margin: 0;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+
+    h1 {
+        color: #767676;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    #apply-btn {
+        display: block;
+        margin: 20px auto 0 auto;
+    }
+</style>
+
+<body>
+    <h1>Crowdin</h1>
+
+    <button id="apply-btn">Apply</button>
+</body>
+
+<script>
+    function apply() {
+        alert('qweqew');
+
+        const message = { test: 4 };
+
+        if (window.webkit && window.webkit.messageHandlers.sketchPlugin) {
+            window.webkit.messageHandlers.sketchPlugin.postMessage(JSON.stringify(message));
+        } else {
+            console.error('Failed to send options - could not to find "sketchPlugin" message handler. Is every thing set up properly for messaging?');
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('apply-btn').addEventListener('click', () => {
+            apply();
+        });
+
+    });
+</script>
+
+</html>
