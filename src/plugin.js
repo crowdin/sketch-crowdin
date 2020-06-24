@@ -8,7 +8,7 @@ export default function start() {
     const options = {
         identifier,
         width: 380,
-        height: 580,
+        height: 600,
         hidesOnDeactivate: false,
         remembersWindowFrame: true,
         alwaysOnTop: true,
