@@ -1,20 +1,30 @@
 import BrowserWindow from 'sketch-module-web-view';
+import { getWebview } from 'sketch-module-web-view/remote';
 
-function start() {
+const identifier = 'crowdin';
+
+export default function start() {
 
     const options = {
-        identifier: 'crowdin',
-        width: 400,
-        height: 600,
+        identifier,
+        width: 380,
+        height: 580,
         hidesOnDeactivate: false,
         remembersWindowFrame: true,
         alwaysOnTop: true,
-        title: 'Crowdin'
-    }
+        title: 'Crowdin',
+        backgroundColor: '#FFFFFF',
+        resizable: false
+    };
 
-    const browserWindow = new BrowserWindow(options)
+    const browserWindow = new BrowserWindow(options);
 
-    browserWindow.loadURL(require('./plugin.html'));
+    browserWindow.loadURL(require('../ui/plugin.html'));
 };
 
-export { start };
+export function onShutdown() {
+    const existingWebview = getWebview(identifier);
+    if (existingWebview) {
+        existingWebview.close();
+    }
+}

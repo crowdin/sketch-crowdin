@@ -1,0 +1,162 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="../bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../styles.css">
+    <script src="../jquery/dist/jquery.min.js"></script>
+    <script src="../bootstrap/dist/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li class="nav-item">
+                    <a id="translation-nav" class="nav-link" href="#" onclick="openModal('translation')">Translation</a>
+                </li>
+                <li class="nav-item">
+                    <a id="strings-nav" class="nav-link" href="#" onclick="openModal('strings')">Strings</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="nav-item">
+                    <a id="settings-nav" class="nav-link active" href="#" onclick="openModal('settings')">Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Contact Us</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main role="main">
+        <div class="container" id="settings">
+            <br>
+            <form class="needs-validation" novalidate="">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Organization</label>
+                        <input type="text" class="form-control" id="organization">
+                        <small class="form-text text-muted">
+                            You can generate it in your Crowdin Account Settings
+                        </small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Personal Access Token</label>
+                        <input type="text" class="form-control" id="token">
+                        <small class="form-text text-muted">
+                            Specify organization domain name (for Crowdin Enterprise only).
+                            If you connect Crowdin account, leave the field empty
+                        </small>
+                    </div>
+                </div>
+                <hr class="mb-4">
+                <button class="btn btn-secondary">Connect to Crowdin</button>
+                <hr class="mb-4">
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label>Select project</label>
+                        <select class="custom-select d-block w-100" id="project">
+                            <option>Pr1</option>
+                            <option>Pr2</option>
+                            <option>Pr3</option>
+                            <option>Pr4</option>
+                            <option>Pr5</option>
+                            <option>Pr6</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="container" id="strings" style="display: none;">
+            <br>
+            <form>
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label>Source Strings</label>
+                        <select class="custom-select d-block w-100" id="string">
+                            <option>One</option>
+                            <option>Two</option>
+                            <option>Three</option>
+                            <option>Four</option>
+                            <option>Five</option>
+                            <option>Six</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            Use source string for you text component in design
+                        </small>
+                    </div>
+                </div>
+                <button class="btn btn-secondary">Use</button>
+                <hr class="mb-4">
+                <button class="btn btn-secondary">Upload Screenshots for selected page</button>
+            </form>
+        </div>
+
+        <div class="container" id="translation" style="display: none;">
+            <br>
+            <form>
+                <div>
+                    <label>Send texts for selected</label>
+                    <button class="btn btn-secondary" style="margin-left: 18px;">Page</button>
+                    <button class="btn btn-secondary">Artboard</button>
+                </div>
+                <hr class="mb-4">
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label>Language</label>
+                        <select class="custom-select d-block w-100" id="language">
+                            <option>Uk</option>
+                            <option>En</option>
+                            <option>Ru</option>
+                            <option>Es</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label>Translate selected</label>
+                    <button class="btn btn-secondary" style="margin-left: 54px;">Page</button>
+                    <button class="btn btn-secondary">Artboard</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="spinner" class="modal fade bd-example-modal-lg" data-backdrop="static" data-keyboard="false"
+            tabindex="-1">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content" style="width: 48px">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+<script>
+    var openedModal = 'settings';
+
+    function openModal(modal, e) {
+        if (openedModal === modal) {
+            return;
+        }
+        $(`#${openedModal}`).hide();
+        $(`#${openedModal}-nav`).removeClass('active');
+        $(`#${modal}`).show();
+        $(`#${modal}-nav`).addClass('active');
+        openedModal = modal;
+    }
+
+    function showLoading() {
+        $('#spinner').modal('show');
+    }
+
+    function hideLoading() {
+        $('#spinner').modal('hide');
+    }
+</script>
+
+</html>

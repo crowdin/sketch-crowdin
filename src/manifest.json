@@ -70,7 +70,12 @@
       "name": "Plugin",
       "identifier": "plugin",
       "script": "./plugin.js",
-      "handler": "start"
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
     }
   ],
   "menu": {
