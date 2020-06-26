@@ -12,10 +12,12 @@
         <div class="container-fluid">
             <ul class="nav navbar-nav">
                 <li class="nav-item">
-                    <a id="translation-nav" class="nav-link" href="#" onclick="openModal('translation')">Translation</a>
+                    <a id="translation-nav" class="nav-link" href="#"
+                        onclick="openModal('translation');getLanguages();">Translation</a>
                 </li>
                 <li class="nav-item">
-                    <a id="strings-nav" class="nav-link" href="#" onclick="openModal('strings')">Strings</a>
+                    <a id="strings-nav" class="nav-link" href="#"
+                        onclick="openModal('strings-mode');getStrings();">Strings</a>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -23,7 +25,7 @@
                     <a id="settings-nav" class="nav-link active" href="#" onclick="openModal('settings')">Settings</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Contact Us</a>
+                    <a class="nav-link" href="#" onclick="contactUsClick()">Contact Us</a>
                 </li>
             </ul>
         </div>
@@ -52,83 +54,73 @@
                     </div>
                 </div>
                 <hr class="mb-4">
-                <button type="button" class="btn btn-light">Connect to Crowdin</button>
+                <button type="button" class="btn btn-light" onclick="saveCredentials()">Connect to Crowdin</button>
                 <hr class="mb-4">
                 <div class="row">
                     <div class="col-md-5 mb-3">
                         <label>Select project</label>
-                        <select class="custom-select d-block w-100" id="project">
-                            <option>Pr1</option>
-                            <option>Pr2</option>
-                            <option>Pr3</option>
-                            <option>Pr4</option>
-                            <option>Pr5</option>
-                            <option>Pr6</option>
+                        <select class="custom-select d-block w-100" id="projects" onchange="saveProject()">
                         </select>
                     </div>
                 </div>
             </form>
         </div>
 
-        <div class="container" id="strings" style="display: none;">
+        <div class="container" id="strings-mode" style="display: none;">
             <form>
                 <div class="row">
                     <div class="col-md-5 mb-3">
                         <label>Source Strings</label>
-                        <select class="custom-select d-block w-100" id="string">
-                            <option>One</option>
-                            <option>Two</option>
-                            <option>Three</option>
-                            <option>Four</option>
-                            <option>Five</option>
-                            <option>Six</option>
+                        <select class="custom-select d-block w-100" id="strings">
                         </select>
                     </div>
                 </div>
-                <button type="button" class="btn btn-light">Use</button>
+                <button type="button" class="btn btn-light" onclick="useString()">Use</button>
                 <small class="form-text text-muted">
                     Use source string for you text component in design
                 </small>
                 <hr class="mb-4">
-                <button type="button" class="btn btn-light">Upload Screenshots</button>
+                <button type="button" class="btn btn-light" onclick="uploadScreenshots()">Upload Screenshots</button>
                 <small class="form-text text-muted">Send Artboards Screenshots for selected page with tagged
                     strings</small>
+                <hr class="mb-4">
+                <small class="form-text text-muted">Use this mode to work with dynamic designs, including product UI.
+                    Get real source texts from Crowdin, use them in your designs, and upload screenshots of the
+                    artboards to provide context for translators.
+                </small>
             </form>
         </div>
 
         <div class="container" id="translation" style="display: none;">
             <form>
-                <small class="form-text text-muted">Send texts for translations to Crowdin and preview the translated
-                    copies back in Sketch. Before
-                    the development starts.</small>
-                <hr class="mb-4">
                 <div>
                     <label>Send texts for selected</label>
-                    <button type="button" class="btn btn-light" style="margin-left: 18px;">Page</button>
-                    <button type="button" class="btn btn-light">Artboard</button>
+                    <button type="button" class="btn btn-light" style="margin-left: 18px;"
+                        onclick="sendStrings(true)">Page</button>
+                    <button type="button" class="btn btn-light" onclick="sendStrings(false)">Artboard</button>
                 </div>
                 <hr class="mb-4">
                 <div class="row">
                     <div class="col-md-5 mb-3">
                         <label>Language</label>
-                        <select class="custom-select d-block w-100" id="language">
-                            <option>Uk</option>
-                            <option>En</option>
-                            <option>Ru</option>
-                            <option>Es</option>
+                        <select class="custom-select d-block w-100" id="languages">
                         </select>
                     </div>
                 </div>
                 <div>
                     <label>Translate selected</label>
-                    <button type="button" class="btn btn-light" style="margin-left: 54px;">Page</button>
-                    <button type="button" class="btn btn-light">Artboard</button>
+                    <button type="button" class="btn btn-light" style="margin-left: 54px;"
+                        onclick="translateComponent(true)">Page</button>
+                    <button type="button" class="btn btn-light" onclick="translateComponent(false)">Artboard</button>
                 </div>
+                <hr class="mb-4">
+                <small class="form-text text-muted">Send designs for translations to Crowdin and upload translated
+                    copies back to Sketch. Use for translating static pages, like banners and brochures.</small>
             </form>
         </div>
 
-        <div id="spinner" class="modal fade bd-example-modal-lg" data-backdrop="static" data-keyboard="false"
-            tabindex="-1">
+        <div id="spinner" class="modal fade bd-example-modal-lg show" data-backdrop="static" data-keyboard="false"
+            tabindex="-1" style="display: none;" aria-modal="true">
             <div class="modal-dialog modal-sm">
                 <div class="modal-content" style="width: 48px">
                     <div class="spinner-border" role="status">
@@ -140,13 +132,19 @@
 
         <div class="footer" id="footer"></div>
     </main>
+    <div id="modalFade" class="modal-backdrop fade show" style="display: none;"></div>
 </body>
 
 <script>
+
     var openedModal = 'settings';
+    var languages;
+    var strings;
+
+    getCredentials();
+    getProjects();
 
     function openModal(modal) {
-        console.log('qweqwe')
         if (openedModal === modal) {
             return;
         }
@@ -158,11 +156,116 @@
     }
 
     function showLoading() {
-        $('#spinner').modal('show');
+        $('#spinner').show();
+        $('#modalFade').show();
     }
 
     function hideLoading() {
-        $('#spinner').modal('hide');
+        $('#spinner').hide();
+        $('#modalFade').hide();
+    }
+
+    function contactUsClick() {
+        window.postMessage('contactUs');
+    }
+
+    function getCredentials() {
+        return window.postMessage('getCredentials').then(creds => {
+            $('#organization').val(creds[0].organization);
+            $('#token').val(creds[0].token);
+        });
+    }
+
+    function getProjects() {
+        showLoading();
+        window.postMessage('getProjects')
+            .then(info => {
+                const projectsInfo = info[0];
+                const options = projectsInfo.projects.map(pr => {
+                    if (pr.id === projectsInfo.selectedProjectId) {
+                        return `<option value="${pr.id}" selected>${pr.name}</option>`;
+                    } else {
+                        return `<option value="${pr.id}">${pr.name}</option>`;
+                    }
+                }).join('');
+                $('#projects').find('option').remove().end().append(options);
+            })
+            .then(hideLoading);
+    }
+
+    function saveCredentials() {
+        const token = $('#token').val();
+        const organization = $('#organization').val();
+        window.postMessage('saveCredentials', { token, organization })
+            .then(getCredentials)
+            .then(getProjects)
+            .then(clearStorage);
+    }
+
+    function saveProject() {
+        const projectId = $('#projects option:selected').val();
+        window.postMessage('saveProject', projectId)
+            .then(clearStorage);
+    }
+
+    function getLanguages() {
+        if (!languages) {
+            showLoading();
+            window.postMessage('getLanguages')
+                .then(res => {
+                    languages = res[0];
+                    let options = '<option value="-1">All Languages</option>';
+                    options += languages.map(lan => {
+                        return `<option value="${lan.id}">${lan.name}</option>`;
+                    }).join('');
+                    $('#languages').find('option').remove().end().append(options);
+                })
+                .then(hideLoading);
+        }
+    }
+
+    function getStrings() {
+        if (!strings) {
+            showLoading();
+            window.postMessage('getStrings')
+                .then(res => {
+                    strings = res[0];
+                    console.log(strings);
+                    const options = strings.map(str => {
+                        return `<option value="${str.id}">${str.text}</option>`;
+                    }).join('');
+                    $('#strings').find('option').remove().end().append(options);
+                })
+                .then(hideLoading);
+        }
+    }
+
+    function translateComponent(wholePage) {
+        showLoading();
+        const languageId = Number($('#languages option:selected').val());
+        window.postMessage('translate', languageId, wholePage).then(hideLoading);
+    }
+
+    function sendStrings(wholePage) {
+        showLoading();
+        window.postMessage('sendStrings', wholePage).then(hideLoading);
+    }
+
+    function useString() {
+        showLoading();
+        const id = Number($('#strings option:selected').val());
+        const text = $('#strings option:selected').text();
+        window.postMessage('useString', { id, text }).then(hideLoading);
+    }
+
+    function uploadScreenshots() {
+        showLoading();
+        window.postMessage('uploadScreenshots').then(hideLoading);
+    }
+
+    function clearStorage() {
+        strings = undefined;
+        languages = undefined;
     }
 </script>
 

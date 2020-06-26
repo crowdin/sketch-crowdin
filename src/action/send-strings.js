@@ -6,36 +6,25 @@ import * as domUtil from '../util/dom';
 import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
 import * as htmlUtil from '../util/html';
-import { connectToCrowdin, setProjectIdFromExisting } from '../settings';
 import { getFileName, getDirectoryName } from '../util/file';
 
-async function sendPageStrings() {
-    await sendStringsAction(true);
-}
-
-async function sendArtboardStrings() {
-    await sendStringsAction(false);
-}
-
-async function sendStringsAction(wholePage) {
+async function sendStrings(wholePage) {
     try {
         const selectedDocument = dom.getSelectedDocument();
-        const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
-        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
-
         if (!selectedDocument) {
             throw 'Please select a document';
         }
+        const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
+        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
+
         if (!selectedPage) {
             throw 'Please select a page';
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            await connectToCrowdin();
-            return;
+            throw 'Please specify correct access token';
         }
         if (!projectId) {
-            await setProjectIdFromExisting();
-            return;
+            throw 'Please select a project';
         }
 
         const translatedPages = localStorage.getListOfTranslatedElements(selectedDocument, 'page');
@@ -135,4 +124,4 @@ async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, p
     }
 }
 
-export { sendPageStrings, sendArtboardStrings };
+export { sendStrings };

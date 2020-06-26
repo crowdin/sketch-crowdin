@@ -6,68 +6,7 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "Connect to Crowdin",
-      "identifier": "connect-to-crowdin",
-      "script": "./settings.js",
-      "handler": "connectToCrowdin"
-    },
-    {
-      "name": "Select project",
-      "identifier": "select-project",
-      "script": "./settings.js",
-      "handler": "setProjectIdFromExisting"
-    },
-    {
-      "name": "Set organization",
-      "identifier": "set-organization",
-      "script": "./settings.js",
-      "handler": "setOrganization"
-    },
-    {
-      "name": "Contact Us",
-      "identifier": "contact-us",
-      "script": "./settings.js",
-      "handler": "openContactUs"
-    },
-    {
-      "name": "Send texts of selected page",
-      "identifier": "send-page-text",
-      "script": "./action/send-strings.js",
-      "handler": "sendPageStrings"
-    },
-    {
-      "name": "Send texts of selected artboard",
-      "identifier": "send-artboard-text",
-      "script": "./action/send-strings.js",
-      "handler": "sendArtboardStrings"
-    },
-    {
-      "name": "Get translations for selected page",
-      "identifier": "translate-page",
-      "script": "./action/translate.js",
-      "handler": "translatePage"
-    },
-    {
-      "name": "Get translations for selected artboard",
-      "identifier": "translate-artboard",
-      "script": "./action/translate.js",
-      "handler": "translateArtboard"
-    },
-    {
-      "name": "Crowdin Strings",
-      "identifier": "crowdin-strings",
-      "script": "./action/source-strings.js",
-      "handler": "crowdinStrings",
-      "shortcut": "ctrl shift c"
-    },
-    {
-      "name": "Upload Artboard Screenshots for selected page",
-      "identifier": "upload-screenshots",
-      "script": "./action/upload-screenshots.js",
-      "handler": "uploadScreenshots"
-    },
-    {
-      "name": "Plugin",
+      "name": "Crowdin",
       "identifier": "plugin",
       "script": "./plugin.js",
       "handlers": {
@@ -81,20 +20,8 @@
   "menu": {
     "title": "Crowdin",
     "items": [
-      "plugin",
-      "connect-to-crowdin",
-      "select-project",
-      "-",
-      "crowdin-strings",
-      "upload-screenshots",
-      "-",
-      "send-page-text",
-      "send-artboard-text",
-      "-",
-      "translate-page",
-      "translate-artboard",
-      "-",
-      "contact-us"
-    ]
+      "plugin"
+    ],
+    "isRoot": true
   }
 }

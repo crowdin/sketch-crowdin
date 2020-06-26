@@ -5,28 +5,25 @@ import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
 import { getTextElementsInArtboard } from '../util/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
-import { connectToCrowdin, setProjectIdFromExisting } from '../settings';
-import { fetchAllStrings } from '../util/client';
+import { fetchStrings } from '../util/client';
 
 async function uploadScreenshots() {
     try {
         const selectedDocument = dom.getSelectedDocument();
-        const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
-        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
-
         if (!selectedDocument) {
             throw 'Please select a document';
         }
+        const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
+        const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
+
         if (!selectedPage) {
             throw 'Please select a page';
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            await connectToCrowdin();
-            return;
+            throw 'Please specify correct access token';
         }
         if (!projectId) {
-            await setProjectIdFromExisting();
-            return;
+            throw 'Please select a project';
         }
 
         let tags = localStorage.getTags(selectedDocument);
@@ -37,7 +34,7 @@ async function uploadScreenshots() {
 
         //removing obsolete tags
         const { sourceStringsApi, screenshotsApi } = httpUtil.createClient();
-        const strings = await fetchAllStrings(projectId, sourceStringsApi);
+        const strings = await fetchStrings(projectId, sourceStringsApi);
         const stringsIds = strings.map(st => st.id)
 
         const screenshotsBefore = [];

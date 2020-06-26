@@ -6,27 +6,21 @@ import * as domUtil from '../util/dom';
 import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
 import * as htmlUtil from '../util/html';
-import { connectToCrowdin, setProjectIdFromExisting } from '../settings';
 import { getFileName, getDirectoryName } from '../util/file';
 
-async function translatePage() {
-    await translate(true);
-}
-
-async function translateArtboard() {
-    await translate(false);
-}
-
-async function translate(wholePage) {
+async function translate(languageId, wholePage) {
     try {
+        if (!languageId) {
+            throw 'Please select a language';
+        }
         const selectedDocument = dom.getSelectedDocument();
+        if (!selectedDocument) {
+            throw 'Please select a document';
+        }
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
         let artboard;
 
-        if (!selectedDocument) {
-            throw 'Please select a document';
-        }
         if (!selectedPage) {
             throw 'Please select a page';
         }
@@ -34,12 +28,10 @@ async function translate(wholePage) {
             throw 'Nothing to translate';
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            await connectToCrowdin();
-            return;
+            throw 'Please specify correct access token';
         }
         if (!projectId) {
-            await setProjectIdFromExisting();
-            return;
+            throw 'Please select a project';
         }
         const translatedPages = localStorage.getListOfTranslatedElements(selectedDocument, 'page');
         if (!!wholePage) {
@@ -58,50 +50,38 @@ async function translate(wholePage) {
         }
 
         const { projectsGroupsApi, languagesApi, translationsApi, sourceFilesApi } = httpUtil.createClient();
-        ui.message('Loading list of languages');
+
         const languages = await languagesApi.listSupportedLanguages(500);
         const project = await projectsGroupsApi.getProject(projectId);
-        const targetLanguages = languages.data
-            .filter(l => project.data.targetLanguageIds.includes(l.data.id))
-            .map(l => l.data.name);
-        const allLanguagesOption = 'All Languages';
-        targetLanguages.unshift(allLanguagesOption);
-        ui.getInputFromUser('Select language', {
-            type: ui.INPUT_TYPE.selection,
-            possibleValues: targetLanguages
-        }, async (err, value) => {
-            if (err) {
-                return;
-            }
-            let selectedLanguages = [];
-            if (value === allLanguagesOption) {
-                selectedLanguages = languages.data.filter(l => project.data.targetLanguageIds.includes(l.data.id));
-            } else {
-                const language = languages.data.find(l => l.data.name === value);
-                if (!!language) {
-                    selectedLanguages = [language];
-                }
-            }
 
-            if (selectedLanguages.length > 0) {
-                try {
-                    const directories = await sourceFilesApi.listProjectDirectories(projectId, undefined, undefined, 500);
-                    const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
-                    if (!directory) {
-                        throw 'There are no translations for ' + (wholePage ? `page ${selectedPage.name}` : `artboard ${artboard.name}`);
-                    }
-                    const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
-                    ui.message('Downloading translations');
-                    if (wholePage) {
-                        await extractPageTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, projectFiles);
-                    } else {
-                        await extractArtboardTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, artboard, projectFiles);
-                    }
-                } catch (error) {
-                    httpUtil.handleError(error);
-                }
+        let selectedLanguages = [];
+        if (languageId < 0) {
+            selectedLanguages = languages.data.filter(l => project.data.targetLanguageIds.includes(l.data.id));
+        } else {
+            const language = languages.data.find(l => l.data.id === languageId);
+            if (!!language) {
+                selectedLanguages = [language];
             }
-        });
+        }
+
+        if (selectedLanguages.length > 0) {
+            try {
+                const directories = await sourceFilesApi.listProjectDirectories(projectId, undefined, undefined, 500);
+                const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
+                if (!directory) {
+                    throw 'There are no translations for ' + (wholePage ? `page ${selectedPage.name}` : `artboard ${artboard.name}`);
+                }
+                const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
+                ui.message('Downloading translations');
+                if (wholePage) {
+                    await extractPageTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, projectFiles);
+                } else {
+                    await extractArtboardTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, artboard, projectFiles);
+                }
+            } catch (error) {
+                httpUtil.handleError(error);
+            }
+        }
     } catch (error) {
         httpUtil.handleError(error);
     }
@@ -232,4 +212,4 @@ async function getFile(translationsApi, projectId, fileId, targetLanguageId) {
     return html.trim();
 }
 
-export { translatePage, translateArtboard };
+export { translate };
