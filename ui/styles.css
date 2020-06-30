@@ -36,3 +36,21 @@ nav {
 button {
     border: 1px solid rgba(0, 0, 0, 0.8) !important;
 }
+
+#strings-container {
+    overflow-y: scroll;
+    max-height: 250px;
+    padding-top: 10px;
+}
+
+#string-row:hover {
+    background-color: #ebebeb;
+}
+
+#string-row {
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
