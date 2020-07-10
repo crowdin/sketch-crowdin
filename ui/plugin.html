@@ -8,10 +8,10 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand navbar-light">
+    <nav class="navbar navbar-expand navbar-light plugin-tabs">
         <div class="container-fluid">
-            <ul class="nav navbar-nav">
-                <li class="nav-item" data-toggle="tooltip" data-placement="bottom"
+            <ul class="nav navbar-nav native-tabs">
+                <li class="nav-item" data-toggle="tooltip" data-id="settings"placement="bottom"
                     title="Send designs for translations to Crowdin and upload translated copies back to Sketch. Use for translating static pages, like banners and brochures.">
                     <a id="translation-nav" class="nav-link" href="#"
                         onclick="openModal('translation');getLanguages();">Translation</a>
@@ -21,95 +21,102 @@
                     <a id="strings-mode-nav" class="nav-link" href="#"
                         onclick="openModal('strings-mode');getStrings();">Strings</a>
                 </li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
                 <li class="nav-item">
                     <a id="settings-nav" class="nav-link active" href="#" onclick="openModal('settings')">Settings</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="contactUsClick()">Contact Us</a>
-                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right pr-2">
+                <a class="link small" href="#" onclick="contactUsClick()">Contact Us</a>
             </ul>
         </div>
     </nav>
-    <hr id="hr">
     <main role="main">
         <div class="container" id="settings">
             <form>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label>Personal Access Token</label>
-                        <input type="text" class="form-control" id="token">
-                        <small class="form-text text-muted">
-                            Specify organization domain name (for Crowdin Enterprise only).
-                            If you connect Crowdin account, leave the field empty
-                        </small>
-                    </div>
+                <div class="form-group mb-4">
+                    <label>Select project:</label>
+                    <select id="projects" onchange="saveProject()">
+                    </select>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
+                <fieldset>
+                    <label class="fieldset-label">Connection Details</label>
+                    <div class="form-group">
+                        <label>Personal Access Token:</label>
+                        <input type="text" class="form-control" id="token">
+                        <p class="form-text text-muted help-text mb-3">
+                            You can generate it in your Crowdin Account Settings
+                        </p>
+                    </div>
+                    <div class="form-group">
                         <label>Organization</label>
                         <input type="text" class="form-control" id="organization">
-                        <small class="form-text text-muted">
-                            You can generate it in your Crowdin Account Settings
-                        </small>
+                        <p class="form-text text-muted help-text">
+                            Specify organization domain name (for Crowdin Enterprise only).
+                            If you connect Crowdin account, leave the field empty
+                        </p>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="saveCredentials()">Connect to Crowdin</button>
                     </div>
-                </div>
-                <hr class="mb-4">
-                <button type="button" class="btn btn-light" onclick="saveCredentials()">Connect to Crowdin</button>
-                <hr class="mb-4">
-                <div class="row">
-                    <div class="col-md-5 mb-3">
-                        <label>Select project</label>
-                        <select class="custom-select d-block w-100" id="projects" onchange="saveProject()">
-                        </select>
-                    </div>
-                </div>
+                </fieldset>
             </form>
         </div>
 
         <div class="container" id="strings-mode" style="display: none;">
             <form>
-                <div class="row">
-                    <div class="col-md-5 mb-3">
-                        <input type="search" class="form-control" id="search-text" oninput="search()"
+                <div class="form-group">
+                    <div class="search-wrapper">
+                        <input type="search" id="search-text" class="w-100" oninput="search()"
                             placeholder="Search">
-                        <div id="strings-container">
-                        </div>
                     </div>
+                    <div id="strings-container" class="strings-container mt-3 bordered">
+                    </div>
+                    <p class="form-text text-muted help-text">
+                        Use source string for you text component in design
+                    </p>
                 </div>
-                <small class="form-text text-muted">
-                    Use source string for you text component in design
-                </small>
-                <hr class="mb-4">
-                <button type="button" class="btn btn-light" onclick="uploadScreenshots()">Upload Screenshots</button>
-                <small class="form-text text-muted">Send Artboards Screenshots for selected page with tagged
-                    strings</small>
+                <hr class="my-4">
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="uploadScreenshots()">Upload Screenshots</button>
+                    <p class="form-text text-muted help-text">Send Artboards Screenshots for selected page with tagged
+                        strings</p>
+                </div>
             </form>
         </div>
 
         <div class="container" id="translation" style="display: none;">
             <form>
-                <div>
-                    <label>Send texts for selected</label>
-                    <button type="button" class="btn btn-light" style="margin-left: 18px;"
-                        onclick="sendStrings(true)">Page</button>
-                    <button type="button" class="btn btn-light" onclick="sendStrings(false)">Artboard</button>
-                </div>
-                <hr class="mb-4">
-                <div class="row">
-                    <div class="col-md-5 mb-3">
-                        <label>Language</label>
-                        <select class="custom-select d-block w-100" id="languages">
-                        </select>
+                <fieldset>
+                    <label class="fieldset-label">Send Texts</label>
+                    <div class="form-group">
+                        <label>Send texts for selected:</label>
+                        <div class="form-row">
+                            <div class="col">
+                                <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="sendStrings(true)">Page</button>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="sendStrings(false)">Artboard</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label>Translate selected</label>
-                    <button type="button" class="btn btn-light" style="margin-left: 54px;"
-                        onclick="translateComponent(true)">Page</button>
-                    <button type="button" class="btn btn-light" onclick="translateComponent(false)">Artboard</button>
-                </div>
+                </fieldset>
+                <fieldset>
+                    <label class="fieldset-label">Get Translations</label>
+                    <div class="form-group">
+                        <label>Language:</label>
+                        <select id="languages" class="ml-1"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload translations for selected:</label>
+                        <div class="form-row">
+                            <div class="col">
+                                <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="translateComponent(true)">Page</button>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="translateComponent(false)">Artboard</button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
             </form>
         </div>
 
@@ -268,7 +275,7 @@
         const filteredStrings = (!text || text.length === 0)
             ? arr
             : arr.filter(str => str.text.toLowerCase().includes(text));
-        const texts = filteredStrings.map(str => `<p class="hover" id="string-row" onclick="useString(this)" int-id="${str.id}">${str.text}</p>`)
+        const texts = filteredStrings.map(str => `<p class="string-row" onclick="useString(this)" int-id="${str.id}">${str.text}</p>`)
         $('#strings-container').find('p').remove().end().append(texts);
     }
 </script>
