@@ -33,10 +33,11 @@
     <main role="main">
         <div class="container" id="settings">
             <form>
-                <div class="form-group mb-4">
-                    <label>Select project:</label>
-                    <select id="projects" onchange="saveProject()">
-                    </select>
+                <div class="form-group project-select d-flex flex-row">
+                    <label>Select Project:</label>
+                    <div class="project-select-holder ml-2">
+                        <select id="projects" onchange="saveProject()"></select>
+                    </div>
                 </div>
                 <fieldset>
                     <label class="fieldset-label">Connection Details</label>
@@ -74,12 +75,11 @@
                     </p>
                 </div>
                 <hr class="my-4">
-                <div class="form-group">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="uploadScreenshots()">Upload
-                        Screenshots</button>
-                    <p class="form-text text-muted help-text">Send Artboards Screenshots for selected page with tagged
-                        strings</p>
-                </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()">Upload Screenshots</button>
+                        <p class="form-text text-muted help-text">Send Artboards Screenshots for selected page with tagged
+                            strings</p>
+                    </div>
                 <fieldset>
                     <label class="fieldset-label">Preview strings</label>
                     <div class="form-group">

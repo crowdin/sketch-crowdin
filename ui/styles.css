@@ -172,6 +172,18 @@ select {
     font-size: 1rem;
 }
 
+.project-select label {
+    white-space: nowrap;
+}
+
+.project-select-holder {
+    overflow: hidden;
+}
+
+.project-select-holder select {
+    max-width: 100%;
+}
+
 .bd-example-modal-lg .modal-dialog {
     display: table;
     position: relative;
