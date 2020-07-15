@@ -134,7 +134,7 @@ async function extractArtboardTranslations(projectId, selectedLanguages, transla
                             const override = originalSymbol.overrides[j];
                             if (originalSymbol.id + '/' + override.id === textId) {
                                 symbols[i].overrides[j].value = translation.text;
-                                break;
+                                return;
                             }
                         }
                     }

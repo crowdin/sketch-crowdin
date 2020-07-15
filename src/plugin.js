@@ -9,6 +9,7 @@ import { sendStrings } from './action/send-strings';
 import { useString } from './action/source-strings';
 import { translate } from './action/translate';
 import { uploadScreenshots } from './action/upload-screenshots';
+import { stringsPreview } from './action/strings-preview';
 
 const identifier = 'crowdin';
 
@@ -19,8 +20,8 @@ export default function start() {
 
     const options = {
         identifier,
-        width: 380,
-        height: 600,
+        width: 400,
+        height: 650,
         hidesOnDeactivate: false,
         remembersWindowFrame: true,
         alwaysOnTop: true,
@@ -45,6 +46,7 @@ export default function start() {
 
     browserWindow.webContents.on('sendStrings', sendStrings);
     browserWindow.webContents.on('useString', useString);
+    browserWindow.webContents.on('stringsPreview', stringsPreview);
     browserWindow.webContents.on('translate', translate);
     browserWindow.webContents.on('uploadScreenshots', uploadScreenshots);
 };

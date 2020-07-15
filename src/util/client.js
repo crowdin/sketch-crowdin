@@ -84,18 +84,9 @@ async function getStrings() {
     }
 }
 
-async function fetchStrings(projectId, sourceStringsApi, offset) {
-    offset = !offset ? 0 : offset;
-    const limit = 500;
-    const maxAmount = 4000;
-    const res = await sourceStringsApi.listProjectStrings(projectId, null, limit, offset);
-    if ((res.data && res.data.length < limit) || offset > maxAmount) {
-        return convertCrowdinStringsToStrings(res.data);
-    } else {
-        const result = await fetchStrings(projectId, sourceStringsApi, offset + limit);
-        const resStrings = convertCrowdinStringsToStrings(res.data);
-        return [...resStrings, ...result];
-    }
+async function fetchStrings(projectId, sourceStringsApi) {
+    const res = await sourceStringsApi.withFetchAll().listProjectStrings(projectId);
+    return convertCrowdinStringsToStrings(res.data);
 }
 
 function convertCrowdinStringsToStrings(crowdinStrings) {

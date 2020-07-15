@@ -38,7 +38,7 @@
     "postinstall": "npm run build && skpm-link"
   },
   "dependencies": {
-    "@crowdin/crowdin-api-client": "1.8.4",
+    "@crowdin/crowdin-api-client": "1.8.12",
     "cheerio": "^1.0.0-rc.3",
     "sketch-module-web-view": "^3.4.1",
     "bootstrap": "4.5.0",

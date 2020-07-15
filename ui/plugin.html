@@ -11,7 +11,7 @@
     <nav class="navbar navbar-expand navbar-light plugin-tabs">
         <div class="container-fluid">
             <ul class="nav navbar-nav native-tabs">
-                <li class="nav-item" data-toggle="tooltip" data-id="settings"placement="bottom"
+                <li class="nav-item" data-toggle="tooltip" data-id="settings" placement="bottom"
                     title="Send designs for translations to Crowdin and upload translated copies back to Sketch. Use for translating static pages, like banners and brochures.">
                     <a id="translation-nav" class="nav-link" href="#"
                         onclick="openModal('translation');getLanguages();">Translation</a>
@@ -54,7 +54,8 @@
                             Specify organization domain name (for Crowdin Enterprise only).
                             If you connect Crowdin account, leave the field empty
                         </p>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="saveCredentials()">Connect to Crowdin</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="saveCredentials()">Connect to
+                            Crowdin</button>
                     </div>
                 </fieldset>
             </form>
@@ -64,8 +65,7 @@
             <form>
                 <div class="form-group">
                     <div class="search-wrapper">
-                        <input type="search" id="search-text" class="w-100" oninput="search()"
-                            placeholder="Search">
+                        <input type="search" id="search-text" class="w-100" oninput="search()" placeholder="Search">
                     </div>
                     <div id="strings-container" class="strings-container mt-3 bordered">
                     </div>
@@ -75,10 +75,25 @@
                 </div>
                 <hr class="my-4">
                 <div class="form-group">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="uploadScreenshots()">Upload Screenshots</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="uploadScreenshots()">Upload
+                        Screenshots</button>
                     <p class="form-text text-muted help-text">Send Artboards Screenshots for selected page with tagged
                         strings</p>
                 </div>
+                <fieldset>
+                    <label class="fieldset-label">Preview strings</label>
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div class="col">
+                                <select id="languages-preview" class="ml-1"></select>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                    onclick="stringsPreview()">Preview</button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
             </form>
         </div>
 
@@ -90,10 +105,12 @@
                         <label>Send texts for selected:</label>
                         <div class="form-row">
                             <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="sendStrings(true)">Page</button>
+                                <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                    onclick="sendStrings(true)">Page</button>
                             </div>
                             <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="sendStrings(false)">Artboard</button>
+                                <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                    onclick="sendStrings(false)">Artboard</button>
                             </div>
                         </div>
                     </div>
@@ -108,10 +125,12 @@
                         <label>Upload translations for selected:</label>
                         <div class="form-row">
                             <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="translateComponent(true)">Page</button>
+                                <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                    onclick="translateComponent(true)">Page</button>
                             </div>
                             <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="translateComponent(false)">Artboard</button>
+                                <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                    onclick="translateComponent(false)">Artboard</button>
                             </div>
                         </div>
                     </div>
@@ -212,14 +231,15 @@
     function getLanguages() {
         if (!languages) {
             showLoading();
-            window.postMessage('getLanguages')
+            return window.postMessage('getLanguages')
                 .then(res => {
                     languages = res[0];
-                    let options = '<option value="-1">All Languages</option>';
-                    options += languages.map(lan => {
+                    const allLanguages = '<option value="-1">All Languages</option>';
+                    const options = languages.map(lan => {
                         return `<option value="${lan.id}">${lan.name}</option>`;
                     }).join('');
-                    $('#languages').find('option').remove().end().append(options);
+                    $('#languages').find('option').remove().end().append(allLanguages + options);
+                    $('#languages-preview').find('option').remove().end().append(options);
                 })
                 .then(hideLoading);
         }
@@ -233,7 +253,13 @@
                     strings = res[0];
                     search();
                 })
-                .then(hideLoading);
+                .then(() => {
+                    if (!languages) {
+                        return getLanguages();
+                    } else {
+                        hideLoading();
+                    }
+                });
         }
     }
 
@@ -258,6 +284,13 @@
     function uploadScreenshots() {
         showLoading();
         window.postMessage('uploadScreenshots').then(hideLoading);
+    }
+
+    function stringsPreview() {
+        showLoading();
+        const id = $('#languages-preview option:selected').val();
+        const name = $('#languages-preview option:selected').text();
+        window.postMessage('stringsPreview', { id, name }).then(hideLoading);
     }
 
     function clearStorage() {
