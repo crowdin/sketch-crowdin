@@ -42,7 +42,7 @@ function getSelectedText(page) {
     //then in outside
     const outsideText = dom.find('Text', page).find(e => e.selected);
     if (outsideText) {
-        return { element: outsideText, type: TEXT_TYPE }
+        return { element: outsideText, type: TEXT_TYPE, id: outsideText.id };
     }
     const symbols = dom.find('SymbolInstance, [selected=true]', page);
     if (symbols.length > 0) {

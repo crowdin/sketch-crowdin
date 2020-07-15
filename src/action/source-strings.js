@@ -41,28 +41,25 @@ async function useString(string) {
         }
 
         const artboard = selectedText.artboard;
-        if (!!artboard) {
-            const tags = localStorage.getTags(selectedDocument);
-            const tagIndex = tags.findIndex(t =>
-                t.id === selectedText.id
-                && t.type === selectedText.type
-                && t.artboardId === artboard.id
-                && t.pageId === selectedPage.id
-            );
-            const tag = {
-                id: selectedText.id,
-                type: selectedText.type,
-                artboardId: artboard.id,
-                pageId: selectedPage.id,
-                stringId: id
-            };
-            if (tagIndex < 0) {
-                tags.push(tag);
-            } else {
-                tags[tagIndex] = tag;
-            }
-            localStorage.saveTags(selectedDocument, tags);
+        const tags = localStorage.getTags(selectedDocument);
+        const tagIndex = tags.findIndex(t =>
+            t.id === selectedText.id
+            && t.type === selectedText.type
+            && t.pageId === selectedPage.id
+        );
+        const tag = {
+            id: selectedText.id,
+            type: selectedText.type,
+            artboardId: !!artboard ? artboard.id : undefined,
+            pageId: selectedPage.id,
+            stringId: id
+        };
+        if (tagIndex < 0) {
+            tags.push(tag);
+        } else {
+            tags[tagIndex] = tag;
         }
+        localStorage.saveTags(selectedDocument, tags);
     } catch (error) {
         httpUtil.handleError(error);
     }

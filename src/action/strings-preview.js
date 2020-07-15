@@ -46,6 +46,7 @@ async function stringsPreview(language) {
         }
         for (let i = 0; i < selectedLanguages.length; i++) {
             const lang = selectedLanguages[i];
+            ui.message('Loading translations for ' + lang.name);
             const res = await stringTranslationsApi.withFetchAll().listLanguageTranslations(projectId, lang.id);
             extractPageTranslations(lang.name, selectedDocument, selectedPage, res.data);
         }

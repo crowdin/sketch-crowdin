@@ -28,9 +28,9 @@ async function uploadScreenshots() {
 
         let tags = localStorage.getTags(selectedDocument);
         let artboards = dom.find('Artboard', selectedPage);
+        const allTexts = dom.find('Text', selectedPage);
         const translatedArtboards = localStorage.getListOfTranslatedElements(selectedDocument, 'artboard');
         artboards = artboards.filter(artboard => !translatedArtboards.includes(artboard.id));
-        const artboardIds = artboards.map(e => e.id);
 
         //removing obsolete tags
         const { sourceStringsApi, screenshotsApi } = httpUtil.createClient();
@@ -39,13 +39,12 @@ async function uploadScreenshots() {
 
         const screenshotsBefore = [];
         tags
+            .filter(t => !!t.artboardId)
             .map(t => __buildScreenshotName(t.artboardId, t.pageId))
             .filter(id => !screenshotsBefore.includes(id))
             .forEach(id => screenshotsBefore.push(id));
 
-        tags = tags
-            .filter(t => stringsIds.includes(t.stringId))
-            .filter(t => t.pageId !== selectedPage.id || artboardIds.includes(t.artboardId));
+        tags = tags.filter(t => stringsIds.includes(t.stringId));
 
         const artboardsTexts = artboards.map(e => {
             return {
@@ -58,6 +57,9 @@ async function uploadScreenshots() {
         tags = tags.filter(e => {
             if (e.pageId !== selectedPage.id) {
                 return !!selectedDocument.pages.find(p => p.id === e.pageId);
+            }
+            if (!e.artboardId) {
+                return !!allTexts.find(t => t.id === e.id);
             }
             const artboardTexts = artboardsTexts.find(e2 => e2.artboard.id === e.artboardId);
             if (!!artboardTexts) {
@@ -89,6 +91,7 @@ async function uploadScreenshots() {
 
         const screenshotsAfter = [];
         tags
+            .filter(t => !!t.artboardId)
             .map(t => __buildScreenshotName(t.artboardId, t.pageId))
             .filter(id => !screenshotsAfter.includes(id))
             .forEach(id => screenshotsAfter.push(id));
