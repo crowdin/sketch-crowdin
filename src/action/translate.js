@@ -51,7 +51,7 @@ async function translate(languageId, wholePage) {
 
         const { projectsGroupsApi, languagesApi, translationsApi, sourceFilesApi } = httpUtil.createClient();
 
-        const languages = await languagesApi.listSupportedLanguages(500);
+        const languages = await languagesApi.withFetchAll().listSupportedLanguages();
         const project = await projectsGroupsApi.getProject(projectId);
 
         let selectedLanguages = [];
@@ -66,12 +66,12 @@ async function translate(languageId, wholePage) {
 
         if (selectedLanguages.length > 0) {
             try {
-                const directories = await sourceFilesApi.listProjectDirectories(projectId, undefined, undefined, 500);
+                const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId);
                 const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
                 if (!directory) {
                     throw 'There are no translations for ' + (wholePage ? `page ${selectedPage.name}` : `artboard ${artboard.name}`);
                 }
-                const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
+                const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, undefined, directory.data.id);
                 ui.message('Downloading translations');
                 if (wholePage) {
                     await extractPageTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, projectFiles);

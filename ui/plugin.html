@@ -234,11 +234,11 @@
             return window.postMessage('getLanguages')
                 .then(res => {
                     languages = res[0];
-                    const allLanguages = '<option value="-1">All Languages</option>';
-                    const options = languages.map(lan => {
+                    let options = '<option value="-1">All Languages</option>';
+                    options += languages.map(lan => {
                         return `<option value="${lan.id}">${lan.name}</option>`;
                     }).join('');
-                    $('#languages').find('option').remove().end().append(allLanguages + options);
+                    $('#languages').find('option').remove().end().append(options);
                     $('#languages-preview').find('option').remove().end().append(options);
                 })
                 .then(hideLoading);

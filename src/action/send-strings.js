@@ -55,7 +55,7 @@ async function uploadStrings(page, artboard) {
     const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
     const { sourceFilesApi, uploadStorageApi } = httpUtil.createClient();
 
-    const directories = await sourceFilesApi.listProjectDirectories(projectId, undefined, undefined, 500);
+    const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId);
     let directory = directories.data.find(d => d.data.name === getDirectoryName(page));
     if (!directory) {
         ui.message('Creating new directory');
@@ -65,7 +65,7 @@ async function uploadStrings(page, artboard) {
         });
     }
 
-    const projectFiles = await sourceFilesApi.listProjectFiles(projectId, undefined, directory.data.id, 500);
+    const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, undefined, directory.data.id);
     if (!!artboard) {
         await uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directory.data.id);
         return;

@@ -11,7 +11,7 @@ async function getProjects() {
         }
         ui.message('Loading projects');
         const { projectsGroupsApi } = createClient();
-        const projects = await projectsGroupsApi.listProjects(undefined, undefined, 500);
+        const projects = await projectsGroupsApi.withFetchAll().listProjects();
         if (projects.data.length === 0) {
             throw 'Currently there is not projects to select';
         }
@@ -47,7 +47,7 @@ async function getLanguages() {
         }
         ui.message('Loading list of languages');
         const { projectsGroupsApi, languagesApi } = createClient();
-        const languages = await languagesApi.listSupportedLanguages(500);
+        const languages = await languagesApi.withFetchAll().listSupportedLanguages();
         const project = await projectsGroupsApi.getProject(projectId);
         return languages.data
             .filter(l => project.data.targetLanguageIds.includes(l.data.id))

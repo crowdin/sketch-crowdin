@@ -35,9 +35,20 @@ async function stringsPreview(language) {
             throw 'Generated page cannot be translated';
         }
 
-        const { stringTranslationsApi } = httpUtil.createClient();
-        const res = await stringTranslationsApi.withFetchAll().listLanguageTranslations(projectId, language.id);
-        extractPageTranslations(language.name, selectedDocument, selectedPage, res.data);
+        const { stringTranslationsApi, languagesApi, projectsGroupsApi } = httpUtil.createClient();
+        let selectedLanguages = [];
+        if (language.id < 0) {
+            const languages = await languagesApi.withFetchAll().listSupportedLanguages();
+            const project = await projectsGroupsApi.getProject(projectId);
+            selectedLanguages = languages.data.map(e => e.data).filter(l => project.data.targetLanguageIds.includes(l.id));
+        } else {
+            selectedLanguages.push(language);
+        }
+        for (let i = 0; i < selectedLanguages.length; i++) {
+            const lang = selectedLanguages[i];
+            const res = await stringTranslationsApi.withFetchAll().listLanguageTranslations(projectId, lang.id);
+            extractPageTranslations(lang.name, selectedDocument, selectedPage, res.data);
+        }
     } catch (error) {
         httpUtil.handleError(error);
     }

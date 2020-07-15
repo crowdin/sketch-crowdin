@@ -85,7 +85,7 @@ async function uploadScreenshots() {
             return accumulator;
         }, {});
 
-        const screenshots = await screenshotsApi.listScreenshots(projectId, 500);
+        const screenshots = await screenshotsApi.withFetchAll().listScreenshots(projectId);
 
         const screenshotsAfter = [];
         tags
