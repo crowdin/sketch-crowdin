@@ -4,12 +4,13 @@ import settings from 'sketch/settings';
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
 import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION } from './constants';
-import { getProjects, getLanguages, getStrings } from './util/client';
+import { getProjects, getLanguages, getStrings, getFiles } from './util/client';
 import { sendStrings } from './action/send-strings';
 import { useString } from './action/source-strings';
 import { translate } from './action/translate';
 import { uploadScreenshots } from './action/upload-screenshots';
 import { stringsPreview } from './action/strings-preview';
+import { addString, deleteString, editString } from './action/manage-string';
 
 const identifier = 'crowdin';
 
@@ -43,10 +44,15 @@ export default function start() {
     browserWindow.webContents.on('getProjects', getProjects);
     browserWindow.webContents.on('getLanguages', getLanguages);
     browserWindow.webContents.on('getStrings', getStrings);
+    browserWindow.webContents.on('getFiles', getFiles);
 
     browserWindow.webContents.on('sendStrings', sendStrings);
     browserWindow.webContents.on('useString', useString);
     browserWindow.webContents.on('stringsPreview', stringsPreview);
+    browserWindow.webContents.on('addString', addString);
+    browserWindow.webContents.on('deleteString', deleteString);
+    browserWindow.webContents.on('editString', editString);
+
     browserWindow.webContents.on('translate', translate);
     browserWindow.webContents.on('uploadScreenshots', uploadScreenshots);
 };

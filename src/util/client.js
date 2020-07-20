@@ -63,6 +63,30 @@ async function getLanguages() {
     }
 }
 
+async function getFiles() {
+    try {
+        if (!dom.getSelectedDocument()) {
+            throw 'Please select a document';
+        }
+        const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+        if (!projectId) {
+            throw 'Please select a project';
+        }
+        ui.message('Loading list of files');
+        const { sourceFilesApi } = createClient();
+        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId);
+        return files.data.map(e => {
+            return {
+                id: e.data.id,
+                name: e.data.name
+            };
+        });
+    } catch (error) {
+        handleError(error);
+        return [];
+    }
+}
+
 async function getStrings() {
     try {
         if (!dom.getSelectedDocument()) {
@@ -109,4 +133,4 @@ function convertCrowdinStringsToStrings(crowdinStrings) {
         .filter(e => e.text && e.text.length > 0);
 }
 
-export { getProjects, getLanguages, getStrings, fetchStrings };
+export { getProjects, getLanguages, getFiles, getStrings, fetchStrings };
