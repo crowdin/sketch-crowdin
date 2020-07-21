@@ -1,4 +1,5 @@
 import settings from 'sketch/settings';
+import dom from 'sketch/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
 import * as httpUtil from '../util/http';
 import { PatchOperation } from '@crowdin/crowdin-api-client';
@@ -9,7 +10,7 @@ async function addString(req) {
         const res = await sourceStringsApi.addString(projectId, req);
         return { id: res.data.id };
     };
-    await executeOperartion(callback);
+    return await executeOperartion(callback);
 }
 
 async function editString(string) {
@@ -22,15 +23,16 @@ async function editString(string) {
             op: PatchOperation.REPLACE
         }]);
     };
-    await executeOperartion(callback);
+    return await executeOperartion(callback);
 }
 
-async function deleteString(stringId) {
+async function deleteString(req) {
+    const stringId = req.id;
     const callback = async (projectId) => {
         const { sourceStringsApi } = httpUtil.createClient();
         await sourceStringsApi.deleteString(projectId, stringId);
     };
-    await executeOperartion(callback);
+    return await executeOperartion(callback);
 }
 
 async function executeOperartion(operation) {

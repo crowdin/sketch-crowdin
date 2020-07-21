@@ -64,7 +64,7 @@
 
         <div class="container" id="strings-mode" style="display: none;">
             <form>
-                <div class="form-group">
+                <div class="form-group" id="list-strings">
                     <div class="search-wrapper">
                         <input type="search" id="search-text" class="w-100" oninput="search()" placeholder="Search">
                     </div>
@@ -73,13 +73,57 @@
                     <p class="form-text text-muted help-text">
                         Use source string for you text component in design
                     </p>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAddString();">Add
+                        string</button>
                 </div>
-                <hr class="my-4">
+                <div class="form-group" id="edit-string" style="display: none;">
                     <div class="form-group">
-                        <button type="button" class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()">Upload Screenshots</button>
-                        <p class="form-text text-muted help-text">Send Artboards Screenshots for selected page with tagged
-                            strings</p>
+                        <input type="text" class="form-control" id="string-text" placeholder="text">
                     </div>
+                    <div id="new-string-form" style="display: none;">
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="col-4">
+                                    <label>Identifier</label>
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" class="form-control" id="string-identifier"
+                                        placeholder="identifier">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="col-4">
+                                    <label>File</label>
+                                </div>
+                                <div class="col-8">
+                                    <select id="string-files" class="ml-1" style="width: 100%;">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-sm mb-2"
+                                onclick="saveString();">Save</button>
+                            <button type="button" class="btn btn-secondary btn-sm mb-2"
+                                onclick="cancelEditString();">Cancel</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-sm mb-2 float-right"
+                                onclick="deleteString();">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-2">
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()">Upload
+                        Screenshots</button>
+                    <p class="form-text text-muted help-text">Send Artboards Screenshots for selected page with tagged
+                        strings</p>
+                </div>
                 <fieldset>
                     <label class="fieldset-label">Preview strings</label>
                     <div class="form-group">
@@ -160,6 +204,8 @@
     var openedModal = 'settings';
     var languages;
     var strings;
+    var files;
+    var openedString;
 
     getCredentials();
     getProjects();
@@ -245,6 +291,25 @@
         }
     }
 
+    function getFiles() {
+        if (!files) {
+            showLoading();
+            return window.postMessage('getFiles')
+                .then(res => {
+                    files = res[0];
+                    const options = files.map(file => {
+                        return `<option value="${file.id}">${file.name}</option>`;
+                    }).join('');
+                    $('#string-files').find('option').remove().end().append(options);
+                })
+                .then(hideLoading);
+        } else {
+            return new Promise((res, rej) => {
+                res();
+            });
+        }
+    }
+
     function getStrings() {
         if (!strings) {
             showLoading();
@@ -277,7 +342,7 @@
     function useString(e) {
         showLoading();
         const id = Number($(e).attr('int-id'));
-        const text = $(e).text();
+        const text = $(e).text().trim();
         window.postMessage('useString', { id, text }).then(hideLoading);
     }
 
@@ -296,20 +361,113 @@
     function clearStorage() {
         strings = undefined;
         languages = undefined;
+        files = undefined;
+        openedString = undefined;
     }
 
     function search() {
+        const icon = `
+            <svg class="float-right" onclick="openEditString(event, this);" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
+                <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
+            </svg>
+        `;
+
         let text = $('#search-text').val();
         if (text) {
             text = text.trim().toLowerCase();
         }
-        console.log(text);
         const arr = strings || [];
         const filteredStrings = (!text || text.length === 0)
             ? arr
             : arr.filter(str => str.text.toLowerCase().includes(text));
-        const texts = filteredStrings.map(str => `<p class="string-row" onclick="useString(this)" int-id="${str.id}">${str.text}</p>`)
+        const texts = filteredStrings.map(str => `<p class="string-row" onclick="useString(this)" int-id="${str.id}">${str.text}${icon}</p>`)
         $('#strings-container').find('p').remove().end().append(texts);
+    }
+
+    function openEditString(event, element) {
+        event.stopPropagation();
+        const el = $(element);
+        $('#list-strings').hide();
+        $('#new-string-form').hide();
+        $('#edit-string').show();
+        const text = $(element).parent().text().trim();
+        const id = Number($(element).parent().attr('int-id'));
+        $('#string-text').val(text);
+        openedString = id;
+    }
+
+    function openAddString() {
+        getFiles().then(() => {
+            $('#list-strings').hide();
+            $('#new-string-form').show();
+            $('#edit-string').show();
+            $('#string-text').val('');
+            $('#string-identifier').val('');
+            openedString = undefined;
+        });
+    }
+
+    function cancelEditString() {
+        $('#list-strings').show();
+        $('#edit-string').hide();
+    }
+
+    function deleteString() {
+        if (openedString) {
+            showLoading();
+            window.postMessage('deleteString', { id: openedString })
+                .then(e => {
+                    if (!e[0].error) {
+                        strings = strings.filter(e => e.id !== openedString);
+                        cancelEditString();
+                        search();
+                    }
+                    hideLoading();
+                });
+        } else {
+            cancelEditString();
+        }
+    }
+
+    function saveString() {
+        const text = $('#string-text').val();
+        if (openedString) {
+            showLoading();
+            window.postMessage('editString', { id: openedString, text })
+                .then(e => {
+                    if (!e[0].error) {
+                        strings = strings.map(s => {
+                            if (s.id === openedString) {
+                                s.text = text;
+                            }
+                            return s;
+                        });
+                        cancelEditString();
+                        search();
+                    }
+                    hideLoading();
+                });
+        } else {
+            showLoading();
+            const req = {
+                text,
+                identifier: $('#string-identifier').val(),
+                fileId: Number($('#string-files option:selected').val())
+            };
+            window.postMessage('addString', req)
+                .then(e => {
+                    if (!e[0].error) {
+                        strings.push({
+                            id: e[0].data.id,
+                            text: text
+                        });
+                        cancelEditString();
+                        search();
+                    }
+                    hideLoading();
+                });
+        }
     }
 </script>
 
