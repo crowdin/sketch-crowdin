@@ -8,194 +8,201 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand navbar-light plugin-tabs">
-        <div class="container-fluid">
-            <ul class="nav navbar-nav native-tabs">
-                <li class="nav-item" data-toggle="tooltip" data-id="settings" placement="bottom"
-                    title="Send designs for translations to Crowdin and upload translated copies back to Sketch. Use for translating static pages, like banners and brochures.">
-                    <a id="translation-nav" class="nav-link" href="#"
-                        onclick="openModal('translation');getLanguages();">Translation</a>
-                </li>
-                <li class="nav-item" data-toggle="tooltip" data-placement="bottom"
-                    title="Use this mode to work with dynamic designs, including product UI.Get real source texts from Crowdin, use them in your designs, and upload screenshots of the artboards to provide context for translators.">
-                    <a id="strings-mode-nav" class="nav-link" href="#"
-                        onclick="openModal('strings-mode');getStrings();">Strings</a>
-                </li>
-                <li class="nav-item">
-                    <a id="settings-nav" class="nav-link active" href="#" onclick="openModal('settings')">Settings</a>
-                </li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right pr-2">
-                <a class="link small" href="#" onclick="contactUsClick()">Contact Us</a>
-            </ul>
-        </div>
-    </nav>
-    <main role="main">
-        <div class="container" id="settings">
-            <form>
-                <div class="form-group project-select d-flex flex-row">
-                    <label>Select Project:</label>
-                    <div class="project-select-holder ml-2">
-                        <select id="projects" onchange="saveProject()"></select>
+    <div class="main-container">
+        <nav class="navbar navbar-expand navbar-light plugin-tabs">
+            <div class="container-fluid">
+                <ul class="nav navbar-nav native-tabs">
+                    <li class="nav-item" data-toggle="tooltip" data-id="settings" placement="bottom"
+                        title="Send designs for translations to Crowdin and upload translated copies back to Sketch. Use for translating static pages, like banners and brochures.">
+                        <a id="translation-nav" class="nav-link" href="#"
+                            onclick="openModal('translation');getLanguages();">Translation</a>
+                    </li>
+                    <li class="nav-item" data-toggle="tooltip" data-placement="bottom"
+                        title="Use this mode to work with dynamic designs, including product UI.Get real source texts from Crowdin, use them in your designs, and upload screenshots of the artboards to provide context for translators.">
+                        <a id="strings-mode-nav" class="nav-link" href="#"
+                            onclick="openModal('strings-mode');getStrings();">Strings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="settings-nav" class="nav-link active" href="#" onclick="openModal('settings')">Settings</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right pr-2">
+                    <a class="link small" href="#" onclick="contactUsClick()">Contact Us</a>
+                </ul>
+            </div>
+        </nav>
+        <main role="main">
+            <div class="container" id="settings">
+                <form>
+                    <div class="form-group project-select d-flex flex-row">
+                        <label>Select Project:</label>
+                        <div class="project-select-holder ml-2">
+                            <select id="projects" onchange="saveProject()"></select>
+                        </div>
                     </div>
-                </div>
-                <fieldset>
-                    <label class="fieldset-label">Connection Details</label>
-                    <div class="form-group">
-                        <label>Personal Access Token:</label>
-                        <input type="text" class="form-control" id="token">
-                        <p class="form-text text-muted help-text mb-3">
-                            You can generate it in your Crowdin Account Settings
-                        </p>
-                    </div>
-                    <div class="form-group">
-                        <label>Organization</label>
-                        <input type="text" class="form-control" id="organization">
-                        <p class="form-text text-muted help-text">
-                            Specify organization domain name (for Crowdin Enterprise only).
-                            If you connect Crowdin account, leave the field empty
-                        </p>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="saveCredentials()">Connect to
-                            Crowdin</button>
-                    </div>
-                </fieldset>
-            </form>
-        </div>
-
-        <div class="container" id="strings-mode" style="display: none;">
-            <form>
-                <div class="form-group" id="list-strings">
-                    <div class="search-wrapper">
-                        <input type="search" id="search-text" class="w-100" oninput="search()" placeholder="Search">
-                    </div>
-                    <div id="strings-container" class="strings-container mt-3 bordered">
-                    </div>
-                    <p class="form-text text-muted help-text">
-                        Use source string for you text component in design
-                    </p>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAddString();">Add
-                        string</button>
-                </div>
-                <div class="form-group" id="edit-string" style="display: none;">
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                    </div>
-                    <div id="new-string-form" style="display: none;">
+                    <fieldset>
+                        <label class="fieldset-label">Connection Details</label>
                         <div class="form-group">
-                            <div class="form-row">
-                                <div class="col-4">
-                                    <label>Identifier</label>
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" id="string-identifier"
-                                        placeholder="identifier">
-                                </div>
-                            </div>
+                            <label>Personal Access Token:</label>
+                            <input type="text" class="form-control" id="token">
+                            <p class="form-text text-muted help-text mb-3">
+                                You can generate it in your Crowdin Account Settings
+                            </p>
                         </div>
                         <div class="form-group">
+                            <label>Organization</label>
+                            <input type="text" class="form-control" id="organization">
+                            <p class="form-text text-muted help-text">
+                                Specify organization domain name (for Crowdin Enterprise only).
+                                If you connect Crowdin account, leave the field empty
+                            </p>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="saveCredentials()">Connect to
+                                Crowdin</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+
+            <div class="container" id="strings-mode" style="display: none;">
+                <form>
+                    <div class="form-group list-strings-holder mb-4" id="list-strings">
+                        <div>
+                            <button type="button" class="btn btn-secondary btn-sm btn-bottom float-right ml-2" onclick="openAddString();">
+                                <svg class="btn-icon" width="13" height="13" viewBox="0 0 13 13" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M7 1H6V6H1V7H6V12H7V7H12V6H7V1Z" fill="currentColor"/>
+                                </svg>
+                                <span>Add String</span>
+                            </button>
+                            <p class="form-text">
+                                Use source string for you text component in design
+                            </p>
+                        </div>
+                        <div class="search-wrapper">
+                            <input type="search" id="search-text" class="w-100" oninput="search()" placeholder="Search">
+                        </div>
+                        <div id="strings-container" class="strings-container mt-3 bordered">
+                        </div>
+                    </div>
+                    <fieldset id="edit-string" class="edit-string-mode" style="display: none;">
+                        <div class="form-group">
+                            <label>String</label>
+                            <input type="text" class="form-control" id="string-text" placeholder="text">
+                        </div>
+                            <div id="new-string-form" style="display: none;">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div class="col-3 text-right">
+                                            <label>Identifier:</label>
+                                        </div>
+                                        <div class="col-9">
+                                            <input type="text" class="form-control" id="string-identifier"
+                                                placeholder="identifier">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-row mb-3">
+                                        <div class="col-3 text-right">
+                                            <label>File:</label>
+                                        </div>
+                                        <div class="col-9">
+                                            <select id="string-files" class="ml-1" style="width: 100%;">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button-holder d-flex flex-row">
+                                <button type="button" class="btn btn-primary btn-sm" onclick="saveString();">Save</button>
+                                <button type="button" class="btn btn-secondary btn-sm ml-2" onclick="cancelEditString();">Cancel</button>
+                                <button type="button" class="btn btn-secondary btn-sm ml-auto" onclick="deleteString();">Delete</button>
+                            </div>
+                    </fieldset>
+                    <fieldset>
+                        <label class="fieldset-label">Preview Strings</label>
+                        <div class="form-group">
+                            <p class="form-text">Preview translations from Crowdin for strings used in the designs</p>
                             <div class="form-row">
-                                <div class="col-4">
-                                    <label>File</label>
+                                <div class="col">
+                                    <select id="languages-preview" class="ml-1"></select>
                                 </div>
-                                <div class="col-8">
-                                    <select id="string-files" class="ml-1" style="width: 100%;">
-                                    </select>
+                                <div class="col">
+                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                        onclick="stringsPreview()">Preview</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-sm mb-2"
-                                onclick="saveString();">Save</button>
-                            <button type="button" class="btn btn-secondary btn-sm mb-2"
-                                onclick="cancelEditString();">Cancel</button>
+                    </fieldset>
+                    <fieldset>
+                        <label class="fieldset-label">Upload Screenshots</label>
+                        <div class="form-group">
+                            <p class="form-text">Send Artboards Screenshots for selected page with tagged
+                                strings</p>
+                            <button type="button" class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()">Upload
+                                Screenshots</button>
                         </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-sm mb-2 float-right"
-                                onclick="deleteString();">Delete</button>
-                        </div>
-                    </div>
-                </div>
-                <hr class="my-2">
-                <div class="form-group">
-                    <button type="button" class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()">Upload
-                        Screenshots</button>
-                    <p class="form-text text-muted help-text">Send Artboards Screenshots for selected page with tagged
-                        strings</p>
-                </div>
-                <fieldset>
-                    <label class="fieldset-label">Preview strings</label>
-                    <div class="form-group">
-                        <div class="form-row">
-                            <div class="col">
-                                <select id="languages-preview" class="ml-1"></select>
-                            </div>
-                            <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                    onclick="stringsPreview()">Preview</button>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
-        </div>
+                    </fieldset>
+                </form>
+            </div>
 
-        <div class="container" id="translation" style="display: none;">
-            <form>
-                <fieldset>
-                    <label class="fieldset-label">Send Texts</label>
-                    <div class="form-group">
-                        <label>Send texts for selected:</label>
-                        <div class="form-row">
-                            <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                    onclick="sendStrings(true)">Page</button>
-                            </div>
-                            <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                    onclick="sendStrings(false)">Artboard</button>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <label class="fieldset-label">Get Translations</label>
-                    <div class="form-group">
-                        <label>Language:</label>
-                        <select id="languages" class="ml-1"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Upload translations for selected:</label>
-                        <div class="form-row">
-                            <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                    onclick="translateComponent(true)">Page</button>
-                            </div>
-                            <div class="col">
-                                <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                    onclick="translateComponent(false)">Artboard</button>
+            <div class="container" id="translation" style="display: none;">
+                <form>
+                    <fieldset>
+                        <label class="fieldset-label">Send Texts</label>
+                        <div class="form-group">
+                            <label>Send texts for selected:</label>
+                            <div class="form-row">
+                                <div class="col">
+                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                        onclick="sendStrings(true)">Page</button>
+                                </div>
+                                <div class="col">
+                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                        onclick="sendStrings(false)">Artboard</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </fieldset>
+                    </fieldset>
+                    <fieldset>
+                        <label class="fieldset-label">Get Translations</label>
+                        <div class="form-group">
+                            <label>Language:</label>
+                            <select id="languages" class="ml-1"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Upload translations for selected:</label>
+                            <div class="form-row">
+                                <div class="col">
+                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                        onclick="translateComponent(true)">Page</button>
+                                </div>
+                                <div class="col">
+                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
+                                        onclick="translateComponent(false)">Artboard</button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
 
-            </form>
-        </div>
+                </form>
+            </div>
 
-        <div id="spinner" class="modal fade bd-example-modal-lg show" data-backdrop="static" data-keyboard="false"
-            tabindex="-1" style="display: none;" aria-modal="true">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content" style="width: 48px">
-                    <div class="spinner-border" role="status">
-                        <span class="sr-only">Loading...</span>
+            <div id="spinner" class="modal fade bd-example-modal-lg show" data-backdrop="static" data-keyboard="false"
+                tabindex="-1" style="display: none;" aria-modal="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content" style="width: 48px">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="footer" id="footer"></div>
-    </main>
+
+        </main>
+        <div class="push"></div>
+    </div>
+    <div class="footer" id="footer"></div>
     <div id="modalFade" class="modal-backdrop fade show" style="display: none;"></div>
 </body>
 
@@ -367,7 +374,7 @@
 
     function search() {
         const icon = `
-            <svg class="float-right" onclick="openEditString(event, this);" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pencil" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <svg class="float-right bi bi-pencil" onclick="openEditString(event, this);" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
                 <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
             </svg>
