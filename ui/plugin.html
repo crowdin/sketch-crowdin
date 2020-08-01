@@ -13,22 +13,22 @@
             <div class="container-fluid">
                 <ul class="nav navbar-nav native-tabs">
                     <li class="nav-item" data-toggle="tooltip" data-id="settings" placement="bottom"
-                        title="Send designs for translations to Crowdin and upload translated copies back to Sketch. Use for translating static pages, like banners and brochures.">
-                        <a id="translation-nav" class="nav-link" href="#"
-                            onclick="openModal('translation');cancelEditString();getLanguages();">Translation</a>
+                        crowdin-ui-text-details="translationsDetails">
+                        <a crowdin-ui-text-label="translationTab" id="translation-nav" class="nav-link" href="#"
+                            onclick="openModal('translation');cancelEditString();getLanguages();"></a>
                     </li>
                     <li class="nav-item" data-toggle="tooltip" data-placement="bottom"
-                        title="Use this mode to work with dynamic designs, including product UI.Get real source texts from Crowdin, use them in your designs, and upload screenshots of the artboards to provide context for translators.">
-                        <a id="strings-mode-nav" class="nav-link" href="#"
-                            onclick="openModal('strings-mode');getStrings();">Strings</a>
+                        crowdin-ui-text-details="stringsDetails">
+                        <a crowdin-ui-text-label="stringsTab" id="strings-mode-nav" class="nav-link" href="#"
+                            onclick="openModal('strings-mode');getStrings();"></a>
                     </li>
                     <li class="nav-item">
-                        <a id="settings-nav" class="nav-link active" href="#"
-                            onclick="openModal('settings');cancelEditString();">Settings</a>
+                        <a crowdin-ui-text-label="settingsTab" id="settings-nav" class="nav-link active" href="#"
+                            onclick="openModal('settings');cancelEditString();"></a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right pr-2">
-                    <a class="link small" href="#" onclick="contactUsClick()">Contact Us</a>
+                    <a crowdin-ui-text-label="contactUsTab" class="link small" href="#" onclick="contactUsClick()"></a>
                 </ul>
             </div>
         </nav>
@@ -36,29 +36,26 @@
             <div class="container" id="settings">
                 <form>
                     <div class="form-group project-select d-flex flex-row">
-                        <label>Select Project:</label>
+                        <label crowdin-ui-text-label="selectProjectLabel"></label>
                         <div class="project-select-holder ml-2">
                             <select id="projects" onchange="saveProject()"></select>
                         </div>
                     </div>
                     <fieldset>
-                        <label class="fieldset-label">Connection Details</label>
+                        <label crowdin-ui-text-label="connectionDetailsLabel" class="fieldset-label"></label>
                         <div class="form-group">
-                            <label>Personal Access Token:</label>
+                            <label crowdin-ui-text-label="tokenLabel"></label>
                             <input type="text" class="form-control" id="token">
-                            <p class="form-text text-muted help-text mb-3">
-                                You can generate it in your Crowdin Account Settings
+                            <p crowdin-ui-text-label="tokenDetailsText" class="form-text text-muted help-text mb-3">
                             </p>
                         </div>
                         <div class="form-group">
-                            <label>Organization</label>
+                            <label crowdin-ui-text-label="organizationLabel"></label>
                             <input type="text" class="form-control" id="organization">
-                            <p class="form-text text-muted help-text">
-                                Specify organization domain name (for Crowdin Enterprise only).
-                                If you connect Crowdin account, leave the field empty
+                            <p crowdin-ui-text-label="organizationDetailsText" class="form-text text-muted help-text">
                             </p>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="saveCredentials()">Connect to
-                                Crowdin</button>
+                            <button crowdin-ui-text-label="connectToCrowdinButton" type="button"
+                                class="btn btn-primary btn-sm" onclick="saveCredentials()"></button>
                         </div>
                     </fieldset>
                 </form>
@@ -75,10 +72,9 @@
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M7 1H6V6H1V7H6V12H7V7H12V6H7V1Z"
                                         fill="currentColor" />
                                 </svg>
-                                <span>Add String</span>
+                                <span crowdin-ui-text-label="addStringButton"></span>
                             </button>
-                            <p class="form-text">
-                                Use source string for you text component in design
+                            <p class="form-text" crowdin-ui-text-label="useStringDetailsText">
                             </p>
                         </div>
                         <div class="search-wrapper">
@@ -89,7 +85,8 @@
                     </div>
                     <fieldset id="edit-string" class="edit-string-mode" style="display: none;">
                         <div class="form-group">
-                            <label><abbr title="The text for translation">String</abbr></label>
+                            <label><abbr crowdin-ui-text-label="addStringStringLabel"
+                                    crowdin-ui-text-details="addStringStringDetails"></abbr></label>
                             <input type="text" class="form-control" id="string-text" placeholder="text">
                             <label style="color: red;" id="invalidString"></label>
                         </div>
@@ -97,8 +94,8 @@
                             <div class="form-group">
                                 <div class="form-row">
                                     <div class="col-3 text-right">
-                                        <label><abbr
-                                                title="A unique identifier of this string (may be used to identify translated text in your application)">Identifier:</abbr></label>
+                                        <label><abbr crowdin-ui-text-label="addStringIdentifierLabel"
+                                                crowdin-ui-text-details="addStringIdentifierDetails"></abbr></label>
                                     </div>
                                     <div class="col-9">
                                         <input type="text" class="form-control" id="string-identifier"
@@ -110,8 +107,8 @@
                             <div class="form-group">
                                 <div class="form-row mb-3">
                                     <div class="col-3 text-right">
-                                        <label><abbr
-                                                title="Select editable file to add new source string into it. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES.">File:</abbr></label>
+                                        <label><abbr crowdin-ui-text-label="addStringFileLabel"
+                                                crowdin-ui-text-details="addStringFileDetails"></abbr></label>
                                     </div>
                                     <div class="col-9">
                                         <select id="string-files" class="ml-1" style="width: 100%;">
@@ -122,36 +119,35 @@
                             </div>
                         </div>
                         <div class="button-holder d-flex flex-row">
-                            <button type="button" class="btn btn-primary btn-sm" onclick="saveString();">Save</button>
-                            <button type="button" class="btn btn-secondary btn-sm ml-2"
-                                onclick="cancelEditString();">Cancel</button>
-                            <button type="button" class="btn btn-secondary btn-sm ml-auto"
-                                onclick="deleteString();">Delete</button>
+                            <button crowdin-ui-text-label="addStringSaveButtonLabel" type="button"
+                                class="btn btn-primary btn-sm" onclick="saveString();"></button>
+                            <button crowdin-ui-text-label="addStringCancelButtonLabel" type="button"
+                                class="btn btn-secondary btn-sm ml-2" onclick="cancelEditString();"></button>
+                            <button crowdin-ui-text-label="addStringDeleteButtonLabel" type="button"
+                                class="btn btn-secondary btn-sm ml-auto" onclick="deleteString();"></button>
                         </div>
                     </fieldset>
                     <fieldset>
-                        <label class="fieldset-label">Preview Strings</label>
+                        <label crowdin-ui-text-label="previewStringsLabel" class="fieldset-label"></label>
                         <div class="form-group">
-                            <p class="form-text">Preview translations from Crowdin for strings used in the designs</p>
+                            <p crowdin-ui-text-label="previewStringsDetailsText" class="form-text"></p>
                             <div class="form-row">
                                 <div class="col">
                                     <select id="languages-preview" class="ml-1"></select>
                                 </div>
                                 <div class="col">
-                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                        onclick="stringsPreview()">Preview</button>
+                                    <button crowdin-ui-text-label="previewButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview()"></button>
                                 </div>
                             </div>
                         </div>
                     </fieldset>
                     <fieldset>
-                        <label class="fieldset-label">Upload Screenshots</label>
+                        <label crowdin-ui-text-label="uploadScreenshotsLabel" class="fieldset-label"></label>
                         <div class="form-group">
-                            <p class="form-text">Send Artboards Screenshots for selected page with tagged
-                                strings</p>
-                            <button type="button" class="btn btn-secondary btn-sm mb-2"
-                                onclick="uploadScreenshots()">Upload
-                                Screenshots</button>
+                            <p crowdin-ui-text-label="uploadScreenshotsDetailsText" class="form-text"></p>
+                            <button crowdin-ui-text-label="uploadScreenshotsButtonLabel" type="button"
+                                class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()"></button>
                         </div>
                     </fieldset>
                 </form>
@@ -160,37 +156,40 @@
             <div class="container" id="translation" style="display: none;">
                 <form>
                     <fieldset>
-                        <label class="fieldset-label">Send Texts</label>
+                        <label crowdin-ui-text-label="sendTextsLabel" class="fieldset-label"></label>
                         <div class="form-group">
-                            <label>Send texts for selected:</label>
+                            <label crowdin-ui-text-label="sendTextsForLabel"></label>
                             <div class="form-row">
                                 <div class="col">
-                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                        onclick="sendStrings(true)">Page</button>
+                                    <button crowdin-ui-text-label="sendTextsForPageButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block" onclick="sendStrings(true)"></button>
                                 </div>
                                 <div class="col">
-                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                        onclick="sendStrings(false)">Artboard</button>
+                                    <button crowdin-ui-text-label="sendTextsForArtboardButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block"
+                                        onclick="sendStrings(false)"></button>
                                 </div>
                             </div>
                         </div>
                     </fieldset>
                     <fieldset>
-                        <label class="fieldset-label">Get Translations</label>
+                        <label crowdin-ui-text-label="getTranslationsLabel" class="fieldset-label"></label>
                         <div class="form-group">
-                            <label>Language:</label>
+                            <label crowdin-ui-text-label="getTranslationsLanguageLabel"></label>
                             <select id="languages" class="ml-1"></select>
                         </div>
                         <div class="form-group">
-                            <label>Upload translations for selected:</label>
+                            <label crowdin-ui-text-label="uploadTranslationsLabelFor"></label>
                             <div class="form-row">
                                 <div class="col">
-                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                        onclick="translateComponent(true)">Page</button>
+                                    <button crowdin-ui-text-label="uploadTranslationsForPageButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block"
+                                        onclick="translateComponent(true)"></button>
                                 </div>
                                 <div class="col">
-                                    <button type="button" class="btn btn-secondary btn-sm btn-block"
-                                        onclick="translateComponent(false)">Artboard</button>
+                                    <button crowdin-ui-text-label="uploadTranslationsForArtboardButtonLabel"
+                                        type="button" class="btn btn-secondary btn-sm btn-block"
+                                        onclick="translateComponent(false)"></button>
                                 </div>
                             </div>
                         </div>
@@ -204,7 +203,7 @@
                 <div class="modal-dialog modal-sm">
                     <div class="modal-content" style="width: 48px">
                         <div class="spinner-border" role="status">
-                            <span class="sr-only">Loading...</span>
+                            <span crowdin-ui-text-label="loadingDialog" class="sr-only"></span>
                         </div>
                     </div>
                 </div>
@@ -226,6 +225,9 @@
     var openedModal = 'settings';
     getCredentials();
     getProjects();
+
+    var validationMessages = {};
+    var applicationTexts = {};
 
     var languages;
     var strings;
@@ -407,7 +409,7 @@
         $('#invalidFile').text('');
         const text = $('#string-text').val();
         if (!text || text.length === '') {
-            $('#invalidString').text('String can not be empty');
+            $('#invalidString').text(validationMessages.addStringEmptyString || 'Invalid');
             return;
         }
         if (openedString) {
@@ -430,11 +432,11 @@
             const identifier = $('#string-identifier').val();
             const file = $('#string-files option:selected').val();
             if (!identifier || identifier.length === '') {
-                $('#invalidIdentifier').text('Identifier can not be empty');
+                $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                 return;
             }
             if (!file) {
-                $('#invalidFile').text('Please select a file');
+                $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
                 return;
             }
             showLoading();
@@ -486,7 +488,7 @@
             return window.postMessage('getLanguages')
                 .then(res => {
                     languages = res[0];
-                    let options = '<option value="-1">All Languages</option>';
+                    let options = `<option value="-1">${applicationTexts.allLanguagesOption || ''}</option>`;
                     options += languages.map(lan => {
                         return `<option value="${lan.id}">${lan.name}</option>`;
                     }).join('');
@@ -538,6 +540,29 @@
             });
         }
     }
+
+    //texts
+    function loadText() {
+        window.postMessage('getTexts').then(e => {
+            const uiTexts = e[0].ui;
+            validationMessages = uiTexts.validation;
+            applicationTexts = uiTexts.dynamic;
+            const labels = $('[crowdin-ui-text-label]');
+            for (let i = 0; i < labels.length; i++) {
+                const label = $(labels[i]);
+                const key = label.attr('crowdin-ui-text-label');
+                label.text(uiTexts.labels[key] || '');
+            }
+            const detailsArr = $('[crowdin-ui-text-details]');
+            for (let i = 0; i < detailsArr.length; i++) {
+                const details = $(detailsArr[i]);
+                const key = details.attr('crowdin-ui-text-details');
+                details.attr('title', (uiTexts.details[key] || ''));
+            }
+        });
+    }
+
+    loadText();
 </script>
 
 </html>

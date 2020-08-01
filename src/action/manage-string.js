@@ -3,6 +3,7 @@ import dom from 'sketch/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
 import * as httpUtil from '../util/http';
 import { PatchOperation } from '@crowdin/crowdin-api-client';
+import { default as displayTexts } from '../../assets/texts.json';
 
 async function addString(req) {
     const callback = async (projectId) => {
@@ -39,15 +40,15 @@ async function executeOperartion(operation) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         if (!selectedDocument) {
-            throw 'Please select a document';
+            throw displayTexts.notifications.warning.selectDocument;
         }
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
 
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            throw 'Please specify correct access token';
+            throw displayTexts.notifications.warning.noAccessToken;
         }
         if (!projectId) {
-            throw 'Please select a project';
+            throw displayTexts.notifications.warning.selectProject;
         }
 
         const res = await operation(projectId);

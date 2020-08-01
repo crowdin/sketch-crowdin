@@ -1,0 +1,102 @@
+{
+    "notifications": {
+        "warning": {
+            "selectDocument": "Please select a document",
+            "selectPage": "Please select a page",
+            "selectProject": "Please select a project",
+            "selectArtboard": "Please select an artboard",
+            "selectString": "Please select a string",
+            "selectTextElement": "Please select a text element",
+            "selectLanguage": "Please select a language",
+            "noAccessToken": "Please set access token",
+            "noProjects": "Currently there is not projects to select",
+            "noStrings": "There are no strings in Crowdin yet",
+            "authorizationError": "You don't have enough permissions to perform this action",
+            "serverError": "An error occurred %error%",
+            "generatedPageCannotBeTranslated": "Generated page cannot be translated",
+            "generatedArtboardCannotBeTranslated": "Generated artboard cannot be translated",
+            "nothingToTranslate": "Nothing to translate",
+            "noTranslationsForPage": "There are no translations for page %name%",
+            "noTranslationsForArtboard": "There are no translations for artboard %name%"
+        },
+        "info": {
+            "loadingProjects": "Loading projects",
+            "loadingLanguages": "Loading list of languages",
+            "loadingFiles": "Loading list of files",
+            "loadingStrings": "Loading strings",
+            "projectSaved": "Project saved",
+            "credentialsSaved": "Credentials saved",
+            "stringsUploadedToCrowdin": "Strings were successfully pushed to Crowdin",
+            "creatingNewDirectory": "Creating new directory",
+            "updatingExistingFileForArtboard": "Updating existing file for artboard",
+            "creatingNewFileForArtboard": "Creating new file for artboard %name%",
+            "updatingExistingFileForPage": "Updating existing file for page %name%",
+            "creatingNewFileForPage": "Creating new file for page %name%",
+            "loadingTranslationsForLanguage": "Loading translations for language %name%",
+            "translatedPageCreated": "Page %name% was created",
+            "translatedArtboardCreated": "Artboard %name% was created",
+            "downloadingTranslations": "Downloading translations",
+            "loadingTranslations": "Loading translations",
+            "translationsForLanguageLoaded": "Translations for language %name% loaded",
+            "removingNotValidScreenshot": "Removing screenshot %name%",
+            "screenshotsUploadedToCrowdin": "Screenshots were successfully pushed to Crowdin",
+            "screenshotUploadingToCrowdin": "Sending screenshot for %name% Artboard",
+            "screenshotUploadedToCrowdin": "Screenshot for %name% Artboard successfully pushed to Crowdin",
+            "addingTagsToScreenshot": "Adding tags to screenshot for %name% Artboard"
+        }
+    },
+    "ui": {
+        "labels": {
+            "translationTab": "Translation",
+            "stringsTab": "Strings",
+            "settingsTab": "Settings",
+            "contactUsTab": "Contact Us",
+            "selectProjectLabel": "Select Project:",
+            "connectionDetailsLabel": "Connection Details",
+            "tokenLabel": "Personal Access Token:",
+            "tokenDetailsText": "You can generate it in your Crowdin Account Settings",
+            "organizationLabel": "Organization",
+            "organizationDetailsText": "Specify organization domain name (for Crowdin Enterprise only). If you connect Crowdin account, leave the field empty",
+            "connectToCrowdinButton": "Connect to Crowdin",
+            "addStringButton": "Add String",
+            "useStringDetailsText": "Use source string for you text component in design",
+            "addStringStringLabel": "String",
+            "addStringIdentifierLabel": "Identifier",
+            "addStringFileLabel": "File",
+            "addStringSaveButtonLabel": "Save",
+            "addStringCancelButtonLabel": "Cancel",
+            "addStringDeleteButtonLabel": "Delete",
+            "previewStringsLabel": "Preview Strings",
+            "previewStringsDetailsText": "Preview translations from Crowdin for strings used in the designs",
+            "previewButtonLabel": "Preview",
+            "uploadScreenshotsLabel": "Upload Screenshots",
+            "uploadScreenshotsDetailsText": "Send Artboards Screenshots for selected page with tagged strings",
+            "uploadScreenshotsButtonLabel": "Upload Screenshots",
+            "sendTextsLabel": "Send Texts",
+            "sendTextsForLabel": "Send texts for selected:",
+            "sendTextsForPageButtonLabel": "Page",
+            "sendTextsForArtboardButtonLabel": "Artboard",
+            "getTranslationsLabel": "Get Translations",
+            "getTranslationsLanguageLabel": "Language:",
+            "uploadTranslationsForLabel": "Upload translations for selected:",
+            "uploadTranslationsForPageButtonLabel": "Page",
+            "uploadTranslationsForArtboardButtonLabel": "Artboard",
+            "loadingDialog": "Loading..."
+        },
+        "details": {
+            "translationsDetails": "Send designs for translations to Crowdin and upload translated copies back to Sketch. Use for translating static pages, like banners and brochures.",
+            "stringsDetails": "Use this mode to work with dynamic designs, including product UI.Get real source texts from Crowdin, use them in your designs, and upload screenshots of the artboards to provide context for translators.",
+            "addStringStringDetails": "The text for translation",
+            "addStringIdentifierDetails": "A unique identifier of this string (may be used to identify translated text in your application)",
+            "addStringFileDetails": "Select editable file to add new source string into it. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES."
+        },
+        "validation": {
+            "addStringEmptyString": "String can not be empty",
+            "addStringEmptyIdentifier": "Identifier can not be empty",
+            "addStringEmptyFile": "Please select a file"
+        },
+        "dynamic": {
+            "allLanguagesOption": "All Languages"
+        }
+    }
+}

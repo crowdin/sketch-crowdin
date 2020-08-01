@@ -7,45 +7,46 @@ import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
 import * as htmlUtil from '../util/html';
 import { getFileName, getDirectoryName } from '../util/file';
+import { default as displayTexts } from '../../assets/texts.json';
 
 async function translate(languageId, wholePage) {
     try {
         if (!languageId) {
-            throw 'Please select a language';
+            throw displayTexts.notifications.warning.selectLanguage;
         }
         const selectedDocument = dom.getSelectedDocument();
         if (!selectedDocument) {
-            throw 'Please select a document';
+            throw displayTexts.notifications.warning.selectDocument;
         }
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
         let artboard;
 
         if (!selectedPage) {
-            throw 'Please select a page';
+            throw displayTexts.notifications.warning.selectPage;
         }
         if (selectedDocument.pages === 0) {
-            throw 'Nothing to translate';
+            throw displayTexts.notifications.warning.nothingToTranslate;
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            throw 'Please specify correct access token';
+            throw displayTexts.notifications.warning.noAccessToken;
         }
         if (!projectId) {
-            throw 'Please select a project';
+            throw displayTexts.notifications.warning.selectProject;
         }
         const translatedPages = localStorage.getListOfTranslatedElements(selectedDocument, 'page');
         if (!!wholePage) {
             if (translatedPages.includes(selectedPage.id)) {
-                throw 'Generated page cannot be translated';
+                throw displayTexts.notifications.warning.generatedPageCannotBeTranslated;
             }
         } else {
             artboard = domUtil.getSelectedArtboard(selectedPage);
             if (!artboard) {
-                throw 'Please select an artboard';
+                throw displayTexts.notifications.warning.selectArtboard;
             }
             const translatedArtboard = localStorage.getListOfTranslatedElements(selectedDocument, 'artboard');
             if (translatedArtboard.includes(artboard.id) || translatedPages.includes(artboard.parent.id)) {
-                throw 'Generated artboard cannot be translated';
+                throw displayTexts.notifications.warning.generatedArtboardCannotBeTranslated;
             }
         }
 
@@ -69,10 +70,14 @@ async function translate(languageId, wholePage) {
                 const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId);
                 const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
                 if (!directory) {
-                    throw 'There are no translations for ' + (wholePage ? `page ${selectedPage.name}` : `artboard ${artboard.name}`);
+                    if (wholePage) {
+                        throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', selectedPage.name);
+                    } else {
+                        throw displayTexts.notifications.warning.noTranslationsForArtboard.replace('%name%', artboard.name);
+                    }
                 }
                 const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, undefined, directory.data.id);
-                ui.message('Downloading translations');
+                ui.message(displayTexts.notifications.info.downloadingTranslations);
                 if (wholePage) {
                     await extractPageTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, projectFiles);
                 } else {
@@ -90,13 +95,13 @@ async function translate(languageId, wholePage) {
 async function extractArtboardTranslations(projectId, selectedLanguages, translationsApi, document, page, artboard, projectFiles) {
     const foundFile = projectFiles.data.find(file => file.data.name === getFileName(artboard));
     if (!!foundFile) {
-        ui.message('Loading translations');
+        ui.message(displayTexts.notifications.info.loadingTranslations);
         const fileForEachLanguage = [];
         for (let i = 0; i < selectedLanguages.length; i++) {
             const lang = selectedLanguages[i];
             //in sequential manner instead of parallel because back end produce incorrect results
             const html = await getFile(translationsApi, projectId, foundFile.data.id, lang.data.id);
-            ui.message(`Translations for language ${lang.data.name} loaded`);
+            ui.message(displayTexts.notifications.info.translationsForLanguageLoaded.replace('%name%', lang.data.name));
             fileForEachLanguage.push({ html, languageName: lang.data.name });
         }
         fileForEachLanguage.forEach(e => {
@@ -139,16 +144,16 @@ async function extractArtboardTranslations(projectId, selectedLanguages, transla
                         }
                     }
                 });
-            ui.message(`Artboard ${newArtboard.name} was created`);
+            ui.message(displayTexts.notifications.info.translatedArtboardCreated.replace('%name%', newArtboard.name));
         });
     } else {
-        throw `There are no translations for artboard ${artboard.name}`;
+        throw displayTexts.notifications.warning.noTranslationsForArtboard.replace('%name%', artboard.name);
     }
 }
 
 async function extractPageTranslations(projectId, selectedLanguages, translationsApi, document, page, projectFiles) {
     if (projectFiles.data.length > 0) {
-        ui.message('Loading translations');
+        ui.message(displayTexts.notifications.info.loadingTranslations);
         const filesForEachLanguage = [];
         for (let i = 0; i < selectedLanguages.length; i++) {
             const lang = selectedLanguages[i];
@@ -156,7 +161,7 @@ async function extractPageTranslations(projectId, selectedLanguages, translation
             const files = await Promise.all(
                 projectFiles.data.map(file => getFile(translationsApi, projectId, file.data.id, lang.data.id))
             );
-            ui.message(`Translations for language ${lang.data.name} loaded`);
+            ui.message(displayTexts.notifications.info.translationsForLanguageLoaded.replace('%name%', lang.data.name));
             filesForEachLanguage.push({ files, languageName: lang.data.name });
         }
         filesForEachLanguage.forEach(e => {
@@ -197,10 +202,10 @@ async function extractPageTranslations(projectId, selectedLanguages, translation
                 });
             domUtil.removeGeneratedArtboards(document, page, newPage);
             document.selectedPage = newPage;
-            ui.message(`Page ${newPage.name} was created`);
+            ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', newPage.name));
         });
     } else {
-        throw `There are no translations for page ${page.name}`;
+        throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', page.name);
     }
 }
 

@@ -4,31 +4,32 @@ import { ACCESS_TOKEN_KEY, PROJECT_ID, TEXT_TYPE } from '../constants';
 import * as domUtil from '../util/dom';
 import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
+import { default as displayTexts } from '../../assets/texts.json';
 
 async function useString(string) {
     try {
         if (!string || !string.id || !string.text) {
-            throw 'Please select a string';
+            throw displayTexts.notifications.warning.selectString;
         }
         const selectedDocument = dom.getSelectedDocument();
         if (!selectedDocument) {
-            throw 'Please select a document';
+            throw displayTexts.notifications.warning.selectDocument;
         }
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
 
         if (!selectedPage) {
-            throw 'Please select a page';
+            throw displayTexts.notifications.warning.selectPage;
         }
         const selectedText = domUtil.getSelectedText(selectedPage);
         if (!selectedText) {
-            throw 'Please select a text element';
+            throw displayTexts.notifications.warning.selectTextElement;
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            throw 'Please specify correct access token';
+            throw displayTexts.notifications.warning.noAccessToken;
         }
         if (!projectId) {
-            throw 'Please select a project';
+            throw displayTexts.notifications.warning.selectProject;
         }
 
         const id = string.id;

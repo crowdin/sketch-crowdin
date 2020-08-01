@@ -11,13 +11,14 @@ import { translate } from './action/translate';
 import { uploadScreenshots } from './action/upload-screenshots';
 import { stringsPreview } from './action/strings-preview';
 import { addString, deleteString, editString } from './action/manage-string';
+import { default as displayTexts } from '../assets/texts.json';
 
 const identifier = 'crowdin';
 
 export default function start() {
 
     //set to true for local development
-    const devTools = false;
+    const devTools = true;
 
     const options = {
         identifier,
@@ -35,6 +36,8 @@ export default function start() {
     const browserWindow = new BrowserWindow(options);
 
     browserWindow.loadURL(require('../ui/plugin.html'));
+
+    browserWindow.webContents.on('getTexts', () => displayTexts);
 
     //settings
     browserWindow.webContents.on('contactUs', contactUs);
@@ -86,16 +89,16 @@ function saveCredentials(creds) {
         settings.setSettingForKey(ACCESS_TOKEN_KEY, creds.token);
     }
     settings.setSettingForKey(ORGANIZATION, creds.organization);
-    ui.message('Credentials saved');
+    ui.message(displayTexts.notifications.info.credentialsSaved);
 }
 
 function saveProject(projectId) {
     if (!dom.getSelectedDocument()) {
-        ui.message('Please select a document');
+        ui.message(displayTexts.notifications.warning.selectDocument);
         return;
     }
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, projectId);
-    ui.message('Project saved');
+    ui.message(displayTexts.notifications.info.projectSaved);
 }
 
 export function onShutdown() {

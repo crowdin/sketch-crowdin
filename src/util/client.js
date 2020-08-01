@@ -3,17 +3,18 @@ import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import { PROJECT_ID } from '../constants';
 import { handleError, createClient } from './http';
+import { default as displayTexts } from '../../assets/texts.json';
 
 async function getProjects() {
     try {
         if (!dom.getSelectedDocument()) {
-            throw 'Please select a document';
+            throw displayTexts.notifications.warning.selectDocument;
         }
-        ui.message('Loading projects');
+        ui.message(displayTexts.notifications.info.loadingProjects);
         const { projectsGroupsApi } = createClient();
         const projects = await projectsGroupsApi.withFetchAll().listProjects();
         if (projects.data.length === 0) {
-            throw 'Currently there is not projects to select';
+            throw displayTexts.notifications.warning.noProjects;
         }
         let projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
         if (!!projectId) {
@@ -39,13 +40,13 @@ async function getProjects() {
 async function getLanguages() {
     try {
         if (!dom.getSelectedDocument()) {
-            throw 'Please select a document';
+            throw displayTexts.notifications.warning.selectDocument;
         }
         const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
         if (!projectId) {
-            throw 'Please select a project';
+            throw displayTexts.notifications.warning.selectProject;
         }
-        ui.message('Loading list of languages');
+        ui.message(displayTexts.notifications.info.loadingLanguages);
         const { projectsGroupsApi, languagesApi } = createClient();
         const languages = await languagesApi.withFetchAll().listSupportedLanguages();
         const project = await projectsGroupsApi.getProject(projectId);
@@ -66,13 +67,13 @@ async function getLanguages() {
 async function getFiles() {
     try {
         if (!dom.getSelectedDocument()) {
-            throw 'Please select a document';
+            throw displayTexts.notifications.warning.selectDocument;
         }
         const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
         if (!projectId) {
-            throw 'Please select a project';
+            throw displayTexts.notifications.warning.selectProject;
         }
-        ui.message('Loading list of files');
+        ui.message(displayTexts.notifications.info.loadingFiles);
         const { sourceFilesApi } = createClient();
         const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId);
         return files.data.map(e => {
@@ -91,16 +92,16 @@ async function getFiles() {
 async function getStrings() {
     try {
         if (!dom.getSelectedDocument()) {
-            throw 'Please select a document';
+            throw displayTexts.notifications.warning.selectDocument;
         }
         const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
         if (!projectId) {
-            throw 'Please select a project';
+            throw displayTexts.notifications.warning.selectProject;
         }
-        ui.message('Loading strings');
+        ui.message(displayTexts.notifications.info.loadingStrings);
         const strings = await fetchStrings(projectId, createClient().sourceStringsApi);
         if (strings.length === 0) {
-            throw 'There are no strings in Crowdin yet';
+            throw displayTexts.notifications.warning.noStrings;
         }
         return strings;
     } catch (error) {

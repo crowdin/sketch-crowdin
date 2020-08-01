@@ -6,24 +6,25 @@ import * as localStorage from '../util/local-storage';
 import { getTextElementsInArtboard } from '../util/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
 import { fetchStrings } from '../util/client';
+import { default as displayTexts } from '../../assets/texts.json';
 
 async function uploadScreenshots() {
     try {
         const selectedDocument = dom.getSelectedDocument();
         if (!selectedDocument) {
-            throw 'Please select a document';
+            throw displayTexts.notifications.warning.selectDocument;
         }
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
 
         if (!selectedPage) {
-            throw 'Please select a page';
+            throw displayTexts.notifications.warning.selectPage;
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            throw 'Please specify correct access token';
+            throw displayTexts.notifications.warning.noAccessToken;
         }
         if (!projectId) {
-            throw 'Please select a project';
+            throw displayTexts.notifications.warning.selectProject;
         }
 
         let tags = localStorage.getTags(selectedDocument);
@@ -102,7 +103,7 @@ async function uploadScreenshots() {
             .map(async screenshotName => {
                 const screenshot = screenshots.data.find(sc => sc.data.name === screenshotName);
                 if (!!screenshot) {
-                    ui.message(`Removing screenshot ${screenshot.data.name}`);
+                    ui.message(displayTexts.notifications.info.removingNotValidScreenshot.replace('%name%', screenshot.data.name));
                     await screenshotsApi.deleteScreenshot(projectId, screenshot.data.id);
                 }
             })
@@ -116,7 +117,7 @@ async function uploadScreenshots() {
         await Promise.all(promises);
 
         localStorage.saveTags(selectedDocument, tags);
-        ui.message('Screenshots were successfully pushed to Crowdin');
+        ui.message(displayTexts.notifications.info.screenshotsUploadedToCrowdin);
     } catch (error) {
         httpUtil.handleError(error);
     }
@@ -129,7 +130,7 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
         output: false,
         formats: 'png'
     });
-    ui.message(`Sending screenshot for ${artboard.name} Artboard`);
+    ui.message(displayTexts.notifications.info.screenshotUploadingToCrowdin.replace('%name%', artboard.name));
     const { screenshotsApi, uploadStorageApi } = httpUtil.createClient();
     const screenshotName = __buildScreenshotName(artboard.id, page.id);
     const storageRecord = await uploadStorageApi.addStorage(`${screenshotName}.png`, b.slice(b.byteOffset, b.byteOffset + b.byteLength));
@@ -149,7 +150,7 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
     }
     const screenshotId = screenshot.data.id;
 
-    ui.message(`Adding tags to screenshot for ${artboard.name} Artboard`);
+    ui.message(displayTexts.notifications.info.addingTagsToScreenshot.replace('%name%', artboard.name));
     await screenshotsApi.clearTags(projectId, screenshotId);
 
     const tagsRequest = tags.map(tag => {
@@ -165,7 +166,7 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
     });
 
     await screenshotsApi.addTag(projectId, screenshotId, tagsRequest);
-    ui.message(`Screenshot for ${artboard.name} Artboard successfully pushed to Crowdin`);
+    ui.message(displayTexts.notifications.info.screenshotUploadedToCrowdin.replace('%name%', artboard.name));
 }
 
 function __buildScreenshotName(artboardId, pageId) {
