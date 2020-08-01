@@ -81,7 +81,8 @@
             "uploadTranslationsForLabel": "Upload translations for selected:",
             "uploadTranslationsForPageButtonLabel": "Page",
             "uploadTranslationsForArtboardButtonLabel": "Artboard",
-            "loadingDialog": "Loading..."
+            "loadingDialog": "Loading...",
+            "allLanguagesOption": "All Languages"
         },
         "details": {
             "translationsDetails": "Send designs for translations to Crowdin and upload translated copies back to Sketch. Use for translating static pages, like banners and brochures.",
@@ -94,9 +95,6 @@
             "addStringEmptyString": "String can not be empty",
             "addStringEmptyIdentifier": "Identifier can not be empty",
             "addStringEmptyFile": "Please select a file"
-        },
-        "dynamic": {
-            "allLanguagesOption": "All Languages"
         }
     }
 }

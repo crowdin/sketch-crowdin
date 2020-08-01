@@ -227,7 +227,7 @@
     getProjects();
 
     var validationMessages = {};
-    var applicationTexts = {};
+    var allLanguagesOption;
 
     var languages;
     var strings;
@@ -488,7 +488,7 @@
             return window.postMessage('getLanguages')
                 .then(res => {
                     languages = res[0];
-                    let options = `<option value="-1">${applicationTexts.allLanguagesOption || ''}</option>`;
+                    let options = `<option value="-1">${allLanguagesOption || ''}</option>`;
                     options += languages.map(lan => {
                         return `<option value="${lan.id}">${lan.name}</option>`;
                     }).join('');
@@ -546,7 +546,7 @@
         window.postMessage('getTexts').then(e => {
             const uiTexts = e[0].ui;
             validationMessages = uiTexts.validation;
-            applicationTexts = uiTexts.dynamic;
+            allLanguagesOption = uiTexts.labels.allLanguagesOption;
             const labels = $('[crowdin-ui-text-label]');
             for (let i = 0; i < labels.length; i++) {
                 const label = $(labels[i]);
