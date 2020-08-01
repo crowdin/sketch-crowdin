@@ -6,7 +6,7 @@ import { getWebview } from 'sketch-module-web-view/remote';
 import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION } from './constants';
 import { getProjects, getLanguages, getStrings, getFiles } from './util/client';
 import { sendStrings } from './action/send-strings';
-import { useString } from './action/source-strings';
+import { useString, getSelectedText } from './action/source-strings';
 import { translate } from './action/translate';
 import { uploadScreenshots } from './action/upload-screenshots';
 import { stringsPreview } from './action/strings-preview';
@@ -22,7 +22,7 @@ export default function start() {
     const options = {
         identifier,
         width: 400,
-        height: 650,
+        height: 700,
         hidesOnDeactivate: false,
         remembersWindowFrame: true,
         alwaysOnTop: true,
@@ -36,23 +36,29 @@ export default function start() {
 
     browserWindow.loadURL(require('../ui/plugin.html'));
 
+    //settings
     browserWindow.webContents.on('contactUs', contactUs);
     browserWindow.webContents.on('getCredentials', getCredentials);
     browserWindow.webContents.on('saveCredentials', saveCredentials);
     browserWindow.webContents.on('saveProject', saveProject);
 
+    //data
     browserWindow.webContents.on('getProjects', getProjects);
     browserWindow.webContents.on('getLanguages', getLanguages);
     browserWindow.webContents.on('getStrings', getStrings);
     browserWindow.webContents.on('getFiles', getFiles);
 
-    browserWindow.webContents.on('sendStrings', sendStrings);
+    //strings mode
     browserWindow.webContents.on('useString', useString);
     browserWindow.webContents.on('stringsPreview', stringsPreview);
+    //string management
+    browserWindow.webContents.on('getSelectedText', getSelectedText);
     browserWindow.webContents.on('addString', addString);
     browserWindow.webContents.on('deleteString', deleteString);
     browserWindow.webContents.on('editString', editString);
 
+    //translate
+    browserWindow.webContents.on('sendStrings', sendStrings);
     browserWindow.webContents.on('translate', translate);
     browserWindow.webContents.on('uploadScreenshots', uploadScreenshots);
 };

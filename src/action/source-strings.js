@@ -65,4 +65,25 @@ async function useString(string) {
     }
 }
 
-export { useString };
+function getSelectedText() {
+    const selectedDocument = dom.getSelectedDocument();
+    if (!selectedDocument) {
+        return {};
+    }
+
+    const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
+    if (!selectedPage) {
+        return {};
+    }
+
+    const selectedText = domUtil.getSelectedText(selectedPage);
+    if (!selectedText) {
+        return {};
+    }
+
+    const text = selectedText.type === TEXT_TYPE ? selectedText.element.text : selectedText.element.value;
+
+    return { text };
+}
+
+export { useString, getSelectedText };

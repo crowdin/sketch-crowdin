@@ -15,7 +15,7 @@
                     <li class="nav-item" data-toggle="tooltip" data-id="settings" placement="bottom"
                         title="Send designs for translations to Crowdin and upload translated copies back to Sketch. Use for translating static pages, like banners and brochures.">
                         <a id="translation-nav" class="nav-link" href="#"
-                            onclick="openModal('translation');getLanguages();">Translation</a>
+                            onclick="openModal('translation');cancelEditString();getLanguages();">Translation</a>
                     </li>
                     <li class="nav-item" data-toggle="tooltip" data-placement="bottom"
                         title="Use this mode to work with dynamic designs, including product UI.Get real source texts from Crowdin, use them in your designs, and upload screenshots of the artboards to provide context for translators.">
@@ -23,7 +23,8 @@
                             onclick="openModal('strings-mode');getStrings();">Strings</a>
                     </li>
                     <li class="nav-item">
-                        <a id="settings-nav" class="nav-link active" href="#" onclick="openModal('settings')">Settings</a>
+                        <a id="settings-nav" class="nav-link active" href="#"
+                            onclick="openModal('settings');cancelEditString();">Settings</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right pr-2">
@@ -67,9 +68,12 @@
                 <form>
                     <div class="form-group list-strings-holder mb-4" id="list-strings">
                         <div>
-                            <button type="button" class="btn btn-secondary btn-sm btn-bottom float-right ml-2" onclick="openAddString();">
-                                <svg class="btn-icon" width="13" height="13" viewBox="0 0 13 13" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M7 1H6V6H1V7H6V12H7V7H12V6H7V1Z" fill="currentColor"/>
+                            <button type="button" class="btn btn-secondary btn-sm btn-bottom float-right ml-2"
+                                onclick="openAddString();">
+                                <svg class="btn-icon" width="13" height="13" viewBox="0 0 13 13" fill="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M7 1H6V6H1V7H6V12H7V7H12V6H7V1Z"
+                                        fill="currentColor" />
                                 </svg>
                                 <span>Add String</span>
                             </button>
@@ -85,38 +89,45 @@
                     </div>
                     <fieldset id="edit-string" class="edit-string-mode" style="display: none;">
                         <div class="form-group">
-                            <label>String</label>
+                            <label><abbr title="The text for translation">String</abbr></label>
                             <input type="text" class="form-control" id="string-text" placeholder="text">
+                            <label style="color: red;" id="invalidString"></label>
                         </div>
-                            <div id="new-string-form" style="display: none;">
-                                <div class="form-group">
-                                    <div class="form-row">
-                                        <div class="col-3 text-right">
-                                            <label>Identifier:</label>
-                                        </div>
-                                        <div class="col-9">
-                                            <input type="text" class="form-control" id="string-identifier"
-                                                placeholder="identifier">
-                                        </div>
+                        <div id="new-string-form" style="display: none;">
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div class="col-3 text-right">
+                                        <label><abbr
+                                                title="A unique identifier of this string (may be used to identify translated text in your application)">Identifier:</abbr></label>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="form-row mb-3">
-                                        <div class="col-3 text-right">
-                                            <label>File:</label>
-                                        </div>
-                                        <div class="col-9">
-                                            <select id="string-files" class="ml-1" style="width: 100%;">
-                                            </select>
-                                        </div>
+                                    <div class="col-9">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
                                     </div>
                                 </div>
                             </div>
-                            <div class="button-holder d-flex flex-row">
-                                <button type="button" class="btn btn-primary btn-sm" onclick="saveString();">Save</button>
-                                <button type="button" class="btn btn-secondary btn-sm ml-2" onclick="cancelEditString();">Cancel</button>
-                                <button type="button" class="btn btn-secondary btn-sm ml-auto" onclick="deleteString();">Delete</button>
+                            <div class="form-group">
+                                <div class="form-row mb-3">
+                                    <div class="col-3 text-right">
+                                        <label><abbr
+                                                title="Select editable file to add new source string into it. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES.">File:</abbr></label>
+                                    </div>
+                                    <div class="col-9">
+                                        <select id="string-files" class="ml-1" style="width: 100%;">
+                                        </select>
+                                        <label style="color: red;" id="invalidFile"></label>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                        <div class="button-holder d-flex flex-row">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="saveString();">Save</button>
+                            <button type="button" class="btn btn-secondary btn-sm ml-2"
+                                onclick="cancelEditString();">Cancel</button>
+                            <button type="button" class="btn btn-secondary btn-sm ml-auto"
+                                onclick="deleteString();">Delete</button>
+                        </div>
                     </fieldset>
                     <fieldset>
                         <label class="fieldset-label">Preview Strings</label>
@@ -138,7 +149,8 @@
                         <div class="form-group">
                             <p class="form-text">Send Artboards Screenshots for selected page with tagged
                                 strings</p>
-                            <button type="button" class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()">Upload
+                            <button type="button" class="btn btn-secondary btn-sm mb-2"
+                                onclick="uploadScreenshots()">Upload
                                 Screenshots</button>
                         </div>
                     </fieldset>
@@ -208,14 +220,28 @@
 
 <script>
 
+    const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties'];
+
+    //initial view
     var openedModal = 'settings';
+    getCredentials();
+    getProjects();
+
     var languages;
     var strings;
     var files;
     var openedString;
+    var selectedText;
 
-    getCredentials();
-    getProjects();
+    //basic functions
+
+    function clearStorage() {
+        strings = undefined;
+        languages = undefined;
+        files = undefined;
+        openedString = undefined;
+        selectedText = undefined;
+    }
 
     function openModal(modal) {
         if (openedModal === modal) {
@@ -242,28 +268,13 @@
         window.postMessage('contactUs');
     }
 
+    //settings
+
     function getCredentials() {
         return window.postMessage('getCredentials').then(creds => {
             $('#organization').val(creds[0].organization);
             $('#token').val(creds[0].token);
         });
-    }
-
-    function getProjects() {
-        showLoading();
-        window.postMessage('getProjects')
-            .then(info => {
-                const projectsInfo = info[0];
-                const options = projectsInfo.projects.map(pr => {
-                    if (pr.id === projectsInfo.selectedProjectId) {
-                        return `<option value="${pr.id}" selected>${pr.name}</option>`;
-                    } else {
-                        return `<option value="${pr.id}">${pr.name}</option>`;
-                    }
-                }).join('');
-                $('#projects').find('option').remove().end().append(options);
-            })
-            .then(hideLoading);
     }
 
     function saveCredentials() {
@@ -281,59 +292,7 @@
             .then(clearStorage);
     }
 
-    function getLanguages() {
-        if (!languages) {
-            showLoading();
-            return window.postMessage('getLanguages')
-                .then(res => {
-                    languages = res[0];
-                    let options = '<option value="-1">All Languages</option>';
-                    options += languages.map(lan => {
-                        return `<option value="${lan.id}">${lan.name}</option>`;
-                    }).join('');
-                    $('#languages').find('option').remove().end().append(options);
-                    $('#languages-preview').find('option').remove().end().append(options);
-                })
-                .then(hideLoading);
-        }
-    }
-
-    function getFiles() {
-        if (!files) {
-            showLoading();
-            return window.postMessage('getFiles')
-                .then(res => {
-                    files = res[0];
-                    const options = files.map(file => {
-                        return `<option value="${file.id}">${file.name}</option>`;
-                    }).join('');
-                    $('#string-files').find('option').remove().end().append(options);
-                })
-                .then(hideLoading);
-        } else {
-            return new Promise((res, rej) => {
-                res();
-            });
-        }
-    }
-
-    function getStrings() {
-        if (!strings) {
-            showLoading();
-            window.postMessage('getStrings')
-                .then(res => {
-                    strings = res[0];
-                    search();
-                })
-                .then(() => {
-                    if (!languages) {
-                        return getLanguages();
-                    } else {
-                        hideLoading();
-                    }
-                });
-        }
-    }
+    //translation
 
     function translateComponent(wholePage) {
         showLoading();
@@ -345,6 +304,8 @@
         showLoading();
         window.postMessage('sendStrings', wholePage).then(hideLoading);
     }
+
+    //strings mode
 
     function useString(e) {
         showLoading();
@@ -363,13 +324,6 @@
         const id = $('#languages-preview option:selected').val();
         const name = $('#languages-preview option:selected').text();
         window.postMessage('stringsPreview', { id, name }).then(hideLoading);
-    }
-
-    function clearStorage() {
-        strings = undefined;
-        languages = undefined;
-        files = undefined;
-        openedString = undefined;
     }
 
     function search() {
@@ -392,6 +346,8 @@
         $('#strings-container').find('p').remove().end().append(texts);
     }
 
+    //strings management
+
     function openEditString(event, element) {
         event.stopPropagation();
         const el = $(element);
@@ -405,19 +361,27 @@
     }
 
     function openAddString() {
-        getFiles().then(() => {
-            $('#list-strings').hide();
-            $('#new-string-form').show();
-            $('#edit-string').show();
-            $('#string-text').val('');
-            $('#string-identifier').val('');
-            openedString = undefined;
-        });
+        getFiles()
+            .then(() => window.postMessage('getSelectedText'))
+            .then((e) => {
+                const selected = e[0].text;
+                $('#list-strings').hide();
+                $('#new-string-form').show();
+                $('#edit-string').show();
+                $('#string-text').val(selected || '');
+                $('#string-identifier').val('');
+                selectedText = selected;
+                openedString = undefined;
+            });
     }
 
     function cancelEditString() {
         $('#list-strings').show();
         $('#edit-string').hide();
+        $('#invalidString').text('');
+        $('#invalidIdentifier').text('');
+        $('#invalidFile').text('');
+        selectedText = undefined;
     }
 
     function deleteString() {
@@ -438,7 +402,14 @@
     }
 
     function saveString() {
+        $('#invalidString').text('');
+        $('#invalidIdentifier').text('');
+        $('#invalidFile').text('');
         const text = $('#string-text').val();
+        if (!text || text.length === '') {
+            $('#invalidString').text('String can not be empty');
+            return;
+        }
         if (openedString) {
             showLoading();
             window.postMessage('editString', { id: openedString, text })
@@ -456,11 +427,21 @@
                     hideLoading();
                 });
         } else {
+            const identifier = $('#string-identifier').val();
+            const file = $('#string-files option:selected').val();
+            if (!identifier || identifier.length === '') {
+                $('#invalidIdentifier').text('Identifier can not be empty');
+                return;
+            }
+            if (!file) {
+                $('#invalidFile').text('Please select a file');
+                return;
+            }
             showLoading();
             const req = {
                 text,
-                identifier: $('#string-identifier').val(),
-                fileId: Number($('#string-files option:selected').val())
+                identifier,
+                fileId: Number(file)
             };
             window.postMessage('addString', req)
                 .then(e => {
@@ -469,11 +450,92 @@
                             id: e[0].data.id,
                             text: text
                         });
+                        if (selectedText) {
+                            window.postMessage('useString', { id: e[0].data.id, text });
+                        }
                         cancelEditString();
                         search();
-                    }
+                    };
                     hideLoading();
                 });
+        }
+    }
+
+    //data loading functions
+
+    function getProjects() {
+        showLoading();
+        return window.postMessage('getProjects')
+            .then(info => {
+                const projectsInfo = info[0];
+                const options = projectsInfo.projects.map(pr => {
+                    if (pr.id === projectsInfo.selectedProjectId) {
+                        return `<option value="${pr.id}" selected>${pr.name}</option>`;
+                    } else {
+                        return `<option value="${pr.id}">${pr.name}</option>`;
+                    }
+                }).join('');
+                $('#projects').find('option').remove().end().append(options);
+            })
+            .then(hideLoading);
+    }
+
+    function getLanguages() {
+        if (!languages) {
+            showLoading();
+            return window.postMessage('getLanguages')
+                .then(res => {
+                    languages = res[0];
+                    let options = '<option value="-1">All Languages</option>';
+                    options += languages.map(lan => {
+                        return `<option value="${lan.id}">${lan.name}</option>`;
+                    }).join('');
+                    $('#languages').find('option').remove().end().append(options);
+                    $('#languages-preview').find('option').remove().end().append(options);
+                })
+                .then(hideLoading);
+        } else {
+            return new Promise((res, rej) => {
+                res();
+            });
+        }
+    }
+
+    function getFiles() {
+        if (!files) {
+            showLoading();
+            return window.postMessage('getFiles')
+                .then(res => {
+                    files = res[0];
+                    const options = files
+                        .filter(file => editableFileTypes.includes(file.type))
+                        .map(file => {
+                            return `<option value="${file.id}">${file.name}</option>`;
+                        }).join('');
+                    $('#string-files').find('option').remove().end().append(options);
+                })
+                .then(hideLoading);
+        } else {
+            return new Promise((res, rej) => {
+                res();
+            });
+        }
+    }
+
+    function getStrings() {
+        if (!strings) {
+            showLoading();
+            return window.postMessage('getStrings')
+                .then(res => {
+                    strings = res[0];
+                    search();
+                })
+                .then(getLanguages)
+                .finally(hideLoading);
+        } else {
+            return new Promise((res, rej) => {
+                res();
+            });
         }
     }
 </script>

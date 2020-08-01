@@ -262,7 +262,7 @@ button .btn-icon {
 
 .strings-container {
     overflow-y: scroll;
-    max-height: 250px;
+    max-height: 200px;
     background-color: #ffffff;
     padding: 0;
 }

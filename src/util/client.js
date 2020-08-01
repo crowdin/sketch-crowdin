@@ -78,7 +78,8 @@ async function getFiles() {
         return files.data.map(e => {
             return {
                 id: e.data.id,
-                name: e.data.name
+                name: e.data.name,
+                type: e.data.type
             };
         });
     } catch (error) {
