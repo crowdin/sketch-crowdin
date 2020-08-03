@@ -298,7 +298,7 @@
 
     function translateComponent(wholePage) {
         showLoading();
-        const languageId = Number($('#languages option:selected').val());
+        const languageId = $('#languages option:selected').val();
         window.postMessage('translate', languageId, wholePage).then(hideLoading);
     }
 

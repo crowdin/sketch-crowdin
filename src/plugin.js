@@ -18,13 +18,13 @@ const identifier = 'crowdin';
 export default function start() {
 
     //set to true for local development
-    const devTools = true;
+    const devTools = false;
 
     const options = {
         identifier,
         width: 400,
         height: 700,
-        hidesOnDeactivate: false,
+        hidesOnDeactivate: true,
         remembersWindowFrame: true,
         alwaysOnTop: true,
         title: 'Crowdin',
