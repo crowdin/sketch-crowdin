@@ -344,7 +344,11 @@
         const filteredStrings = (!text || text.length === 0)
             ? arr
             : arr.filter(str => str.text.toLowerCase().includes(text));
-        const texts = filteredStrings.map(str => `<p class="string-row" onclick="useString(this)" int-id="${str.id}">${str.text}${icon}</p>`)
+        const texts = filteredStrings.map(str => {
+            const file = files.find(f => f.id === str.fileId);
+            const editable = file && editableFileTypes.includes(file.type);
+            return `<p class="string-row" onclick="useString(this)" int-id="${str.id}">${str.text}${editable ? icon : ''}</p>`;
+        });
         $('#strings-container').find('p').remove().end().append(texts);
     }
 
@@ -363,18 +367,16 @@
     }
 
     function openAddString() {
-        getFiles()
-            .then(() => window.postMessage('getSelectedText'))
-            .then((e) => {
-                const selected = e[0].text;
-                $('#list-strings').hide();
-                $('#new-string-form').show();
-                $('#edit-string').show();
-                $('#string-text').val(selected || '');
-                $('#string-identifier').val('');
-                selectedText = selected;
-                openedString = undefined;
-            });
+        window.postMessage('getSelectedText').then((e) => {
+            const selected = e[0].text;
+            $('#list-strings').hide();
+            $('#new-string-form').show();
+            $('#edit-string').show();
+            $('#string-text').val(selected || '');
+            $('#string-identifier').val('');
+            selectedText = selected;
+            openedString = undefined;
+        });
     }
 
     function cancelEditString() {
@@ -505,7 +507,6 @@
 
     function getFiles() {
         if (!files) {
-            showLoading();
             return window.postMessage('getFiles')
                 .then(res => {
                     files = res[0];
@@ -515,8 +516,7 @@
                             return `<option value="${file.id}">${file.name}</option>`;
                         }).join('');
                     $('#string-files').find('option').remove().end().append(options);
-                })
-                .then(hideLoading);
+                });
         } else {
             return new Promise((res, rej) => {
                 res();
@@ -527,13 +527,16 @@
     function getStrings() {
         if (!strings) {
             showLoading();
-            return window.postMessage('getStrings')
-                .then(res => {
-                    strings = res[0];
-                    search();
-                })
-                .then(getLanguages)
-                .finally(hideLoading);
+            return getFiles()
+                .then(() => {
+                    return window.postMessage('getStrings')
+                        .then(res => {
+                            strings = res[0];
+                            search();
+                        })
+                        .then(getLanguages)
+                        .finally(hideLoading);
+                });
         } else {
             return new Promise((res, rej) => {
                 res();

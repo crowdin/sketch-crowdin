@@ -129,7 +129,7 @@ function convertCrowdinStringsToStrings(crowdinStrings) {
                     text.other || '';
             }
             return {
-                text, id: e.id
+                text, id: e.id, fileId: e.fileId
             }
         })
         .filter(e => e.text && e.text.length > 0);
