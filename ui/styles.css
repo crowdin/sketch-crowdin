@@ -272,7 +272,7 @@ button .btn-icon {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 100%;
+    width: 92%;
     margin: 2px 0;
     padding: 2px 12px;
 }
@@ -280,6 +280,11 @@ button .btn-icon {
 .string-row:hover {
     background-color: var(--primaryColor);
     color: #ffffff;
+}
+
+.string-row-edit {
+    cursor: pointer;
+    margin-right: 12px;
 }
 
 
