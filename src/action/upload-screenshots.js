@@ -157,10 +157,10 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
         return {
             stringId: tag.stringId,
             position: {
-                x: tag.textElement.x,
-                y: tag.textElement.y,
-                width: tag.textElement.frame.width,
-                height: tag.textElement.frame.height
+                x: parseInt(tag.textElement.x),
+                y: parseInt(tag.textElement.y),
+                width: parseInt(tag.textElement.frame.width),
+                height: parseInt(tag.textElement.frame.height)
             }
         };
     });
