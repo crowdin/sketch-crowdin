@@ -5,50 +5,47 @@ import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
 import { getTextElementsInArtboard } from '../util/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
-import { connectToCrowdin, setProjectIdFromExisting } from '../settings';
-import { fetchAllStrings } from '../util/client';
+import { fetchStrings } from '../util/client';
+import { default as displayTexts } from '../../assets/texts.json';
 
 async function uploadScreenshots() {
     try {
         const selectedDocument = dom.getSelectedDocument();
+        if (!selectedDocument) {
+            throw displayTexts.notifications.warning.selectDocument;
+        }
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
 
-        if (!selectedDocument) {
-            throw 'Please select a document';
-        }
         if (!selectedPage) {
-            throw 'Please select a page';
+            throw displayTexts.notifications.warning.selectPage;
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            await connectToCrowdin();
-            return;
+            throw displayTexts.notifications.warning.noAccessToken;
         }
         if (!projectId) {
-            await setProjectIdFromExisting();
-            return;
+            throw displayTexts.notifications.warning.selectProject;
         }
 
         let tags = localStorage.getTags(selectedDocument);
         let artboards = dom.find('Artboard', selectedPage);
+        const allTexts = dom.find('Text', selectedPage);
         const translatedArtboards = localStorage.getListOfTranslatedElements(selectedDocument, 'artboard');
         artboards = artboards.filter(artboard => !translatedArtboards.includes(artboard.id));
-        const artboardIds = artboards.map(e => e.id);
 
         //removing obsolete tags
         const { sourceStringsApi, screenshotsApi } = httpUtil.createClient();
-        const strings = await fetchAllStrings(projectId, sourceStringsApi);
+        const strings = await fetchStrings(projectId, sourceStringsApi);
         const stringsIds = strings.map(st => st.id)
 
         const screenshotsBefore = [];
         tags
+            .filter(t => !!t.artboardId)
             .map(t => __buildScreenshotName(t.artboardId, t.pageId))
             .filter(id => !screenshotsBefore.includes(id))
             .forEach(id => screenshotsBefore.push(id));
 
-        tags = tags
-            .filter(t => stringsIds.includes(t.stringId))
-            .filter(t => t.pageId !== selectedPage.id || artboardIds.includes(t.artboardId));
+        tags = tags.filter(t => stringsIds.includes(t.stringId));
 
         const artboardsTexts = artboards.map(e => {
             return {
@@ -61,6 +58,9 @@ async function uploadScreenshots() {
         tags = tags.filter(e => {
             if (e.pageId !== selectedPage.id) {
                 return !!selectedDocument.pages.find(p => p.id === e.pageId);
+            }
+            if (!e.artboardId) {
+                return !!allTexts.find(t => t.id === e.id);
             }
             const artboardTexts = artboardsTexts.find(e2 => e2.artboard.id === e.artboardId);
             if (!!artboardTexts) {
@@ -88,10 +88,11 @@ async function uploadScreenshots() {
             return accumulator;
         }, {});
 
-        const screenshots = await screenshotsApi.listScreenshots(projectId, 500);
+        const screenshots = await screenshotsApi.withFetchAll().listScreenshots(projectId);
 
         const screenshotsAfter = [];
         tags
+            .filter(t => !!t.artboardId)
             .map(t => __buildScreenshotName(t.artboardId, t.pageId))
             .filter(id => !screenshotsAfter.includes(id))
             .forEach(id => screenshotsAfter.push(id));
@@ -102,7 +103,7 @@ async function uploadScreenshots() {
             .map(async screenshotName => {
                 const screenshot = screenshots.data.find(sc => sc.data.name === screenshotName);
                 if (!!screenshot) {
-                    ui.message(`Removing screenshot ${screenshot.data.name}`);
+                    ui.message(displayTexts.notifications.info.removingNotValidScreenshot.replace('%name%', screenshot.data.name));
                     await screenshotsApi.deleteScreenshot(projectId, screenshot.data.id);
                 }
             })
@@ -116,7 +117,7 @@ async function uploadScreenshots() {
         await Promise.all(promises);
 
         localStorage.saveTags(selectedDocument, tags);
-        ui.message('Screenshots were successfully pushed to Crowdin');
+        ui.message(displayTexts.notifications.info.screenshotsUploadedToCrowdin);
     } catch (error) {
         httpUtil.handleError(error);
     }
@@ -129,7 +130,7 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
         output: false,
         formats: 'png'
     });
-    ui.message(`Sending screenshot for ${artboard.name} Artboard`);
+    ui.message(displayTexts.notifications.info.screenshotUploadingToCrowdin.replace('%name%', artboard.name));
     const { screenshotsApi, uploadStorageApi } = httpUtil.createClient();
     const screenshotName = __buildScreenshotName(artboard.id, page.id);
     const storageRecord = await uploadStorageApi.addStorage(`${screenshotName}.png`, b.slice(b.byteOffset, b.byteOffset + b.byteLength));
@@ -149,23 +150,23 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
     }
     const screenshotId = screenshot.data.id;
 
-    ui.message(`Adding tags to screenshot for ${artboard.name} Artboard`);
+    ui.message(displayTexts.notifications.info.addingTagsToScreenshot.replace('%name%', artboard.name));
     await screenshotsApi.clearTags(projectId, screenshotId);
 
     const tagsRequest = tags.map(tag => {
         return {
             stringId: tag.stringId,
             position: {
-                x: tag.textElement.x,
-                y: tag.textElement.y,
-                width: tag.textElement.frame.width,
-                height: tag.textElement.frame.height
+                x: parseInt(tag.textElement.x),
+                y: parseInt(tag.textElement.y),
+                width: parseInt(tag.textElement.frame.width),
+                height: parseInt(tag.textElement.frame.height)
             }
         };
     });
 
     await screenshotsApi.addTag(projectId, screenshotId, tagsRequest);
-    ui.message(`Screenshot for ${artboard.name} Artboard successfully pushed to Crowdin`);
+    ui.message(displayTexts.notifications.info.screenshotUploadedToCrowdin.replace('%name%', artboard.name));
 }
 
 function __buildScreenshotName(artboardId, pageId) {

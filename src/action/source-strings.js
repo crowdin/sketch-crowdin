@@ -1,92 +1,90 @@
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
-import ui from 'sketch/ui';
 import { ACCESS_TOKEN_KEY, PROJECT_ID, TEXT_TYPE } from '../constants';
-import { connectToCrowdin, setProjectIdFromExisting } from '../settings';
 import * as domUtil from '../util/dom';
 import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
-import { fetchAllStrings } from '../util/client';
+import { default as displayTexts } from '../../assets/texts.json';
 
-async function crowdinStrings() {
+async function useString(string) {
     try {
+        if (!string || !string.id || !string.text) {
+            throw displayTexts.notifications.warning.selectString;
+        }
         const selectedDocument = dom.getSelectedDocument();
+        if (!selectedDocument) {
+            throw displayTexts.notifications.warning.selectDocument;
+        }
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
 
-        if (!selectedDocument) {
-            throw 'Please select a document';
-        }
         if (!selectedPage) {
-            throw 'Please select a page';
+            throw displayTexts.notifications.warning.selectPage;
         }
         const selectedText = domUtil.getSelectedText(selectedPage);
         if (!selectedText) {
-            throw 'Please select a text element';
+            throw displayTexts.notifications.warning.selectTextElement;
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
-            await connectToCrowdin();
-            return;
+            throw displayTexts.notifications.warning.noAccessToken;
         }
         if (!projectId) {
-            await setProjectIdFromExisting();
-            return;
+            throw displayTexts.notifications.warning.selectProject;
         }
 
-        const { sourceStringsApi } = httpUtil.createClient();
-        ui.message('Loading strings');
-        let strings = await fetchAllStrings(projectId, sourceStringsApi);
-        ui.message(`Loaded ${strings.length} strings`);
+        const id = string.id;
+        const text = string.text;
 
-        if (strings.length === 0) {
-            return ui.message('There are no strings in Crowdin yet');
+        if (selectedText.type === TEXT_TYPE) {
+            selectedText.element.text = text;
+        } else {
+            selectedText.element.value = text;
         }
 
-        ui.getInputFromUser('Select text', {
-            type: ui.INPUT_TYPE.selection,
-            possibleValues: strings.map(st => `${st.text} [${st.id}]`)
-        }, (err, value) => {
-            if (err) {
-                return;
-            }
-            const parts = value.split('[');
-            const part = parts[parts.length - 1];
-            const id = parseInt(part.substring(0, part.length - 1));
-            const text = strings.find(st => st.id === id).text;
-
-            if (selectedText.type === TEXT_TYPE) {
-                selectedText.element.text = text;
-            } else {
-                selectedText.element.value = text;
-            }
-
-            const artboard = selectedText.artboard;
-            if (!!artboard) {
-                const tags = localStorage.getTags(selectedDocument);
-                const tagIndex = tags.findIndex(t =>
-                    t.id === selectedText.id
-                    && t.type === selectedText.type
-                    && t.artboardId === artboard.id
-                    && t.pageId === selectedPage.id
-                );
-                const tag = {
-                    id: selectedText.id,
-                    type: selectedText.type,
-                    artboardId: artboard.id,
-                    pageId: selectedPage.id,
-                    stringId: id
-                };
-                if (tagIndex < 0) {
-                    tags.push(tag);
-                } else {
-                    tags[tagIndex] = tag;
-                }
-                localStorage.saveTags(selectedDocument, tags);
-            }
-        });
+        const artboard = selectedText.artboard;
+        const tags = localStorage.getTags(selectedDocument);
+        const tagIndex = tags.findIndex(t =>
+            t.id === selectedText.id
+            && t.type === selectedText.type
+            && t.pageId === selectedPage.id
+        );
+        const tag = {
+            id: selectedText.id,
+            type: selectedText.type,
+            artboardId: !!artboard ? artboard.id : undefined,
+            pageId: selectedPage.id,
+            stringId: id
+        };
+        if (tagIndex < 0) {
+            tags.push(tag);
+        } else {
+            tags[tagIndex] = tag;
+        }
+        localStorage.saveTags(selectedDocument, tags);
     } catch (error) {
         httpUtil.handleError(error);
     }
 }
 
-export { crowdinStrings };
+function getSelectedText() {
+    const selectedDocument = dom.getSelectedDocument();
+    if (!selectedDocument) {
+        return {};
+    }
+
+    const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
+    if (!selectedPage) {
+        return {};
+    }
+
+    const selectedText = domUtil.getSelectedText(selectedPage);
+    if (!selectedText) {
+        return {};
+    }
+
+    const text = selectedText.type === TEXT_TYPE ? selectedText.element.text : selectedText.element.value;
+
+    return { text };
+}
+
+export { useString, getSelectedText };

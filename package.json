@@ -23,7 +23,12 @@
     "manifest": "src/manifest.json",
     "main": "sketch-crowdin.sketchplugin",
     "assets": [
-      "assets/**/*"
+      "assets/**/*",
+      "ui/**/*",
+      "!ui/plugin.html",
+      "node_modules/bootstrap/dist/css/bootstrap.min.css*",
+      "node_modules/bootstrap/dist/js/bootstrap.min.js*",
+      "node_modules/jquery/dist/jquery.min.js*"
     ]
   },
   "scripts": {
@@ -33,11 +38,14 @@
     "postinstall": "npm run build && skpm-link"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.7.0",
-    "@crowdin/crowdin-api-client": "1.8.4",
-    "cheerio": "^1.0.0-rc.3"
+    "@crowdin/crowdin-api-client": "1.8.12",
+    "cheerio": "^1.0.0-rc.3",
+    "sketch-module-web-view": "^3.4.1",
+    "bootstrap": "4.5.0",
+    "jquery": "3.5.1"
   },
   "devDependencies": {
-    "@skpm/builder": "^0.7.5"
+    "@skpm/builder": "^0.7.5",
+    "@babel/polyfill": "^7.7.0"
   }
 }
