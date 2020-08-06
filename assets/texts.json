@@ -12,6 +12,7 @@
             "noProjects": "Currently there is not projects to select",
             "noStrings": "There are no strings in Crowdin yet",
             "authorizationError": "You don't have enough permissions to perform this action",
+            "authenticationError": "Unable to authorize. Please, use another Personal Access Token and try again.",
             "serverError": "An error occurred %error%",
             "generatedPageCannotBeTranslated": "Generated page cannot be translated",
             "generatedArtboardCannotBeTranslated": "Generated artboard cannot be translated",

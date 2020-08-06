@@ -31,6 +31,8 @@ function handleError(error) {
             const httpError = error.error;
             if (httpError.code && httpError.code === 403) {
                 return ui.message(displayTexts.notifications.warning.authorizationError);
+            } else if (httpError.code && httpError.code === 401) {
+                return ui.message(displayTexts.notifications.warning.authenticationError);
             } else if (httpError.message) {
                 return ui.message(httpError.message);
             }
