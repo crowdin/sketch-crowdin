@@ -1,6 +1,6 @@
 [<p align='center'><img src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' data-canonical-src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' width='200' height='200' align='center'/></p>](https://crowdin.com)
 
-# Crowdin for Sketch plugin
+# Crowdin plugin for Sketch
 
 [![Build Status](https://dev.azure.com/crowdin/sketch-plugin/_apis/build/status/Build?branchName=master)](https://dev.azure.com/crowdin/sketch-plugin/_build?definitionId=25&branchName=master)
 [![GitHub All Releases](https://img.shields.io/github/downloads/crowdin/sketch-crowdin/total?cacheSeconds=1800)](https://github.com/crowdin/sketch-crowdin/releases)
