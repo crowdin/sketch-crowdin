@@ -5,4 +5,4 @@ export const PROJECT_ID = 'crowdin-project-id';
 export const SYMBOL_TYPE = 'symbol-override';
 export const TEXT_TYPE = 'text';
 
-export const PLUGIN_VERSION = '1.2.1';
+export const PLUGIN_VERSION = '2.0.0';
