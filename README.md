@@ -1,6 +1,6 @@
 [<p align='center'><img src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' data-canonical-src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' width='200' height='200' align='center'/></p>](https://crowdin.com)
 
-# Crowdin for Sketch plugin
+# Crowdin plugin for Sketch
 
 [![Build Status](https://dev.azure.com/crowdin/sketch-plugin/_apis/build/status/Build?branchName=master)](https://dev.azure.com/crowdin/sketch-plugin/_build?definitionId=25&branchName=master)
 [![GitHub All Releases](https://img.shields.io/github/downloads/crowdin/sketch-crowdin/total?cacheSeconds=1800)](https://github.com/crowdin/sketch-crowdin/releases)
@@ -48,11 +48,14 @@ If you find any problems or would like to suggest a feature, please feel free to
 
 Need help working with Crowdin Sketch plugin or have any questions? [Contact](https://crowdin.com/contacts) Customer Success Service.
 
+### Resources
+
+- [Knowledge Base article](https://support.crowdin.com/sketch-plugin/)
+- [Localize product interface faster](https://medium.com/@crowdin/localize-product-interface-faster-3a929f3af057)
+
 ### License
 
 <pre>
-Copyright © 2020 Crowdin
-
 The Crowdin Sketch plugin is licensed under the MIT License.
 See the LICENSE file distributed with this work for additional
 information regarding copyright ownership.
