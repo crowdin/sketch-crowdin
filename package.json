@@ -1,6 +1,6 @@
 {
   "name": "sketch-crowdin",
-  "displayName": "Crowdin for Sketch",
+  "displayName": "Crowdin plugin for Sketch",
   "description": "Localize the UI before programming starts. Translate and preview any design with ease",
   "publisher": "Crowdin",
   "version": "2.0.0",
