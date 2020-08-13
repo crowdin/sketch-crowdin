@@ -48,11 +48,14 @@ If you find any problems or would like to suggest a feature, please feel free to
 
 Need help working with Crowdin Sketch plugin or have any questions? [Contact](https://crowdin.com/contacts) Customer Success Service.
 
+### Resources
+
+- [Knowledge Base article](https://support.crowdin.com/sketch-plugin/)
+- [Localize product interface faster](https://medium.com/@crowdin/localize-product-interface-faster-3a929f3af057)
+
 ### License
 
 <pre>
-Copyright © 2020 Crowdin
-
 The Crowdin Sketch plugin is licensed under the MIT License.
 See the LICENSE file distributed with this work for additional
 information regarding copyright ownership.
