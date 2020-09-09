@@ -19,6 +19,8 @@ async function getProjects() {
         let projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
         if (!!projectId) {
             projectId = parseInt(projectId);
+        } else {
+            projectId = projects.data.length > 0 ? projects.data[0].data.id : null;
         }
         return {
             selectedProjectId: projectId,

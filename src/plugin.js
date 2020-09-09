@@ -119,7 +119,9 @@ function saveProject(projectId) {
         return;
     }
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, projectId);
-    ui.message(displayTexts.notifications.info.projectSaved);
+    if (!!projectId) {
+        ui.message(displayTexts.notifications.info.projectSaved);
+    }   
 }
 
 export function onShutdown() {

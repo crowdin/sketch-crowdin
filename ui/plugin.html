@@ -294,7 +294,7 @@
         window.postMessage('saveCredentials', { token, organization })
             .then(getCredentials)
             .then(getProjects)
-            .then(clearStorage);
+            .then(saveProject);
     }
 
     function saveProject() {

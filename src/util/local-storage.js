@@ -3,6 +3,8 @@ import dom from 'sketch/dom';
 import { OVERRIDE_TRANSLATIONS } from '../constants';
 
 function removeTranslatedElements(doc, sourceElementId, languageName, type) {
+    //remove translated elements which were deleted manually by user
+    syncStorage(doc, sourceElementId, languageName, type);
     const remove = !!settings.documentSettingForKey(doc, OVERRIDE_TRANSLATIONS);
     if (!remove) {
         return;
@@ -59,7 +61,6 @@ function removeTranslatedElements(doc, sourceElementId, languageName, type) {
 }
 
 function getAmountOfTranslatedElements(doc, sourceElementId, languageName, type) {
-    syncStorage(doc, sourceElementId, languageName, type);
     const elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-${type}s`);
     let amount = 0;
     if (!!elements) {
@@ -126,6 +127,8 @@ function syncStorage(doc, sourceElementId, languageName, type) {
 }
 
 function addTranslatedElement(doc, sourceElementId, translatedId, languageName, type) {
+    //remove translated elements which were deleted manually by user
+    syncStorage(doc, sourceElementId, languageName, type);
     let elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-${type}s`);
     let translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-${type}s`);
     if (!elements) {
