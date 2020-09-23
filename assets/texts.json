@@ -26,6 +26,7 @@
             "loadingFiles": "Loading list of files",
             "loadingStrings": "Loading strings",
             "projectSaved": "Project saved",
+            "overrideTranslationsSaved": "Override translations flag updated",
             "credentialsSaved": "Credentials saved",
             "stringsUploadedToCrowdin": "Strings were successfully pushed to Crowdin. You can now either pre-translate them via Machine Translation engines or invite translators to your Crowdin project",
             "creatingNewDirectory": "Creating new directory",
@@ -53,6 +54,7 @@
             "settingsTab": "Settings",
             "contactUsTab": "Contact Us",
             "selectProjectLabel": "Select Project:",
+            "overrideTranslationsLabel": "Override existing translations",
             "connectionDetailsLabel": "Crowdin Credentials",
             "tokenLabel": "Personal Access Token:",
             "tokenDetailsText": "You can generate it in your Crowdin Account Settings",
@@ -90,7 +92,8 @@
             "stringsDetails": "Streamline UI localization. Get real texts from Crowdin and update source files with the new strings. Send screenshots for translators’ reference and preview the translated versions in Sketch.",
             "addStringStringDetails": "Fill in text string you'd like to add to the Crowdin project",
             "addStringIdentifierDetails": "A unique identifier of this string. It helps to match source and translated texts in your application",
-            "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES."
+            "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES.",
+            "overrideTranslationsDetails": "Override existing translated pages and artboards and keep only the latest version for each language"
         },
         "validation": {
             "addStringEmptyString": "Please, insert the source string",

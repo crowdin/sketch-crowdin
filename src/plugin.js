@@ -3,7 +3,7 @@ import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
-import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION } from './constants';
+import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION, OVERRIDE_TRANSLATIONS } from './constants';
 import { getProjects, getLanguages, getStrings, getFiles } from './util/client';
 import { sendStrings } from './action/send-strings';
 import { useString, getSelectedText } from './action/source-strings';
@@ -44,6 +44,8 @@ export default function start() {
     browserWindow.webContents.on('getCredentials', getCredentials);
     browserWindow.webContents.on('saveCredentials', saveCredentials);
     browserWindow.webContents.on('saveProject', saveProject);
+    browserWindow.webContents.on('getOverrideTranslations', getOverrideTranslations);
+    browserWindow.webContents.on('saveOverrideTranslations', saveOverrideTranslations);
 
     //data
     browserWindow.webContents.on('getProjects', getProjects);
@@ -79,6 +81,25 @@ function getCredentials() {
     return { token, organization };
 }
 
+function getOverrideTranslations() {
+    if (!dom.getSelectedDocument()) {
+        ui.message(displayTexts.notifications.warning.selectDocument);
+        return { overrideTranslations: false };
+    }
+    return {
+        overrideTranslations: settings.documentSettingForKey(dom.getSelectedDocument(), OVERRIDE_TRANSLATIONS)
+    };
+}
+
+function saveOverrideTranslations(value) {
+    if (!dom.getSelectedDocument()) {
+        ui.message(displayTexts.notifications.warning.selectDocument);
+        return;
+    }
+    settings.setDocumentSettingForKey(dom.getSelectedDocument(), OVERRIDE_TRANSLATIONS, value);
+    ui.message(displayTexts.notifications.info.overrideTranslationsSaved);
+}
+
 function saveCredentials(creds) {
     const token = settings.settingForKey(ACCESS_TOKEN_KEY);
     let initValue = undefined;
@@ -98,7 +119,9 @@ function saveProject(projectId) {
         return;
     }
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, projectId);
-    ui.message(displayTexts.notifications.info.projectSaved);
+    if (!!projectId) {
+        ui.message(displayTexts.notifications.info.projectSaved);
+    }   
 }
 
 export function onShutdown() {

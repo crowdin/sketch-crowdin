@@ -41,6 +41,14 @@
                             <select id="projects" onchange="saveProject()"></select>
                         </div>
                     </div>
+                    <div class="form-group d-flex flex-row">
+                        <label>
+                            <abbr crowdin-ui-text-label="overrideTranslationsLabel"
+                                crowdin-ui-text-details="overrideTranslationsDetails"></abbr>
+                        </label>
+                        <input type="checkbox" class="ml-1 mt-1" id="overrideTranslations"
+                            onchange="saveOverrideTranslations()">
+                    </div>
                     <fieldset>
                         <label crowdin-ui-text-label="connectionDetailsLabel" class="fieldset-label"></label>
                         <div class="form-group">
@@ -225,6 +233,7 @@
     var openedModal = 'settings';
     getCredentials();
     getProjects();
+    getOverrideTranslations();
 
     var validationMessages = {};
     var allLanguagesOption;
@@ -285,13 +294,17 @@
         window.postMessage('saveCredentials', { token, organization })
             .then(getCredentials)
             .then(getProjects)
-            .then(clearStorage);
+            .then(saveProject);
     }
 
     function saveProject() {
         const projectId = $('#projects option:selected').val();
         window.postMessage('saveProject', projectId)
             .then(clearStorage);
+    }
+
+    function saveOverrideTranslations() {
+        window.postMessage('saveOverrideTranslations', $('#overrideTranslations').prop('checked'));
     }
 
     //translation
@@ -466,6 +479,11 @@
     }
 
     //data loading functions
+
+    function getOverrideTranslations() {
+        window.postMessage('getOverrideTranslations')
+            .then(msg => $('#overrideTranslations').prop('checked', !!msg[0].overrideTranslations));
+    }
 
     function getProjects() {
         showLoading();

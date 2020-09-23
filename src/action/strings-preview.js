@@ -59,10 +59,11 @@ async function stringsPreview(language) {
 
 function extractPageTranslations(languageName, document, page, translations) {
     const tags = localStorage.getTags(document);
-    localStorage.removeTranslatedElement(document, page.id, languageName, 'page');
+    localStorage.removeTranslatedElements(document, page.id, languageName, 'page');
+    const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, page.id, languageName, 'page');
     const newPage = page.duplicate();
     localStorage.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
-    newPage.name = `${newPage.name} (${languageName})`;
+    newPage.name = `${newPage.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
 
     const originalStrings = dom.find('Text', page);
     const texts = dom.find('Text', newPage);

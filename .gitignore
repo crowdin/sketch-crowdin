@@ -10,3 +10,6 @@ npm-debug.log
 # mac
 .DS_Store
 .idea
+
+# css
+ui/styles.css
