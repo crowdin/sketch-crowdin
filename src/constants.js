@@ -8,4 +8,4 @@ export const OVERRIDE_TRANSLATIONS = `${KEY_PREFIX}-override-translations`;
 export const SYMBOL_TYPE = 'symbol-override';
 export const TEXT_TYPE = 'text';
 
-export const PLUGIN_VERSION = '2.0.0';
+export const PLUGIN_VERSION = '2.0.1';

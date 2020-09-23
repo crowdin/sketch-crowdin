@@ -5,6 +5,21 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1]
+
+### Added
+
+- Added flag to enable/disable translations override ([#34](https://github.com/crowdin/sketch-crowdin/pull/34/commits/c76521e4a8abdd19e612ef192fe7f97c8283790b))
+
+### Updated
+
+- css -> scss ([#34](https://github.com/crowdin/sketch-crowdin/pull/34/commits/3bae9c4a2f579cca5f87b0cb130255687046b595))
+- Updated libraries versions ([#34](https://github.com/crowdin/sketch-crowdin/pull/34/commits/3cbf8b58f661af8db1a707006037a8eedbbe93fc))
+
+### Fixed
+
+- Fixed issue with single project ([#34](https://github.com/crowdin/sketch-crowdin/pull/34/commits/1a489f0130c4cfa1d993bc8827595d7af36d404c))
+
 ## [2.0.0]
 
 ### Added
