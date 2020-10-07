@@ -41,7 +41,7 @@
                             <select id="projects" onchange="saveProject()"></select>
                         </div>
                     </div>
-                    <div class="form-group  mb-3">
+                    <div class="form-group mb-3">
                         <div>
                             <label crowdin-ui-text-label="overrideTranslationsLabel" class="mb-0">
                             </label>
@@ -49,6 +49,15 @@
                                 onchange="saveOverrideTranslations()">
                         </div>
                         <p crowdin-ui-text-label="overrideTranslationsText" class="form-text text-muted help-text">
+                        </p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div>
+                            <label crowdin-ui-text-label="stringsKeyNamingLabel"></label>
+                            <select class="ml-2" id="stringsKeyNaming" onchange="saveKeyNamingOption()">
+                            </select>
+                        </div>
+                        <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
                         </p>
                     </div>
                     <fieldset class="mt-4">
@@ -236,6 +245,7 @@
     getCredentials();
     getProjects();
     getOverrideTranslations();
+    getKeyNamingOptions();
 
     var validationMessages = {};
     var allLanguagesOption;
@@ -307,6 +317,12 @@
 
     function saveOverrideTranslations() {
         window.postMessage('saveOverrideTranslations', $('#overrideTranslations').prop('checked'));
+    }
+
+    function saveKeyNamingOption() {
+        const option = Number($('#stringsKeyNaming option:selected').val());
+        window.postMessage('saveKeyPatternOption', option)
+            .then(clearStorage);
     }
 
     //translation
@@ -485,6 +501,21 @@
     function getOverrideTranslations() {
         window.postMessage('getOverrideTranslations')
             .then(msg => $('#overrideTranslations').prop('checked', !!msg[0].overrideTranslations));
+    }
+
+    function getKeyNamingOptions() {
+        window.postMessage('getKeyPatternOptions')
+            .then(info => {
+                const options = info[0];
+                const html = options.map(o => {
+                    if (o.selected) {
+                        return `<option value="${o.id}" selected>${o.name}</option>`;
+                    } else {
+                        return `<option value="${o.id}">${o.name}</option>`;
+                    }
+                }).join('');
+                $('#stringsKeyNaming').find('option').remove().end().append(html);
+            });
     }
 
     function getProjects() {

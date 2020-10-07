@@ -3,7 +3,7 @@ import dom from 'sketch/dom';
 import settings from 'sketch/settings';
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
-import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION, OVERRIDE_TRANSLATIONS } from './constants';
+import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION, OVERRIDE_TRANSLATIONS, DEFAULT_STRINGS_KEY_NAMING_OPTION, KEY_NAMING_PATTERN, STRINGS_KEY_NAMING_OPTIONS } from './constants';
 import { getProjects, getLanguages, getStrings, getFiles } from './util/client';
 import { sendStrings } from './action/send-strings';
 import { useString, getSelectedText } from './action/source-strings';
@@ -46,6 +46,8 @@ export default function start() {
     browserWindow.webContents.on('saveProject', saveProject);
     browserWindow.webContents.on('getOverrideTranslations', getOverrideTranslations);
     browserWindow.webContents.on('saveOverrideTranslations', saveOverrideTranslations);
+    browserWindow.webContents.on('getKeyPatternOptions', getKeyPatternOptions);
+    browserWindow.webContents.on('saveKeyPatternOption', saveKeyPatternOption);
 
     //data
     browserWindow.webContents.on('getProjects', getProjects);
@@ -100,6 +102,27 @@ function saveOverrideTranslations(value) {
     ui.message(displayTexts.notifications.info.overrideTranslationsSaved);
 }
 
+function getKeyPatternOptions() {
+    let selectedOption = !!dom.getSelectedDocument() && !!settings.documentSettingForKey(dom.getSelectedDocument(), KEY_NAMING_PATTERN)
+        ? parseInt(settings.documentSettingForKey(dom.getSelectedDocument(), KEY_NAMING_PATTERN))
+        : DEFAULT_STRINGS_KEY_NAMING_OPTION;
+    return STRINGS_KEY_NAMING_OPTIONS.map(e => {
+        return {
+            selected: selectedOption === e.id,
+            ...e
+        };
+    })
+}
+
+function saveKeyPatternOption(value) {
+    if (!dom.getSelectedDocument()) {
+        ui.message(displayTexts.notifications.warning.selectDocument);
+        return;
+    }
+    settings.setDocumentSettingForKey(dom.getSelectedDocument(), KEY_NAMING_PATTERN, value);
+    ui.message(displayTexts.notifications.info.stringsKeyNamingSaved);
+}
+
 function saveCredentials(creds) {
     const token = settings.settingForKey(ACCESS_TOKEN_KEY);
     let initValue = undefined;
@@ -121,7 +144,7 @@ function saveProject(projectId) {
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, projectId);
     if (!!projectId) {
         ui.message(displayTexts.notifications.info.projectSaved);
-    }   
+    }
 }
 
 export function onShutdown() {
