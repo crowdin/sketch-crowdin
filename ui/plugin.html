@@ -41,15 +41,17 @@
                             <select id="projects" onchange="saveProject()"></select>
                         </div>
                     </div>
-                    <div class="form-group d-flex flex-row">
-                        <label>
-                            <abbr crowdin-ui-text-label="overrideTranslationsLabel"
-                                crowdin-ui-text-details="overrideTranslationsDetails"></abbr>
-                        </label>
-                        <input type="checkbox" class="ml-1 mt-1" id="overrideTranslations"
-                            onchange="saveOverrideTranslations()">
+                    <div class="form-group  mb-3">
+                        <div>
+                            <label crowdin-ui-text-label="overrideTranslationsLabel" class="mb-0">
+                            </label>
+                            <input type="checkbox" class="ml-1 mt-1" id="overrideTranslations"
+                                onchange="saveOverrideTranslations()">
+                        </div>
+                        <p crowdin-ui-text-label="overrideTranslationsText" class="form-text text-muted help-text">
+                        </p>
                     </div>
-                    <fieldset>
+                    <fieldset class="mt-4">
                         <label crowdin-ui-text-label="connectionDetailsLabel" class="fieldset-label"></label>
                         <div class="form-group">
                             <label crowdin-ui-text-label="tokenLabel"></label>

@@ -58,6 +58,7 @@
             "connectionDetailsLabel": "Crowdin Credentials",
             "tokenLabel": "Personal Access Token:",
             "tokenDetailsText": "You can generate it in your Crowdin Account Settings",
+            "overrideTranslationsText": "Override existing translated pages and artboards and keep only the latest version for each language",
             "organizationLabel": "Organization",
             "organizationDetailsText": "Fill in your organization domain name (for Crowdin Enterprise only)",
             "connectToCrowdinButton": "Connect to Crowdin",
@@ -92,8 +93,7 @@
             "stringsDetails": "Streamline UI localization. Get real texts from Crowdin and update source files with the new strings. Send screenshots for translators’ reference and preview the translated versions in Sketch.",
             "addStringStringDetails": "Fill in text string you'd like to add to the Crowdin project",
             "addStringIdentifierDetails": "A unique identifier of this string. It helps to match source and translated texts in your application",
-            "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES.",
-            "overrideTranslationsDetails": "Override existing translated pages and artboards and keep only the latest version for each language"
+            "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES."
         },
         "validation": {
             "addStringEmptyString": "Please, insert the source string",
