@@ -430,7 +430,7 @@ const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings'
             let increment;
             for (; ;) {
                 if ((strings || []).some(st => st.identifier === uniqueIdentifier)) {
-                    increment = !!identifier ? (increment + 1) : 1;
+                    increment = !!increment ? (increment + 1) : 1;
                     uniqueIdentifier = identifier + increment;
                 } else {
                     break;
@@ -546,7 +546,8 @@ const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings'
                         strings.push({
                             id: e[0].data.id,
                             text: text,
-                            fileId: Number(file)
+                            fileId: Number(file),
+                            identifier: identifier
                         });
                         if (selectedText.text) {
                             window.postMessage('useString', { id: e[0].data.id, text });
