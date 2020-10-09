@@ -83,10 +83,11 @@ function getSelectedText() {
     }
 
     const text = selectedText.type === TEXT_TYPE ? selectedText.element.text : selectedText.element.value;
+    const elementName = selectedText.type === TEXT_TYPE ? selectedText.element.name : selectedText.element.affectedLayer.name;
     const artboardName = !!selectedText.artboard ? selectedText.artboard.name : '';
     const groupName = !!selectedText.group ? selectedText.group.name : '';
 
-    return { text, artboard: artboardName, group: groupName };
+    return { text, artboard: artboardName, group: groupName, elementName };
 }
 
 export { useString, getSelectedText };

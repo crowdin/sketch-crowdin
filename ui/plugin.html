@@ -238,7 +238,7 @@
 
 <script>
 
-    const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties'];
+const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties'];
 
     //initial view
     var openedModal = 'settings';
@@ -398,15 +398,78 @@
 
     function openAddString() {
         window.postMessage('getSelectedText').then((e) => {
-            const selected = e[0].text;
+            selectedText = e[0];
             $('#list-strings').hide();
             $('#new-string-form').show();
             $('#edit-string').show();
-            $('#string-text').val(selected || '');
-            $('#string-identifier').val('');
-            selectedText = selected;
+            $('#string-text').val(e[0].text || '');
+            $('#string-identifier').val(generateIdentifier());
             openedString = undefined;
         });
+    }
+
+    function generateIdentifier() {
+        if (selectedText.text) {
+            const pattern = $('#stringsKeyNaming option:selected').text();
+            const artboardName = selectedText.artboard.toLowerCase();
+            const groupName = selectedText.group.toLowerCase();
+            const elementName = selectedText.elementName.toLowerCase();
+            const artboardNameUpperCase = capitalizeFirstLetter(artboardName);
+            const groupNameUpperCase = capitalizeFirstLetter(groupName);
+            const elementNameUpperCase = capitalizeFirstLetter(elementName);
+            const identifier = smartReplace(pattern, {
+                'Artboard': artboardNameUpperCase,
+                'artboard': artboardName,
+                'Group': groupNameUpperCase,
+                'group': groupName,
+                'Element_name': elementNameUpperCase,
+                'element_name': elementName
+            });
+            let uniqueIdentifier = identifier;
+            //make unique
+            let increment;
+            for (; ;) {
+                if ((strings || []).some(st => st.identifier === uniqueIdentifier)) {
+                    increment = !!identifier ? (increment + 1) : 1;
+                    uniqueIdentifier = identifier + increment;
+                } else {
+                    break;
+                }
+            }
+            return uniqueIdentifier;
+        }
+        return '';
+    }
+
+    function smartReplace(pattern, obj) {
+        const replacing = {};
+        for (let x in obj) {
+            if (pattern.indexOf(x) > -1) {
+                replacing[pattern.indexOf(x)] = {
+                    to: x.length + pattern.indexOf(x),
+                    by: obj[x]
+                };
+            }
+        }
+        let result = '';
+        for (let i = 0; i < pattern.length; i++) {
+            let replaced = false;
+            for (let replacingIndex in replacing) {
+                if (Number(replacingIndex) === i) {
+                    replaced = true;
+                    i = replacing[replacingIndex].to - 1;
+                    result += replacing[replacingIndex].by;
+                }
+            }
+            if (!replaced) {
+                result += pattern.charAt(i);
+            }
+        }
+        return result;
+    };
+
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     function cancelEditString() {
@@ -485,7 +548,7 @@
                             text: text,
                             fileId: Number(file)
                         });
-                        if (selectedText) {
+                        if (selectedText.text) {
                             window.postMessage('useString', { id: e[0].data.id, text });
                         }
                         cancelEditString();
