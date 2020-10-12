@@ -733,6 +733,13 @@ button .btn-icon {
     padding: 0;
 }
 
+.multi-add-string-form-container {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 160px;
+    margin-bottom: 10px;
+}
+
 .string-row {
     cursor: pointer;
     overflow: hidden;

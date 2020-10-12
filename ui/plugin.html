@@ -103,37 +103,143 @@
                         </div>
                     </div>
                     <fieldset id="edit-string" class="edit-string-mode" style="display: none;">
-                        <div class="form-group">
-                            <label><abbr crowdin-ui-text-label="addStringStringLabel"
-                                    crowdin-ui-text-details="addStringStringDetails"></abbr></label>
-                            <input type="text" class="form-control" id="string-text" placeholder="text">
-                            <label style="color: red;" id="invalidString"></label>
-                        </div>
-                        <div id="new-string-form" style="display: none;">
+                        <div id="single-string-form">
                             <div class="form-group">
-                                <div class="form-row">
-                                    <div class="col-3 text-right">
-                                        <label><abbr crowdin-ui-text-label="addStringIdentifierLabel"
-                                                crowdin-ui-text-details="addStringIdentifierDetails"></abbr></label>
+                                <label><abbr crowdin-ui-text-label="addStringStringLabel"
+                                        crowdin-ui-text-details="addStringStringDetails"></abbr></label>
+                                <input type="text" class="form-control" id="string-text" placeholder="text">
+                                <label style="color: red;" id="invalidString"></label>
+                            </div>
+                            <div id="new-string-form" style="display: none;">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div class="col-3 text-right">
+                                            <label><abbr crowdin-ui-text-label="addStringIdentifierLabel"
+                                                    crowdin-ui-text-details="addStringIdentifierDetails"></abbr></label>
+                                        </div>
+                                        <div class="col-9">
+                                            <input type="text" class="form-control" id="string-identifier"
+                                                placeholder="identifier">
+                                            <label style="color: red;" id="invalidIdentifier"></label>
+                                        </div>
                                     </div>
-                                    <div class="col-9">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="multi-string-form" class="multi-add-string-form-container" style="display: none;">
+                            <div class="form-group">
+                                <!-- Test data -->
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-identifier"
+                                            placeholder="identifier">
+                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input type="text" class="form-control" id="string-text" placeholder="text">
+                                        <label style="color: red;" id="invalidString"></label>
+                                    </div>
+                                    <div class="col">
                                         <input type="text" class="form-control" id="string-identifier"
                                             placeholder="identifier">
                                         <label style="color: red;" id="invalidIdentifier"></label>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <div class="form-row mb-3">
-                                    <div class="col-3 text-right">
-                                        <label><abbr crowdin-ui-text-label="addStringFileLabel"
-                                                crowdin-ui-text-details="addStringFileDetails"></abbr></label>
-                                    </div>
-                                    <div class="col-9">
-                                        <select id="string-files" class="ml-1" style="width: 100%;">
-                                        </select>
-                                        <label style="color: red;" id="invalidFile"></label>
-                                    </div>
+                        </div>
+                        <div id="string-file-container" class="form-group mt-3">
+                            <div class="form-row mb-3">
+                                <div class="col-3 text-right">
+                                    <label><abbr crowdin-ui-text-label="addStringFileLabel"
+                                            crowdin-ui-text-details="addStringFileDetails"></abbr></label>
+                                </div>
+                                <div class="col-9">
+                                    <select id="string-files" class="ml-1" style="width: 100%;">
+                                    </select>
+                                    <label style="color: red;" id="invalidFile"></label>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +344,7 @@
 
 <script>
 
-const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties'];
+    const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties'];
 
     //initial view
     var openedModal = 'settings';
@@ -390,6 +496,7 @@ const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings'
         const el = $(element);
         $('#list-strings').hide();
         $('#new-string-form').hide();
+        $('#string-file-container').hide();
         $('#edit-string').show();
         const text = el.next().text().trim();
         const id = Number(el.next().attr('int-id'));
@@ -402,6 +509,7 @@ const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings'
             selectedText = e[0];
             $('#list-strings').hide();
             $('#new-string-form').show();
+            $('#string-file-container').show();
             $('#edit-string').show();
             $('#string-text').val(e[0].text || '');
             $('#string-identifier').val(generateIdentifier());
