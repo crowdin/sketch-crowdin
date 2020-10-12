@@ -343,8 +343,9 @@ const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings'
     function useString(e) {
         showLoading();
         const id = Number($(e).attr('int-id'));
+        const identifier = $(e).attr('str-id');
         const text = $(e).text().trim();
-        window.postMessage('useString', { id, text }).then(hideLoading);
+        window.postMessage('useString', { id, text, identifier }).then(hideLoading);
     }
 
     function uploadScreenshots() {
@@ -378,7 +379,7 @@ const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings'
         const texts = filteredStrings.map(str => {
             const file = files.find(f => f.id === str.fileId);
             const editable = file && editableFileTypes.includes(file.type);
-            return `${editable ? icon : ''}<p class="string-row" onclick="useString(this)" int-id="${str.id}">${str.text}</p>`;
+            return `${editable ? icon : ''}<p class="string-row" onclick="useString(this)" int-id="${str.id}" str-id="${str.identifier}">${str.text}</p>`;
         });
         $('#strings-container').find('p, svg').remove().end().append(texts);
     }
@@ -550,7 +551,7 @@ const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings'
                             identifier: identifier
                         });
                         if (selectedText.text) {
-                            window.postMessage('useString', { id: e[0].data.id, text });
+                            window.postMessage('useString', { id: e[0].data.id, text, identifier });
                         }
                         cancelEditString();
                         search();

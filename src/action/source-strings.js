@@ -8,7 +8,7 @@ import { default as displayTexts } from '../../assets/texts.json';
 
 async function useString(string) {
     try {
-        if (!string || !string.id || !string.text) {
+        if (!string || !string.id || !string.text || !string.identifier) {
             throw displayTexts.notifications.warning.selectString;
         }
         const selectedDocument = dom.getSelectedDocument();
@@ -37,6 +37,7 @@ async function useString(string) {
 
         if (selectedText.type === TEXT_TYPE) {
             selectedText.element.text = text;
+            selectedText.element.name = string.identifier;
         } else {
             selectedText.element.value = text;
         }
