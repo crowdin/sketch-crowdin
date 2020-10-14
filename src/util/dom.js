@@ -7,6 +7,7 @@ function getSelectedArtboard(page) {
 }
 
 function getSelectedText(page) {
+    const selectedTexts = [];
     //first look into artboards
     let artboards = dom.find('Artboard', page);
     const translatedArtboards = localStorage.getListOfTranslatedElements(page.parent, 'artboard');
@@ -14,57 +15,40 @@ function getSelectedText(page) {
     for (let i = 0; i < artboards.length; i++) {
         const artboard = artboards[i];
         const texts = getTextElementsInArtboard(artboard);
-        const foundInArtboard = texts.find(text => {
-            if (text.type === SYMBOL_TYPE) {
-                return text.override.selected;
-            } else {
-                return text.e.selected;
-            }
-        });
-        if (foundInArtboard) {
-            if (foundInArtboard.type === SYMBOL_TYPE) {
-                return {
-                    artboard,
-                    element: foundInArtboard.override,
-                    type: foundInArtboard.type,
-                    id: foundInArtboard.textId,
-                    group: foundInArtboard.group
-                };
-            } else {
-                return {
-                    artboard,
-                    element: foundInArtboard.e,
-                    type: foundInArtboard.type,
-                    id: foundInArtboard.textId,
-                    group: foundInArtboard.group
-                };
-            }
-        }
+        texts
+            .filter(text => {
+                if (text.type === SYMBOL_TYPE) {
+                    return text.override.selected;
+                } else {
+                    return text.e.selected;
+                }
+            })
+            .forEach(foundInArtboard => {
+                if (foundInArtboard.type === SYMBOL_TYPE) {
+                    selectedTexts.push({
+                        artboard,
+                        element: foundInArtboard.override,
+                        type: foundInArtboard.type,
+                        id: foundInArtboard.textId,
+                        group: foundInArtboard.group
+                    });
+                } else {
+                    selectedTexts.push({
+                        artboard,
+                        element: foundInArtboard.e,
+                        type: foundInArtboard.type,
+                        id: foundInArtboard.textId,
+                        group: foundInArtboard.group
+                    });
+                }
+            });
     }
     //then in outside
-    const outsideText = dom.find('Text', page).find(e => e.selected);
-    if (outsideText) {
-        let parent = outsideText.parent;
-        let group;
-        while (parent.id !== page.id) {
-            if (parent.type === 'Group') {
-                group = parent;
-                break;
-            }
-            if (!parent || parent.id === parent.parent.id) {
-                break;
-            }
-            parent = parent.parent;
-        }
-        return { element: outsideText, type: TEXT_TYPE, id: outsideText.id, group };
-    }
-    const symbols = dom.find('SymbolInstance, [selected=true]', page);
-    if (symbols.length > 0) {
-        const override = symbols[0].overrides
-            .filter(o => o.selected)
-            .find(override => __isSymbolOverrideText(override));
-        if (!!override) {
-            let parent = symbols[0].parent;
+    dom.find('Text', page)
+        .filter(e => e.selected)
+        .filter(e => !selectedTexts.find(s => s.type === TEXT_TYPE && s.element.id === e.id))
+        .forEach(outsideText => {
+            let parent = outsideText.parent;
             let group;
             while (parent.id !== page.id) {
                 if (parent.type === 'Group') {
@@ -76,11 +60,41 @@ function getSelectedText(page) {
                 }
                 parent = parent.parent;
             }
-            return {
-                element: override, type: SYMBOL_TYPE, group
-            }
-        }
-    }
+            selectedTexts.push({
+                element: outsideText,
+                type: TEXT_TYPE,
+                id: outsideText.id,
+                group
+            });
+        });
+    dom.find('SymbolInstance, [selected=true]', page)
+        .forEach(symbol =>
+            symbol.overrides
+                .filter(o => o.selected)
+                .filter(override => __isSymbolOverrideText(override))
+                .filter(o => !selectedTexts.find(s => s.type === SYMBOL_TYPE && s.element.id === o.id))
+                .forEach(override => {
+                    let parent = symbols[0].parent;
+                    let group;
+                    while (parent.id !== page.id) {
+                        if (parent.type === 'Group') {
+                            group = parent;
+                            break;
+                        }
+                        if (!parent || parent.id === parent.parent.id) {
+                            break;
+                        }
+                        parent = parent.parent;
+                    }
+                    selectedTexts.push({
+                        element: override,
+                        type: SYMBOL_TYPE,
+                        id: override.id,
+                        group
+                    });
+                })
+        );
+    return selectedTexts;
 }
 
 function getNonArtboardTexts(page) {

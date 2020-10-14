@@ -6,9 +6,9 @@ import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
 import { default as displayTexts } from '../../assets/texts.json';
 
-async function useString(string) {
+async function useString(strings) {
     try {
-        if (!string || !string.id || !string.text || !string.identifier) {
+        if (strings.length === 0) {
             throw displayTexts.notifications.warning.selectString;
         }
         const selectedDocument = dom.getSelectedDocument();
@@ -21,8 +21,8 @@ async function useString(string) {
         if (!selectedPage) {
             throw displayTexts.notifications.warning.selectPage;
         }
-        const selectedText = domUtil.getSelectedText(selectedPage);
-        if (!selectedText) {
+        const selectedTexts = domUtil.getSelectedText(selectedPage);
+        if (selectedTexts.length === 0) {
             throw displayTexts.notifications.warning.selectTextElement;
         }
         if (!settings.settingForKey(ACCESS_TOKEN_KEY)) {
@@ -32,36 +32,56 @@ async function useString(string) {
             throw displayTexts.notifications.warning.selectProject;
         }
 
-        const id = string.id;
-        const text = string.text;
+        strings.forEach(string => {
+            const selectedText = !!string.selectedText
+                ? selectedTexts.find(st => {
+                    if (!!string.selectedText.artboardId) {
+                        return !!st.artboard
+                            && st.artboard.id === string.selectedText.artboardId
+                            && st.element.id === string.selectedText.elementId
+                            && st.type === string.selectedText.type;
+                    } else {
+                        return !st.artboard
+                            && st.element.id === string.selectedText.elementId
+                            && st.type === string.selectedText.type;
+                    }
+                })
+                : selectedTexts[0];
+            if (!selectedText) {
+                return;
+            }
 
-        if (selectedText.type === TEXT_TYPE) {
-            selectedText.element.text = text;
-            selectedText.element.name = string.identifier;
-        } else {
-            selectedText.element.value = text;
-        }
+            const id = string.id;
+            const text = string.text;
 
-        const artboard = selectedText.artboard;
-        const tags = localStorage.getTags(selectedDocument);
-        const tagIndex = tags.findIndex(t =>
-            t.id === selectedText.id
-            && t.type === selectedText.type
-            && t.pageId === selectedPage.id
-        );
-        const tag = {
-            id: selectedText.id,
-            type: selectedText.type,
-            artboardId: !!artboard ? artboard.id : undefined,
-            pageId: selectedPage.id,
-            stringId: id
-        };
-        if (tagIndex < 0) {
-            tags.push(tag);
-        } else {
-            tags[tagIndex] = tag;
-        }
-        localStorage.saveTags(selectedDocument, tags);
+            if (selectedText.type === TEXT_TYPE) {
+                selectedText.element.text = text;
+                selectedText.element.name = !!string.identifier ? string.identifier : text;
+            } else {
+                selectedText.element.value = text;
+            }
+
+            const artboard = selectedText.artboard;
+            const tags = localStorage.getTags(selectedDocument);
+            const tagIndex = tags.findIndex(t =>
+                t.id === selectedText.id
+                && t.type === selectedText.type
+                && t.pageId === selectedPage.id
+            );
+            const tag = {
+                id: selectedText.id,
+                type: selectedText.type,
+                artboardId: !!artboard ? artboard.id : undefined,
+                pageId: selectedPage.id,
+                stringId: id
+            };
+            if (tagIndex < 0) {
+                tags.push(tag);
+            } else {
+                tags[tagIndex] = tag;
+            }
+            localStorage.saveTags(selectedDocument, tags);
+        });
     } catch (error) {
         httpUtil.handleError(error);
     }
@@ -78,17 +98,24 @@ function getSelectedText() {
         return {};
     }
 
-    const selectedText = domUtil.getSelectedText(selectedPage);
-    if (!selectedText) {
-        return {};
-    }
+    const selectedTexts = domUtil.getSelectedText(selectedPage);
+    return selectedTexts.map(selectedText => {
+        const text = selectedText.type === TEXT_TYPE ? selectedText.element.text : selectedText.element.value;
+        const elementName = selectedText.type === TEXT_TYPE ? selectedText.element.name : selectedText.element.affectedLayer.name;
+        const artboardName = !!selectedText.artboard ? selectedText.artboard.name : '';
+        const artboardId = !!selectedText.artboard ? selectedText.artboard.id : undefined;
+        const groupName = !!selectedText.group ? selectedText.group.name : '';
 
-    const text = selectedText.type === TEXT_TYPE ? selectedText.element.text : selectedText.element.value;
-    const elementName = selectedText.type === TEXT_TYPE ? selectedText.element.name : selectedText.element.affectedLayer.name;
-    const artboardName = !!selectedText.artboard ? selectedText.artboard.name : '';
-    const groupName = !!selectedText.group ? selectedText.group.name : '';
-
-    return { text, artboard: artboardName, group: groupName, elementName };
+        return {
+            text,
+            artboard: artboardName,
+            group: groupName,
+            elementName,
+            artboardId,
+            type: selectedText.type,
+            elementId: selectedText.element.id
+        };
+    });
 }
 
 export { useString, getSelectedText };

@@ -127,108 +127,6 @@
                             </div>
                         </div>
                         <div id="multi-string-form" class="multi-add-string-form-container" style="display: none;">
-                            <div class="form-group">
-                                <!-- Test data -->
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-text" placeholder="text">
-                                        <label style="color: red;" id="invalidString"></label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                         <div id="string-file-container" class="form-group mt-3">
                             <div class="form-row mb-3">
@@ -360,7 +258,7 @@
     var strings;
     var files;
     var openedString;
-    var selectedText;
+    var selectedText = [];
 
     //basic functions
 
@@ -369,7 +267,7 @@
         languages = undefined;
         files = undefined;
         openedString = undefined;
-        selectedText = undefined;
+        selectedText.length = 0;
     }
 
     function openModal(modal) {
@@ -451,7 +349,7 @@
         const id = Number($(e).attr('int-id'));
         const identifier = $(e).attr('str-id');
         const text = $(e).text().trim();
-        window.postMessage('useString', { id, text, identifier }).then(hideLoading);
+        window.postMessage('useString', [{ id, text, identifier }]).then(hideLoading);
     }
 
     function uploadScreenshots() {
@@ -485,7 +383,7 @@
         const texts = filteredStrings.map(str => {
             const file = files.find(f => f.id === str.fileId);
             const editable = file && editableFileTypes.includes(file.type);
-            return `${editable ? icon : ''}<p class="string-row" onclick="useString(this)" int-id="${str.id}" str-id="${str.identifier}">${str.text}</p>`;
+            return `${editable ? icon : ''}<p class="string-row" onclick="useString(this)" int-id="${str.id}" ${!!str.identifier ? `str-id="${str.identifier}"` : ''}>${str.text}</p>`;
         });
         $('#strings-container').find('p, svg').remove().end().append(texts);
     }
@@ -511,43 +409,73 @@
             $('#new-string-form').show();
             $('#string-file-container').show();
             $('#edit-string').show();
-            $('#string-text').val(e[0].text || '');
-            $('#string-identifier').val(generateIdentifier());
+            if (selectedText.length === 0) {
+                $('#string-text').val('');
+                $('#string-identifier').val('');
+                $('#multi-string-form').hide();
+                $('#single-string-form').show();
+            } else if (selectedText.length === 1) {
+                $('#string-text').val(selectedText[0].text);
+                $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
+                $('#multi-string-form').hide();
+                $('#single-string-form').show();
+            } else {
+                let rowsHtml = '';
+                let identifiers = (strings || []).map(s => s.identifier);
+                selectedText.forEach(e => {
+                    const identifier = generateIdentifier(e, identifiers);
+                    identifiers.push(identifier);
+                    rowsHtml += `
+                    <div class="form-row">
+                        <div class="col">
+                            <input type="text" class="form-control" placeholder="text" value="${e.text}">
+                            <label style="color: red;"></label>
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" placeholder="identifier" value="${identifier}">
+                            <label style="color: red;"></label>
+                        </div>
+                    </div>
+                    `;
+                });
+                const html = `<div class="form-group">${rowsHtml}</div>`;
+                $('#multi-string-form').empty();
+                $('#multi-string-form').append(html);
+                $('#single-string-form').hide();
+                $('#multi-string-form').show();
+            }
             openedString = undefined;
         });
     }
 
-    function generateIdentifier() {
-        if (selectedText.text) {
-            const pattern = $('#stringsKeyNaming option:selected').text();
-            const artboardName = selectedText.artboard.toLowerCase();
-            const groupName = selectedText.group.toLowerCase();
-            const elementName = selectedText.elementName.toLowerCase();
-            const artboardNameUpperCase = capitalizeFirstLetter(artboardName);
-            const groupNameUpperCase = capitalizeFirstLetter(groupName);
-            const elementNameUpperCase = capitalizeFirstLetter(elementName);
-            const identifier = smartReplace(pattern, {
-                'Artboard': artboardNameUpperCase,
-                'artboard': artboardName,
-                'Group': groupNameUpperCase,
-                'group': groupName,
-                'Element_name': elementNameUpperCase,
-                'element_name': elementName
-            });
-            let uniqueIdentifier = identifier;
-            //make unique
-            let increment;
-            for (; ;) {
-                if ((strings || []).some(st => st.identifier === uniqueIdentifier)) {
-                    increment = !!increment ? (increment + 1) : 1;
-                    uniqueIdentifier = identifier + increment;
-                } else {
-                    break;
-                }
+    function generateIdentifier(selectedTextElement, identifiers) {
+        const pattern = $('#stringsKeyNaming option:selected').text();
+        const artboardName = selectedTextElement.artboard.toLowerCase();
+        const groupName = selectedTextElement.group.toLowerCase();
+        const elementName = selectedTextElement.elementName.toLowerCase();
+        const artboardNameUpperCase = capitalizeFirstLetter(artboardName);
+        const groupNameUpperCase = capitalizeFirstLetter(groupName);
+        const elementNameUpperCase = capitalizeFirstLetter(elementName);
+        const identifier = smartReplace(pattern, {
+            'Artboard': artboardNameUpperCase,
+            'artboard': artboardName,
+            'Group': groupNameUpperCase,
+            'group': groupName,
+            'Element_name': elementNameUpperCase,
+            'element_name': elementName
+        });
+        let uniqueIdentifier = identifier;
+        //make unique
+        let increment;
+        for (; ;) {
+            if (identifiers.some(i => i === uniqueIdentifier)) {
+                increment = !!increment ? (increment + 1) : 1;
+                uniqueIdentifier = identifier + increment;
+            } else {
+                break;
             }
-            return uniqueIdentifier;
         }
-        return '';
+        return uniqueIdentifier;
     }
 
     function smartReplace(pattern, obj) {
@@ -587,7 +515,7 @@
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidFile').text('');
-        selectedText = undefined;
+        selectedText.length = 0;
     }
 
     function deleteString() {
@@ -608,6 +536,12 @@
     }
 
     function saveString() {
+        if (selectedText.length > 1) {
+            //TODO fix
+            cancelEditString();
+            search();
+            return;
+        }
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidFile').text('');
@@ -658,8 +592,13 @@
                             fileId: Number(file),
                             identifier: identifier
                         });
-                        if (selectedText.text) {
-                            window.postMessage('useString', { id: e[0].data.id, text, identifier });
+                        if (selectedText.length > 0) {
+                            window.postMessage('useString', [{
+                                id: e[0].data.id,
+                                text,
+                                identifier,
+                                selectedText: selectedText[0]
+                            }]);
                         }
                         cancelEditString();
                         search();
