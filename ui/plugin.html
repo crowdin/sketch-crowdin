@@ -394,7 +394,9 @@
         const el = $(element);
         $('#list-strings').hide();
         $('#new-string-form').hide();
+        $('#multi-string-form').hide();
         $('#string-file-container').hide();
+        $('#single-string-form').show();
         $('#edit-string').show();
         const text = el.next().text().trim();
         const id = Number(el.next().attr('int-id'));
