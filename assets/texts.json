@@ -45,7 +45,8 @@
             "screenshotsUploadedToCrowdin": "Screenshots were successfully pushed to Crowdin",
             "screenshotUploadingToCrowdin": "Sending screenshot for the %name% artboard",
             "screenshotUploadedToCrowdin": "Screenshot for the %name% artboard successfully pushed to Crowdin",
-            "addingTagsToScreenshot": "Adding tags to screenshot for the %name% artboard"
+            "addingTagsToScreenshot": "Adding tags to screenshot for the %name% artboard",
+            "stringAdded": "String '%name%' successfully added to Crowdin"
         }
     },
     "ui": {
