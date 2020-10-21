@@ -118,4 +118,19 @@ function getSelectedText() {
     });
 }
 
-export { useString, getSelectedText };
+function getUsedStrings() {
+    const selectedDocument = dom.getSelectedDocument();
+    if (!selectedDocument) {
+        throw displayTexts.notifications.warning.selectDocument;
+    }
+    const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
+
+    if (!selectedPage) {
+        throw displayTexts.notifications.warning.selectPage;
+    }
+    return localStorage.getTags(selectedDocument)
+        .filter(t => t.pageId === selectedPage.id)
+        .map(t => t.stringId);
+}
+
+export { useString, getSelectedText, getUsedStrings };

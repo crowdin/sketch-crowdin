@@ -6,7 +6,7 @@ import { getWebview } from 'sketch-module-web-view/remote';
 import { ACCESS_TOKEN_KEY, PROJECT_ID, ORGANIZATION, OVERRIDE_TRANSLATIONS, DEFAULT_STRINGS_KEY_NAMING_OPTION, KEY_NAMING_PATTERN, STRINGS_KEY_NAMING_OPTIONS } from './constants';
 import { getProjects, getLanguages, getStrings, getFiles } from './util/client';
 import { sendStrings } from './action/send-strings';
-import { useString, getSelectedText } from './action/source-strings';
+import { useString, getSelectedText, getUsedStrings } from './action/source-strings';
 import { translate } from './action/translate';
 import { uploadScreenshots } from './action/upload-screenshots';
 import { stringsPreview } from './action/strings-preview';
@@ -58,6 +58,7 @@ export default function start() {
     //strings mode
     browserWindow.webContents.on('useString', useString);
     browserWindow.webContents.on('stringsPreview', stringsPreview);
+    browserWindow.webContents.on('getUsedStrings', getUsedStrings);
     //string management
     browserWindow.webContents.on('getSelectedText', getSelectedText);
     browserWindow.webContents.on('addString', addString);

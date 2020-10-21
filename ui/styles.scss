@@ -740,19 +740,28 @@ button .btn-icon {
     margin-bottom: 10px;
 }
 
-.string-row {
+%string-row {
     cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 92%;
+    width: 88%;
     margin: 2px 0;
-    padding: 2px 12px;
 
     &:hover {
         background-color: var(--primaryColor);
         color: #ffffff;
     }
+}
+
+.string-row-used {
+    @extend %string-row;
+    padding: 2px;
+}
+
+.string-row-unused {
+    @extend %string-row;
+    padding: 2px 17px;
 }
 
 .string-row-edit {
