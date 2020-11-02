@@ -55,7 +55,6 @@ async function useString(strings) {
             const text = string.text;
 
             if (selectedText.type === TEXT_TYPE) {
-                selectedText.element.sketchObject.finishEditing();
                 selectedText.element.text = text;
                 selectedText.element.name = !!string.identifier ? string.identifier : text;
             } else {
