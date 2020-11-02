@@ -1,3 +1,4 @@
+import ui from 'sketch/ui';
 import settings from 'sketch/settings';
 import dom from 'sketch/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
@@ -9,6 +10,7 @@ async function addString(req) {
     const callback = async (projectId) => {
         const { sourceStringsApi } = httpUtil.createClient();
         const res = await sourceStringsApi.addString(projectId, req);
+        ui.message(displayTexts.notifications.info.stringAdded.replace('%name%', req.text));
         return { id: res.data.id };
     };
     return await executeOperartion(callback);

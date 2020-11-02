@@ -41,7 +41,7 @@
                             <select id="projects" onchange="saveProject()"></select>
                         </div>
                     </div>
-                    <div class="form-group  mb-3">
+                    <div class="form-group mb-3">
                         <div>
                             <label crowdin-ui-text-label="overrideTranslationsLabel" class="mb-0">
                             </label>
@@ -49,6 +49,15 @@
                                 onchange="saveOverrideTranslations()">
                         </div>
                         <p crowdin-ui-text-label="overrideTranslationsText" class="form-text text-muted help-text">
+                        </p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div>
+                            <label crowdin-ui-text-label="stringsKeyNamingLabel"></label>
+                            <select class="ml-2" id="stringsKeyNaming" onchange="saveKeyNamingOption()">
+                            </select>
+                        </div>
+                        <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
                         </p>
                     </div>
                     <fieldset class="mt-4">
@@ -94,37 +103,41 @@
                         </div>
                     </div>
                     <fieldset id="edit-string" class="edit-string-mode" style="display: none;">
-                        <div class="form-group">
-                            <label><abbr crowdin-ui-text-label="addStringStringLabel"
-                                    crowdin-ui-text-details="addStringStringDetails"></abbr></label>
-                            <input type="text" class="form-control" id="string-text" placeholder="text">
-                            <label style="color: red;" id="invalidString"></label>
-                        </div>
-                        <div id="new-string-form" style="display: none;">
+                        <div id="single-string-form">
                             <div class="form-group">
-                                <div class="form-row">
-                                    <div class="col-3 text-right">
-                                        <label><abbr crowdin-ui-text-label="addStringIdentifierLabel"
-                                                crowdin-ui-text-details="addStringIdentifierDetails"></abbr></label>
-                                    </div>
-                                    <div class="col-9">
-                                        <input type="text" class="form-control" id="string-identifier"
-                                            placeholder="identifier">
-                                        <label style="color: red;" id="invalidIdentifier"></label>
+                                <label><abbr crowdin-ui-text-label="addStringStringLabel"
+                                        crowdin-ui-text-details="addStringStringDetails"></abbr></label>
+                                <input type="text" class="form-control" id="string-text" placeholder="text">
+                                <label style="color: red;" id="invalidString"></label>
+                            </div>
+                            <div id="new-string-form" style="display: none;">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div class="col-3 text-right">
+                                            <label><abbr crowdin-ui-text-label="addStringIdentifierLabel"
+                                                    crowdin-ui-text-details="addStringIdentifierDetails"></abbr></label>
+                                        </div>
+                                        <div class="col-9">
+                                            <input type="text" class="form-control" id="string-identifier"
+                                                placeholder="identifier">
+                                            <label style="color: red;" id="invalidIdentifier"></label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <div class="form-row mb-3">
-                                    <div class="col-3 text-right">
-                                        <label><abbr crowdin-ui-text-label="addStringFileLabel"
-                                                crowdin-ui-text-details="addStringFileDetails"></abbr></label>
-                                    </div>
-                                    <div class="col-9">
-                                        <select id="string-files" class="ml-1" style="width: 100%;">
-                                        </select>
-                                        <label style="color: red;" id="invalidFile"></label>
-                                    </div>
+                        </div>
+                        <div id="multi-string-form" class="multi-add-string-form-container" style="display: none;">
+                        </div>
+                        <div id="string-file-container" class="form-group mt-3">
+                            <div class="form-row mb-3">
+                                <div class="col-3 text-right">
+                                    <label><abbr crowdin-ui-text-label="addStringFileLabel"
+                                            crowdin-ui-text-details="addStringFileDetails"></abbr></label>
+                                </div>
+                                <div class="col-9">
+                                    <select id="string-files" class="ml-1" style="width: 100%;">
+                                    </select>
+                                    <label style="color: red;" id="invalidFile"></label>
                                 </div>
                             </div>
                         </div>
@@ -236,6 +249,7 @@
     getCredentials();
     getProjects();
     getOverrideTranslations();
+    getKeyNamingOptions();
 
     var validationMessages = {};
     var allLanguagesOption;
@@ -244,7 +258,7 @@
     var strings;
     var files;
     var openedString;
-    var selectedText;
+    var selectedText = [];
 
     //basic functions
 
@@ -253,7 +267,7 @@
         languages = undefined;
         files = undefined;
         openedString = undefined;
-        selectedText = undefined;
+        selectedText.length = 0;
     }
 
     function openModal(modal) {
@@ -309,6 +323,12 @@
         window.postMessage('saveOverrideTranslations', $('#overrideTranslations').prop('checked'));
     }
 
+    function saveKeyNamingOption() {
+        const option = Number($('#stringsKeyNaming option:selected').val());
+        window.postMessage('saveKeyPatternOption', option)
+            .then(clearStorage);
+    }
+
     //translation
 
     function translateComponent(wholePage) {
@@ -327,8 +347,12 @@
     function useString(e) {
         showLoading();
         const id = Number($(e).attr('int-id'));
+        const identifier = $(e).attr('str-id');
         const text = $(e).text().trim();
-        window.postMessage('useString', { id, text }).then(hideLoading);
+        window.postMessage('useString', [{ id, text, identifier }]).then(() => {
+            search();
+            hideLoading();
+        });
     }
 
     function uploadScreenshots() {
@@ -344,10 +368,16 @@
     }
 
     function search() {
-        const icon = `
-            <svg class="float-right bi bi-pencil string-row-edit" onclick="openEditString(this);" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        const editIcon = `
+            <svg class="float-right string-row-edit" onclick="openEditString(this);" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
                 <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
+            </svg>
+        `;
+
+        const checkIcon = `
+            <svg class="float-left" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
             </svg>
         `;
 
@@ -359,12 +389,17 @@
         const filteredStrings = (!text || text.length === 0)
             ? arr
             : arr.filter(str => str.text.toLowerCase().includes(text));
-        const texts = filteredStrings.map(str => {
-            const file = files.find(f => f.id === str.fileId);
-            const editable = file && editableFileTypes.includes(file.type);
-            return `${editable ? icon : ''}<p class="string-row" onclick="useString(this)" int-id="${str.id}">${str.text}</p>`;
-        });
-        $('#strings-container').find('p, svg').remove().end().append(texts);
+        window.postMessage('getUsedStrings')
+            .then((e) => {
+                const usedStrings = e[0];
+                const texts = filteredStrings.map(str => {
+                    const isUsed = usedStrings.includes(str.id);
+                    const file = files.find(f => f.id === str.fileId);
+                    const editable = file && editableFileTypes.includes(file.type);
+                    return `${isUsed ? checkIcon : ''}${editable ? editIcon : ''}<p class="string-row-${isUsed ? 'used' : 'unused'}" onclick="useString(this)" int-id="${str.id}" ${!!str.identifier ? `str-id="${str.identifier}"` : ''}>${str.text}</p>`;
+                });
+                $('#strings-container').find('p, svg').remove().end().append(texts);
+            });
     }
 
     //strings management
@@ -373,6 +408,9 @@
         const el = $(element);
         $('#list-strings').hide();
         $('#new-string-form').hide();
+        $('#multi-string-form').hide();
+        $('#string-file-container').hide();
+        $('#single-string-form').show();
         $('#edit-string').show();
         const text = el.next().text().trim();
         const id = Number(el.next().attr('int-id'));
@@ -382,15 +420,109 @@
 
     function openAddString() {
         window.postMessage('getSelectedText').then((e) => {
-            const selected = e[0].text;
+            selectedText = e[0];
             $('#list-strings').hide();
             $('#new-string-form').show();
+            $('#string-file-container').show();
             $('#edit-string').show();
-            $('#string-text').val(selected || '');
-            $('#string-identifier').val('');
-            selectedText = selected;
+            if (selectedText.length === 0) {
+                $('#string-text').val('');
+                $('#string-identifier').val('');
+                $('#multi-string-form').hide();
+                $('#single-string-form').show();
+            } else if (selectedText.length === 1) {
+                $('#string-text').val(selectedText[0].text);
+                $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
+                $('#multi-string-form').hide();
+                $('#single-string-form').show();
+            } else {
+                let rowsHtml = '';
+                let identifiers = (strings || []).map(s => s.identifier);
+                selectedText.forEach(e => {
+                    const identifier = generateIdentifier(e, identifiers);
+                    identifiers.push(identifier);
+                    rowsHtml += `
+                    <div class="form-row">
+                        <div class="col">
+                            <input type="text" class="form-control" placeholder="text" value="${e.text}">
+                            <label style="color: red;"></label>
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" placeholder="identifier" value="${identifier}">
+                            <label style="color: red;"></label>
+                        </div>
+                    </div>
+                    `;
+                });
+                const html = `<div class="form-group">${rowsHtml}</div>`;
+                $('#multi-string-form').empty();
+                $('#multi-string-form').append(html);
+                $('#single-string-form').hide();
+                $('#multi-string-form').show();
+            }
             openedString = undefined;
         });
+    }
+
+    function generateIdentifier(selectedTextElement, identifiers) {
+        const pattern = $('#stringsKeyNaming option:selected').text();
+        const artboardName = selectedTextElement.artboard.toLowerCase();
+        const groupName = selectedTextElement.group.toLowerCase();
+        const elementName = selectedTextElement.elementName.toLowerCase();
+        const artboardNameUpperCase = capitalizeFirstLetter(artboardName);
+        const groupNameUpperCase = capitalizeFirstLetter(groupName);
+        const elementNameUpperCase = capitalizeFirstLetter(elementName);
+        const identifier = smartReplace(pattern, {
+            'Artboard': artboardNameUpperCase,
+            'artboard': artboardName,
+            'Group': groupNameUpperCase,
+            'group': groupName,
+            'Element_name': elementNameUpperCase,
+            'element_name': elementName
+        });
+        let uniqueIdentifier = identifier;
+        //make unique
+        let increment;
+        for (; ;) {
+            if (identifiers.some(i => i === uniqueIdentifier)) {
+                increment = !!increment ? (increment + 1) : 1;
+                uniqueIdentifier = identifier + increment;
+            } else {
+                break;
+            }
+        }
+        return uniqueIdentifier;
+    }
+
+    function smartReplace(pattern, obj) {
+        const replacing = {};
+        for (let x in obj) {
+            if (pattern.indexOf(x) > -1) {
+                replacing[pattern.indexOf(x)] = {
+                    to: x.length + pattern.indexOf(x),
+                    by: obj[x]
+                };
+            }
+        }
+        let result = '';
+        for (let i = 0; i < pattern.length; i++) {
+            let replaced = false;
+            for (let replacingIndex in replacing) {
+                if (Number(replacingIndex) === i) {
+                    replaced = true;
+                    i = replacing[replacingIndex].to - 1;
+                    result += replacing[replacingIndex].by;
+                }
+            }
+            if (!replaced) {
+                result += pattern.charAt(i);
+            }
+        }
+        return result;
+    };
+
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     function cancelEditString() {
@@ -399,7 +531,7 @@
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidFile').text('');
-        selectedText = undefined;
+        selectedText.length = 0;
     }
 
     function deleteString() {
@@ -420,6 +552,74 @@
     }
 
     function saveString() {
+        if (selectedText.length > 1) {
+            //adding multiple strings
+            $('#multi-string-form div.form-group label').text('');
+            const file = $('#string-files option:selected').val();
+            if (!file) {
+                $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
+                return;
+            }
+            const newStrings = [];
+            const rows = $('#multi-string-form div.form-group div.form-row');
+            for (let i = 0; i < rows.length; i++) {
+                const row = $(rows[i]);
+                const text = $(row.find('input')[0]).val();
+                const identifier = $(row.find('input')[1]).val();
+                if (!text || text.length === '') {
+                    $(row.find('label')[0]).text(validationMessages.addStringEmptyString || 'Invalid');
+                    return;
+                }
+                if (!identifier || identifier.length === '') {
+                    $(row.find('label')[1]).text(validationMessages.addStringEmptyIdentifier || 'Invalid');
+                    return;
+                }
+                newStrings.push({
+                    text,
+                    identifier,
+                    fileId: Number(file),
+                    selectedText: selectedText[i]
+                });
+            }
+            showLoading();
+            const addedStrings = [];
+            const promise = newStrings.reduce((acc, str) => {
+                return acc.then(() => {
+                    return window
+                        .postMessage('addString', {
+                            text: str.text,
+                            identifier: str.identifier,
+                            fileId: str.fileId
+                        })
+                        .then(e => {
+                            if (!e[0].error) {
+                                strings.push({
+                                    id: e[0].data.id,
+                                    text: str.text,
+                                    fileId: str.fileId,
+                                    identifier: str.identifier
+                                });
+                                addedStrings.push({
+                                    id: e[0].data.id,
+                                    ...str
+                                });
+                            }
+                        })
+                });
+            }, Promise.resolve());
+            promise
+                .then(() => {
+                    if (addedStrings.length > 0) {
+                        return window.postMessage('useString', addedStrings);
+                    }
+                })
+                .then(() => {
+                    cancelEditString();
+                    search();
+                    hideLoading();
+                });
+            return;
+        }
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidFile').text('');
@@ -429,6 +629,7 @@
             return;
         }
         if (openedString) {
+            //editing string
             showLoading();
             window.postMessage('editString', { id: openedString, text })
                 .then(e => {
@@ -445,6 +646,7 @@
                     hideLoading();
                 });
         } else {
+            //adding single string
             const identifier = $('#string-identifier').val();
             const file = $('#string-files option:selected').val();
             if (!identifier || identifier.length === '') {
@@ -464,19 +666,33 @@
             window.postMessage('addString', req)
                 .then(e => {
                     if (!e[0].error) {
-                        strings.push({
-                            id: e[0].data.id,
-                            text: text,
-                            fileId: Number(file)
-                        });
-                        if (selectedText) {
-                            window.postMessage('useString', { id: e[0].data.id, text });
-                        }
-                        cancelEditString();
-                        search();
+                        return e[0].data.id;
                     };
-                    hideLoading();
-                });
+                })
+                .then(id => {
+                    if (id) {
+                        strings.push({
+                            id,
+                            text: text,
+                            fileId: Number(file),
+                            identifier: identifier
+                        });
+                        if (selectedText.length > 0) {
+                            return window
+                                .postMessage('useString', [{
+                                    id,
+                                    text,
+                                    identifier,
+                                    selectedText: selectedText[0]
+                                }])
+                                .then(() => {
+                                    cancelEditString();
+                                    search();
+                                });
+                        }
+                    }
+                })
+                .then(hideLoading);
         }
     }
 
@@ -485,6 +701,21 @@
     function getOverrideTranslations() {
         window.postMessage('getOverrideTranslations')
             .then(msg => $('#overrideTranslations').prop('checked', !!msg[0].overrideTranslations));
+    }
+
+    function getKeyNamingOptions() {
+        window.postMessage('getKeyPatternOptions')
+            .then(info => {
+                const options = info[0];
+                const html = options.map(o => {
+                    if (o.selected) {
+                        return `<option value="${o.id}" selected>${o.name}</option>`;
+                    } else {
+                        return `<option value="${o.id}">${o.name}</option>`;
+                    }
+                }).join('');
+                $('#stringsKeyNaming').find('option').remove().end().append(html);
+            });
     }
 
     function getProjects() {
