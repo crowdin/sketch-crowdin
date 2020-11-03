@@ -5,6 +5,25 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0]
+
+### Added
+
+- Strings management update ([#38](https://github.com/crowdin/sketch-crowdin/pull/38)):
+  - new option in settings called 'Key Naming Pattern'
+  - adding multiple strings
+  - used string identifier for layer name instead of string text
+  - added 'check' icon to used strings
+
+### Updated
+
+- Using file path as a file name ([#36](https://github.com/crowdin/sketch-crowdin/pull/36/))
+
+### Fixed
+
+- Fixed UI for Override translations functionality ([#37](https://github.com/crowdin/sketch-crowdin/pull/37))
+
+
 ## [2.0.1]
 
 ### Added
