@@ -107,7 +107,7 @@
                             <div class="form-group">
                                 <label><abbr crowdin-ui-text-label="addStringStringLabel"
                                         crowdin-ui-text-details="addStringStringDetails"></abbr></label>
-                                <input type="text" class="form-control" id="string-text" placeholder="text">
+                                <textarea class="form-control" id="string-text" placeholder="text"></textarea>
                                 <label style="color: red;" id="invalidString"></label>
                             </div>
                             <div id="new-string-form" style="display: none;">
@@ -442,13 +442,13 @@
                     const identifier = generateIdentifier(e, identifiers);
                     identifiers.push(identifier);
                     rowsHtml += `
-                    <div class="form-row">
+                    <div class="form-row" style="padding-bottom: 10px;">
                         <div class="col">
-                            <input type="text" class="form-control" placeholder="text" value="${e.text}">
+                            <textarea class="form-control" placeholder="text">${e.text}</textarea>
                             <label style="color: red;"></label>
                         </div>
                         <div class="col">
-                            <input type="text" class="form-control" placeholder="identifier" value="${identifier}">
+                            <input type="text" class="form-control" placeholder="identifier" value="${identifier}" style="margin-top: 13px;">
                             <label style="color: red;"></label>
                         </div>
                     </div>
@@ -564,8 +564,8 @@
             const rows = $('#multi-string-form div.form-group div.form-row');
             for (let i = 0; i < rows.length; i++) {
                 const row = $(rows[i]);
-                const text = $(row.find('input')[0]).val();
-                const identifier = $(row.find('input')[1]).val();
+                const text = $(row.find('textarea')[0]).val();
+                const identifier = $(row.find('input')[0]).val();
                 if (!text || text.length === '') {
                     $(row.find('label')[0]).text(validationMessages.addStringEmptyString || 'Invalid');
                     return;
