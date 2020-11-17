@@ -6,7 +6,7 @@ import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
 import { default as displayTexts } from '../../assets/texts.json';
 
-async function useString(strings) {
+function useString(strings) {
     try {
         if (strings.length === 0) {
             throw displayTexts.notifications.warning.selectString;
@@ -87,6 +87,19 @@ async function useString(strings) {
     }
 }
 
+function deselectString(id) {
+    try {
+        const selectedDocument = dom.getSelectedDocument();
+        if (!selectedDocument) {
+            throw displayTexts.notifications.warning.selectDocument;
+        }
+        const tags = localStorage.getTags(selectedDocument).filter(t => t.stringId !== id);
+        localStorage.saveTags(selectedDocument, tags);
+    } catch (error) {
+        httpUtil.handleError(error);
+    }
+}
+
 function getSelectedText() {
     const selectedDocument = dom.getSelectedDocument();
     if (!selectedDocument) {
@@ -133,4 +146,4 @@ function getUsedStrings() {
         .map(t => t.stringId);
 }
 
-export { useString, getSelectedText, getUsedStrings };
+export { useString, getSelectedText, getUsedStrings, deselectString };
