@@ -242,7 +242,7 @@
 
 <script>
 
-    const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties'];
+    const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties', 'xliff'];
 
     //initial view
     var openedModal = 'settings';
@@ -403,7 +403,7 @@
         const arr = strings || [];
         const filteredStrings = (!text || text.length === 0)
             ? arr
-            : arr.filter(str => str.text.toLowerCase().includes(text));
+            : arr.filter(str => str.text.toLowerCase().includes(text) || (str.identifier && str.identifier.toLowerCase().includes(text)));
         window.postMessage('getUsedStrings')
             .then((e) => {
                 const usedStrings = e[0];
