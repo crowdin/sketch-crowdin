@@ -1,7 +1,7 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
-import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
+import { PROJECT_ID, ACCESS_TOKEN_KEY, CONTENT_SEGMENTATION } from '../constants';
 import * as domUtil from '../util/dom';
 import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
@@ -82,6 +82,8 @@ async function uploadStrings(page, artboard) {
 }
 
 async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directoryId) {
+    let contentSegmentation = settings.documentSettingForKey(dom.getSelectedDocument(), CONTENT_SEGMENTATION);
+    contentSegmentation = contentSegmentation === undefined ? true : !!contentSegmentation;
     const html = htmlUtil.convertArtboardToHtml(page, artboard);
     const fileName = getFileName(artboard);
     const file = projectFiles.data
@@ -91,19 +93,33 @@ async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, pa
     const storageId = storage.data.id;
     if (!!file) {
         ui.message(`${displayTexts.notifications.info.updatingExistingFileForArtboard} ${artboard.name}`);
-        await sourceFilesApi.updateOrRestoreFile(projectId, file.id, { storageId });
+        await sourceFilesApi.updateOrRestoreFile(
+            projectId,
+            file.id,
+            {
+                storageId,
+                importOptions: {
+                    contentSegmentation
+                }
+            }
+        );
     } else {
         ui.message(displayTexts.notifications.info.creatingNewFileForArtboard.replace('%name%', artboard.name));
         await sourceFilesApi.createFile(projectId, {
             storageId: storageId,
             name: fileName,
             title: artboard.name,
-            directoryId: directoryId
+            directoryId: directoryId,
+            importOptions: {
+                contentSegmentation
+            }
         });
     }
 }
 
 async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directoryId) {
+    let contentSegmentation = settings.documentSettingForKey(dom.getSelectedDocument(), CONTENT_SEGMENTATION);
+    contentSegmentation = contentSegmentation === undefined ? true : !!contentSegmentation;
     const text = htmlUtil.convertOutsideTextToHtml(page);
     const fileName = getFileName(page);
     const file = projectFiles.data
@@ -113,14 +129,26 @@ async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, p
     const storageId = storage.data.id;
     if (!!file) {
         ui.message(displayTexts.notifications.info.updatingExistingFileForPage.replace('%name%', page.name));
-        await sourceFilesApi.updateOrRestoreFile(projectId, file.id, { storageId });
+        await sourceFilesApi.updateOrRestoreFile(
+            projectId,
+            file.id,
+            {
+                storageId,
+                importOptions: {
+                    contentSegmentation
+                }
+            }
+        );
     } else {
         ui.message(displayTexts.notifications.info.creatingNewFileForPage.replace('%name%', page.name));
         await sourceFilesApi.createFile(projectId, {
             storageId: storageId,
             name: fileName,
             title: page.name,
-            directoryId: directoryId
+            directoryId: directoryId,
+            importOptions: {
+                contentSegmentation
+            }
         });
     }
 }

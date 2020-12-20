@@ -53,6 +53,16 @@
                     </div>
                     <div class="form-group mb-3">
                         <div>
+                            <label crowdin-ui-text-label="contentSegmentationLabel" class="mb-0">
+                            </label>
+                            <input type="checkbox" class="ml-1 mt-1" id="contentSegmentation"
+                                onchange="saveContentSegmentation()">
+                        </div>
+                        <p crowdin-ui-text-label="contentSegmentationText" class="form-text text-muted help-text">
+                        </p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div>
                             <label crowdin-ui-text-label="stringsKeyNamingLabel"></label>
                             <select class="ml-2" id="stringsKeyNaming" onchange="saveKeyNamingOption()">
                             </select>
@@ -249,6 +259,7 @@
     getCredentials();
     getProjects();
     getOverrideTranslations();
+    getContentSegmentation();
     getKeyNamingOptions();
 
     var validationMessages = {};
@@ -321,6 +332,10 @@
 
     function saveOverrideTranslations() {
         window.postMessage('saveOverrideTranslations', $('#overrideTranslations').prop('checked'));
+    }
+
+    function saveContentSegmentation() {
+        window.postMessage('saveContentSegmentation', $('#contentSegmentation').prop('checked'));
     }
 
     function saveKeyNamingOption() {
@@ -727,6 +742,11 @@
     function getOverrideTranslations() {
         window.postMessage('getOverrideTranslations')
             .then(msg => $('#overrideTranslations').prop('checked', !!msg[0].overrideTranslations));
+    }
+
+    function getContentSegmentation() {
+        window.postMessage('getContentSegmentation')
+            .then(msg => $('#contentSegmentation').prop('checked', !!msg[0].contentSegmentation));
     }
 
     function getKeyNamingOptions() {

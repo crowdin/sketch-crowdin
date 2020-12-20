@@ -4,6 +4,7 @@ export const ACCESS_TOKEN_KEY = `${KEY_PREFIX}-access-token`;
 export const ORGANIZATION = `${KEY_PREFIX}-organization`;
 export const PROJECT_ID = `${KEY_PREFIX}-project-id`;
 export const OVERRIDE_TRANSLATIONS = `${KEY_PREFIX}-override-translations`;
+export const CONTENT_SEGMENTATION = `${KEY_PREFIX}-content-segmentation`;
 export const KEY_NAMING_PATTERN = `${KEY_PREFIX}-key-naming`;
 
 export const SYMBOL_TYPE = 'symbol-override';
