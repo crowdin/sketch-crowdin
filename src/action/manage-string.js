@@ -5,12 +5,13 @@ import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
 import * as httpUtil from '../util/http';
 import { PatchOperation } from '@crowdin/crowdin-api-client';
 import { default as displayTexts } from '../../assets/texts.json';
+import { truncateLongText } from '../util/string';
 
 async function addString(req) {
     const callback = async (projectId) => {
         const { sourceStringsApi } = httpUtil.createClient();
         const res = await sourceStringsApi.addString(projectId, req);
-        ui.message(displayTexts.notifications.info.stringAdded.replace('%name%', req.text));
+        ui.message(displayTexts.notifications.info.stringAdded.replace('%name%', truncateLongText(req.text)));
         return { id: res.data.id };
     };
     return await executeOperartion(callback);
