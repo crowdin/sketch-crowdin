@@ -8,6 +8,7 @@ import * as localStorage from '../util/local-storage';
 import * as htmlUtil from '../util/html';
 import { getFileName, getDirectoryName } from '../util/file';
 import { default as displayTexts } from '../../assets/texts.json';
+import { truncateLongText } from '../util/string';
 
 async function translate(languageId, wholePage) {
     try {
@@ -71,9 +72,9 @@ async function translate(languageId, wholePage) {
                 const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
                 if (!directory) {
                     if (wholePage) {
-                        throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', selectedPage.name);
+                        throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(selectedPage.name));
                     } else {
-                        throw displayTexts.notifications.warning.noTranslationsForArtboard.replace('%name%', artboard.name);
+                        throw displayTexts.notifications.warning.noTranslationsForArtboard.replace('%name%', truncateLongText(artboard.name));
                     }
                 }
                 const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, undefined, directory.data.id);
@@ -145,10 +146,10 @@ async function extractArtboardTranslations(projectId, selectedLanguages, transla
                         }
                     }
                 });
-            ui.message(displayTexts.notifications.info.translatedArtboardCreated.replace('%name%', newArtboard.name));
+            ui.message(displayTexts.notifications.info.translatedArtboardCreated.replace('%name%', truncateLongText(newArtboard.name)));
         });
     } else {
-        throw displayTexts.notifications.warning.noTranslationsForArtboard.replace('%name%', artboard.name);
+        throw displayTexts.notifications.warning.noTranslationsForArtboard.replace('%name%', truncateLongText(artboard.name));
     }
 }
 
@@ -204,10 +205,10 @@ async function extractPageTranslations(projectId, selectedLanguages, translation
                 });
             domUtil.removeGeneratedArtboards(document, page, newPage);
             document.selectedPage = newPage;
-            ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', newPage.name));
+            ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', truncateLongText(newPage.name)));
         });
     } else {
-        throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', page.name);
+        throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(page.name));
     }
 }
 

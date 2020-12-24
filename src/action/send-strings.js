@@ -8,6 +8,7 @@ import * as localStorage from '../util/local-storage';
 import * as htmlUtil from '../util/html';
 import { getFileName, getDirectoryName } from '../util/file';
 import { default as displayTexts } from '../../assets/texts.json';
+import { truncateLongText } from '../util/string';
 
 async function sendStrings(wholePage) {
     try {
@@ -104,7 +105,7 @@ async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, pa
             }
         );
     } else {
-        ui.message(displayTexts.notifications.info.creatingNewFileForArtboard.replace('%name%', artboard.name));
+        ui.message(displayTexts.notifications.info.creatingNewFileForArtboard.replace('%name%', truncateLongText(artboard.name)));
         await sourceFilesApi.createFile(projectId, {
             storageId: storageId,
             name: fileName,
@@ -128,7 +129,7 @@ async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, p
     const storage = await uploadStorageApi.addStorage(fileName, text);
     const storageId = storage.data.id;
     if (!!file) {
-        ui.message(displayTexts.notifications.info.updatingExistingFileForPage.replace('%name%', page.name));
+        ui.message(displayTexts.notifications.info.updatingExistingFileForPage.replace('%name%', truncateLongText(page.name)));
         await sourceFilesApi.updateOrRestoreFile(
             projectId,
             file.id,
@@ -140,7 +141,7 @@ async function uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, p
             }
         );
     } else {
-        ui.message(displayTexts.notifications.info.creatingNewFileForPage.replace('%name%', page.name));
+        ui.message(displayTexts.notifications.info.creatingNewFileForPage.replace('%name%', truncateLongText(page.name)));
         await sourceFilesApi.createFile(projectId, {
             storageId: storageId,
             name: fileName,
