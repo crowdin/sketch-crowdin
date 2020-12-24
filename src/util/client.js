@@ -131,7 +131,7 @@ function convertCrowdinStringsToStrings(crowdinStrings) {
                     text.other || '';
             }
             return {
-                text, id: e.id, fileId: e.fileId, identifier: e.identifier
+                text, id: e.id, fileId: e.fileId, identifier: e.identifier, context: e.context
             }
         })
         .filter(e => e.text && e.text.length > 0);
