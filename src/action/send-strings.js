@@ -93,7 +93,7 @@ async function uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, pa
     const storage = await uploadStorageApi.addStorage(fileName, html);
     const storageId = storage.data.id;
     if (!!file) {
-        ui.message(`${displayTexts.notifications.info.updatingExistingFileForArtboard} ${artboard.name}`);
+        ui.message(`${displayTexts.notifications.info.updatingExistingFileForArtboard} ${truncateLongText(artboard.name)}`);
         await sourceFilesApi.updateOrRestoreFile(
             projectId,
             file.id,
