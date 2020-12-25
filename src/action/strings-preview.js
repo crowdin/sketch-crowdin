@@ -6,6 +6,7 @@ import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
 import * as domUtil from '../util/dom';
 import { default as displayTexts } from '../../assets/texts.json';
+import { truncateLongText } from '../util/string';
 
 async function stringsPreview(language) {
     try {
@@ -101,7 +102,7 @@ function extractPageTranslations(languageName, document, page, translations) {
 
     domUtil.removeGeneratedArtboards(document, page, newPage);
     document.selectedPage = newPage;
-    ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', newPage.name));
+    ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', truncateLongText(newPage.name)));
 
 }
 

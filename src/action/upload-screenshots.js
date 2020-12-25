@@ -7,6 +7,7 @@ import { getTextElementsInArtboard } from '../util/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
 import { fetchStrings } from '../util/client';
 import { default as displayTexts } from '../../assets/texts.json';
+import { truncateLongText } from '../util/string';
 
 async function uploadScreenshots() {
     try {
@@ -103,7 +104,7 @@ async function uploadScreenshots() {
             .map(async screenshotName => {
                 const screenshot = screenshots.data.find(sc => sc.data.name === screenshotName);
                 if (!!screenshot) {
-                    ui.message(displayTexts.notifications.info.removingNotValidScreenshot.replace('%name%', screenshot.data.name));
+                    ui.message(displayTexts.notifications.info.removingNotValidScreenshot.replace('%name%', truncateLongText(screenshot.data.name)));
                     await screenshotsApi.deleteScreenshot(projectId, screenshot.data.id);
                 }
             })
@@ -130,7 +131,7 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
         output: false,
         formats: 'png'
     });
-    ui.message(displayTexts.notifications.info.screenshotUploadingToCrowdin.replace('%name%', artboard.name));
+    ui.message(displayTexts.notifications.info.screenshotUploadingToCrowdin.replace('%name%', truncateLongText(artboard.name)));
     const { screenshotsApi, uploadStorageApi } = httpUtil.createClient();
     const screenshotName = __buildScreenshotName(artboard.id, page.id);
     const storageRecord = await uploadStorageApi.addStorage(`${screenshotName}.png`, b.slice(b.byteOffset, b.byteOffset + b.byteLength));
@@ -150,7 +151,7 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
     }
     const screenshotId = screenshot.data.id;
 
-    ui.message(displayTexts.notifications.info.addingTagsToScreenshot.replace('%name%', artboard.name));
+    ui.message(displayTexts.notifications.info.addingTagsToScreenshot.replace('%name%', truncateLongText(artboard.name)));
     await screenshotsApi.clearTags(projectId, screenshotId);
 
     const tagsRequest = tags.map(tag => {
@@ -166,7 +167,7 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
     });
 
     await screenshotsApi.addTag(projectId, screenshotId, tagsRequest);
-    ui.message(displayTexts.notifications.info.screenshotUploadedToCrowdin.replace('%name%', artboard.name));
+    ui.message(displayTexts.notifications.info.screenshotUploadedToCrowdin.replace('%name%', truncateLongText(artboard.name)));
 }
 
 function __buildScreenshotName(artboardId, pageId) {

@@ -745,7 +745,7 @@ button .btn-icon {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 85%;
+    width: 75%;
     margin: 2px 0;
     padding: 2px;
     &:hover {
@@ -756,6 +756,10 @@ button .btn-icon {
 
 .string-row-edit {
     cursor: pointer;
+    margin-right: 6px;
+}
+
+.string-row-info {
     margin-right: 12px;
 }
 

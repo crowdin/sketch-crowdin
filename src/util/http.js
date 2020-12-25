@@ -3,6 +3,7 @@ import settings from 'sketch/settings';
 import crowdin, { HttpClientType } from '@crowdin/crowdin-api-client';
 import { ACCESS_TOKEN_KEY, ORGANIZATION, PLUGIN_VERSION } from '../constants';
 import { default as displayTexts } from '../../assets/texts.json';
+import { truncateLongText } from './string';
 
 function createClient() {
     const token = settings.settingForKey(ACCESS_TOKEN_KEY);
@@ -37,7 +38,7 @@ function handleError(error) {
                 return ui.message(httpError.message);
             }
         }
-        return ui.message(displayTexts.notifications.warning.serverError.replace('%error%', JSON.stringify(error)));
+        return ui.message(displayTexts.notifications.warning.serverError.replace('%error%', truncateLongText(JSON.stringify(error))));
     }
 }
 

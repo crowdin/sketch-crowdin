@@ -53,6 +53,16 @@
                     </div>
                     <div class="form-group mb-3">
                         <div>
+                            <label crowdin-ui-text-label="contentSegmentationLabel" class="mb-0">
+                            </label>
+                            <input type="checkbox" class="ml-1 mt-1" id="contentSegmentation"
+                                onchange="saveContentSegmentation()">
+                        </div>
+                        <p crowdin-ui-text-label="contentSegmentationText" class="form-text text-muted help-text">
+                        </p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div>
                             <label crowdin-ui-text-label="stringsKeyNamingLabel"></label>
                             <select class="ml-2" id="stringsKeyNaming" onchange="saveKeyNamingOption()">
                             </select>
@@ -249,6 +259,7 @@
     getCredentials();
     getProjects();
     getOverrideTranslations();
+    getContentSegmentation();
     getKeyNamingOptions();
 
     var validationMessages = {};
@@ -321,6 +332,10 @@
 
     function saveOverrideTranslations() {
         window.postMessage('saveOverrideTranslations', $('#overrideTranslations').prop('checked'));
+    }
+
+    function saveContentSegmentation() {
+        window.postMessage('saveContentSegmentation', $('#contentSegmentation').prop('checked'));
     }
 
     function saveKeyNamingOption() {
@@ -396,6 +411,13 @@
             </svg>
         `;
 
+        const infoIconTemplate = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info">
+                <title>Context:\n%context%\n\nIdentifier:\n%identifier%\n\nFile:\n%file%</title>
+                <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path>
+            </svg>
+        `;
+
         let text = $('#search-text').val();
         if (text) {
             text = text.trim().toLowerCase();
@@ -411,8 +433,12 @@
                     const isUsed = usedStrings.includes(str.id);
                     const file = files.find(f => f.id === str.fileId);
                     const editable = file && editableFileTypes.includes(file.type);
+                    const infoIcon = infoIconTemplate
+                        .replace('%context%', str.context)
+                        .replace('%identifier%', str.identifier ? str.identifier : str.text)
+                        .replace('%file%', file ? file.name : '');
                     return `
-                        ${isUsed ? checkIcon : checkIconBlank}${editable ? editIcon : ''}
+                        ${isUsed ? checkIcon : checkIconBlank}${infoIcon}${editable ? editIcon : ''}
                         <p
                             class="string-row"
                             onclick="useString(this)"
@@ -727,6 +753,11 @@
     function getOverrideTranslations() {
         window.postMessage('getOverrideTranslations')
             .then(msg => $('#overrideTranslations').prop('checked', !!msg[0].overrideTranslations));
+    }
+
+    function getContentSegmentation() {
+        window.postMessage('getContentSegmentation')
+            .then(msg => $('#contentSegmentation').prop('checked', !!msg[0].contentSegmentation));
     }
 
     function getKeyNamingOptions() {
