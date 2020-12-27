@@ -59,7 +59,7 @@
             "settingsTab": "Settings",
             "contactUsTab": "Contact Us",
             "selectProjectLabel": "Select Project:",
-            "selectBranchLabel": "Specify branch:",
+            "selectBranchLabel": "Branch:",
             "overrideTranslationsLabel": "Override existing translations",
             "contentSegmentationLabel": "Content segmentation",
             "stringsKeyNamingLabel": "Key naming pattern:",
