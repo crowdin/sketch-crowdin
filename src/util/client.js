@@ -1,7 +1,7 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
-import { PROJECT_ID } from '../constants';
+import { PROJECT_ID, BRANCH_ID } from '../constants';
 import { handleError, createClient } from './http';
 import { default as displayTexts } from '../../assets/texts.json';
 
@@ -35,6 +35,40 @@ async function getProjects() {
         handleError(error);
         return {
             projects: []
+        };
+    }
+}
+
+async function getBranches() {
+    try {
+        if (!dom.getSelectedDocument()) {
+            throw displayTexts.notifications.warning.selectDocument;
+        }
+        const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+        if (!projectId) {
+            throw displayTexts.notifications.warning.selectProject;
+        }
+        ui.message(displayTexts.notifications.info.loadingBranches);
+        const { sourceFilesApi } = createClient();
+        const branches = await sourceFilesApi.withFetchAll().listProjectBranches(projectId);
+        let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
+        if (!branchId || !branches.data.map(b => b.data.id).includes(branchId)) {
+            branchId = -1;
+        }
+        return {
+            selectedBranchId: branchId,
+            branches: branches.data.map(p => {
+                return {
+                    id: p.data.id,
+                    name: p.data.name
+                };
+            })
+        }
+    } catch (error) {
+        handleError(error);
+        return {
+            selectedBranchId: -1,
+            branches: []
         };
     }
 }
@@ -137,4 +171,4 @@ function convertCrowdinStringsToStrings(crowdinStrings) {
         .filter(e => e.text && e.text.length > 0);
 }
 
-export { getProjects, getLanguages, getFiles, getStrings, fetchStrings };
+export { getProjects, getBranches, getLanguages, getFiles, getStrings, fetchStrings };

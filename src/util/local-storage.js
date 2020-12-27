@@ -162,4 +162,11 @@ function saveTags(doc, tags) {
     settings.setDocumentSettingForKey(doc, 'crowdin-tags', JSON.stringify(tags || []));
 }
 
-export { removeTranslatedElements, getAmountOfTranslatedElements, addTranslatedElement, getListOfTranslatedElements, getTags, saveTags };
+export {
+    removeTranslatedElements,
+    getAmountOfTranslatedElements,
+    addTranslatedElement,
+    getListOfTranslatedElements,
+    getTags,
+    saveTags
+};

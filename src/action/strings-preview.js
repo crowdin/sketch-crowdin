@@ -106,6 +106,4 @@ function extractPageTranslations(languageName, document, page, translations) {
 
 }
 
-
-
 export { stringsPreview };
