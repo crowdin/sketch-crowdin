@@ -1,7 +1,7 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
-import { PROJECT_ID, ACCESS_TOKEN_KEY, TEXT_TYPE, SYMBOL_TYPE } from '../constants';
+import { PROJECT_ID, ACCESS_TOKEN_KEY, TEXT_TYPE, SYMBOL_TYPE, BRANCH_ID } from '../constants';
 import * as domUtil from '../util/dom';
 import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
@@ -21,6 +21,8 @@ async function translate(languageId, wholePage) {
         }
         const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
+        let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
+        branchId = !!branchId && branchId > 0 ? branchId : undefined;
         let artboard;
 
         if (!selectedPage) {
@@ -68,7 +70,7 @@ async function translate(languageId, wholePage) {
 
         if (selectedLanguages.length > 0) {
             try {
-                const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId);
+                const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId, branchId);
                 const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
                 if (!directory) {
                     if (wholePage) {

@@ -109,9 +109,11 @@ async function getFiles() {
         if (!projectId) {
             throw displayTexts.notifications.warning.selectProject;
         }
+        let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
+        branchId = !!branchId && branchId > 0 ? branchId : undefined;
         ui.message(displayTexts.notifications.info.loadingFiles);
         const { sourceFilesApi } = createClient();
-        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId);
+        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId);
         return files.data.map(e => {
             return {
                 id: e.data.id,
@@ -135,7 +137,7 @@ async function getStrings() {
             throw displayTexts.notifications.warning.selectProject;
         }
         ui.message(displayTexts.notifications.info.loadingStrings);
-        const strings = await fetchStrings(projectId, createClient().sourceStringsApi);
+        const strings = await fetchStrings(projectId);
         if (strings.length === 0) {
             throw displayTexts.notifications.warning.noStrings;
         }
@@ -146,9 +148,18 @@ async function getStrings() {
     }
 }
 
-async function fetchStrings(projectId, sourceStringsApi) {
+async function fetchStrings(projectId) {
+    const { sourceStringsApi, sourceFilesApi } = createClient();
     const res = await sourceStringsApi.withFetchAll().listProjectStrings(projectId);
-    return convertCrowdinStringsToStrings(res.data);
+    let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
+    branchId = !!branchId && branchId > 0 ? branchId : undefined;
+    const strings = convertCrowdinStringsToStrings(res.data);
+    if (branchId) {
+        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId);
+        const fileIds = files.data.map(f => f.data.id);
+        return strings.filter(s => fileIds.includes(s.fileId));
+    }
+    return strings;
 }
 
 function convertCrowdinStringsToStrings(crowdinStrings) {
