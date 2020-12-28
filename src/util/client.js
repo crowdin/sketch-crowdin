@@ -113,7 +113,7 @@ async function getFiles() {
         branchId = !!branchId && branchId > 0 ? branchId : undefined;
         ui.message(displayTexts.notifications.info.loadingFiles);
         const { sourceFilesApi } = createClient();
-        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId);
+        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId, undefined, undefined, undefined, true);
         return files.data.map(e => {
             return {
                 id: e.data.id,
