@@ -5,6 +5,19 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0]
+
+### Added
+
+- Search strings by identifier ([#44](https://github.com/crowdin/sketch-crowdin/pull/44))
+- Content segmentation option ([#45](https://github.com/crowdin/sketch-crowdin/pull/45))
+- Additional file type which can be edited ([#44](https://github.com/crowdin/sketch-crowdin/pull/44))
+- Info icon with information about string identifier, context and file ([#45](https://github.com/crowdin/sketch-crowdin/pull/45))
+
+### Fixed
+
+- Fixed messages with long text ([#45](https://github.com/crowdin/sketch-crowdin/pull/45))
+
 ## [2.1.2]
 
 ### Fixed
