@@ -155,7 +155,7 @@ async function fetchStrings(projectId) {
     branchId = !!branchId && branchId > 0 ? branchId : undefined;
     const strings = convertCrowdinStringsToStrings(res.data);
     if (branchId) {
-        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId);
+        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId, undefined, undefined, undefined, true);
         const fileIds = files.data.map(f => f.data.id);
         return strings.filter(s => fileIds.includes(s.fileId));
     }
