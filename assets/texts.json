@@ -70,7 +70,7 @@
             "overrideTranslationsText": "Override existing translated pages and artboards and keep only the latest version for each language",
             "contentSegmentationText": "Defines whether to split long texts into smaller text segments when sending texts to Crowdin",
             "stringsKeyNamingText": "Pattern which will be used to autocomplete string identifier if it was added from design",
-            "branchText": "Specify the branch you want to work on. Branches help to manage different versions of the content",
+            "branchText": "Specify the branch for content synchronization. Work on branches to localize different product versions",
             "organizationLabel": "Organization",
             "organizationDetailsText": "Fill in your organization domain name (for Crowdin Enterprise only)",
             "connectToCrowdinButton": "Connect to Crowdin",
