@@ -15,16 +15,16 @@
                     <li class="nav-item" data-toggle="tooltip" data-id="settings" placement="bottom"
                         crowdin-ui-text-details="translationsDetails">
                         <a crowdin-ui-text-label="translationTab" id="translation-nav" class="nav-link" href="#"
-                            onclick="openModal('translation');cancelEditString();getLanguages();"></a>
+                            onclick="openModal('translation');"></a>
                     </li>
                     <li class="nav-item" data-toggle="tooltip" data-placement="bottom"
                         crowdin-ui-text-details="stringsDetails">
                         <a crowdin-ui-text-label="stringsTab" id="strings-mode-nav" class="nav-link" href="#"
-                            onclick="openModal('strings-mode');getStrings();"></a>
+                            onclick="openModal('strings-mode');"></a>
                     </li>
                     <li class="nav-item">
                         <a crowdin-ui-text-label="settingsTab" id="settings-nav" class="nav-link active" href="#"
-                            onclick="openModal('settings');cancelEditString();"></a>
+                            onclick="openModal('settings');"></a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right pr-2">
@@ -35,40 +35,11 @@
         <main role="main">
             <div class="container" id="settings">
                 <form>
-                    <div class="form-group project-select d-flex flex-row">
+                    <div class="form-group inline-select d-flex flex-row">
                         <label crowdin-ui-text-label="selectProjectLabel"></label>
-                        <div class="project-select-holder ml-2">
-                            <select id="projects" onchange="saveProject()"></select>
+                        <div class="inline-select-holder ml-2">
+                            <select id="projects" onchange="onUpdateProject()"></select>
                         </div>
-                    </div>
-                    <div class="form-group mb-3">
-                        <div>
-                            <label crowdin-ui-text-label="overrideTranslationsLabel" class="mb-0">
-                            </label>
-                            <input type="checkbox" class="ml-1 mt-1" id="overrideTranslations"
-                                onchange="saveOverrideTranslations()">
-                        </div>
-                        <p crowdin-ui-text-label="overrideTranslationsText" class="form-text text-muted help-text">
-                        </p>
-                    </div>
-                    <div class="form-group mb-3">
-                        <div>
-                            <label crowdin-ui-text-label="contentSegmentationLabel" class="mb-0">
-                            </label>
-                            <input type="checkbox" class="ml-1 mt-1" id="contentSegmentation"
-                                onchange="saveContentSegmentation()">
-                        </div>
-                        <p crowdin-ui-text-label="contentSegmentationText" class="form-text text-muted help-text">
-                        </p>
-                    </div>
-                    <div class="form-group mb-3">
-                        <div>
-                            <label crowdin-ui-text-label="stringsKeyNamingLabel"></label>
-                            <select class="ml-2" id="stringsKeyNaming" onchange="saveKeyNamingOption()">
-                            </select>
-                        </div>
-                        <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
-                        </p>
                     </div>
                     <fieldset class="mt-4">
                         <label crowdin-ui-text-label="connectionDetailsLabel" class="fieldset-label"></label>
@@ -85,6 +56,54 @@
                             </p>
                             <button crowdin-ui-text-label="connectToCrowdinButton" type="button"
                                 class="btn btn-primary btn-sm" onclick="saveCredentials()"></button>
+                        </div>
+                    </fieldset>
+                    <fieldset class="mt-4">
+                        <label crowdin-ui-text-label="advancedSettingsLabel" class="fieldset-label"></label>
+                        <div class="adv-settings-container">
+                            <div class="form-group mb-3">
+                                <div>
+                                    <label crowdin-ui-text-label="overrideTranslationsLabel" class="mb-0">
+                                    </label>
+                                    <input type="checkbox" class="ml-1 mt-1" id="overrideTranslations"
+                                        onchange="saveOverrideTranslations()">
+                                </div>
+                                <p crowdin-ui-text-label="overrideTranslationsText"
+                                    class="form-text text-muted help-text">
+                                </p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <div>
+                                    <label crowdin-ui-text-label="contentSegmentationLabel" class="mb-0">
+                                    </label>
+                                    <input type="checkbox" class="ml-1 mt-1" id="contentSegmentation"
+                                        onchange="saveContentSegmentation()">
+                                </div>
+                                <p crowdin-ui-text-label="contentSegmentationText"
+                                    class="form-text text-muted help-text">
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <div class="inline-select d-flex flex-row">
+                                    <label crowdin-ui-text-label="stringsKeyNamingLabel"></label>
+                                    <div class="inline-select-holder ml-2">
+                                        <select id="stringsKeyNaming" onchange="saveKeyNamingOption()">
+                                        </select>
+                                    </div>
+                                </div>
+                                <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <div class="inline-select d-flex flex-row">
+                                    <label crowdin-ui-text-label="selectBranchLabel"></label>
+                                    <div class="inline-select-holder ml-2">
+                                        <select id="branches" onchange="saveBranch().then(clearStorage)"></select>
+                                    </div>
+                                </div>
+                                <p crowdin-ui-text-label="branchText" class="form-text text-muted help-text">
+                                </p>
+                            </div>
                         </div>
                     </fieldset>
                 </form>
@@ -256,14 +275,20 @@
 
     //initial view
     var openedModal = 'settings';
-    getCredentials();
-    getProjects();
-    getOverrideTranslations();
-    getContentSegmentation();
-    getKeyNamingOptions();
+
+    //initialization of the settings modal
+    showLoading();
+    getCredentials()
+        .then(getOverrideTranslations)
+        .then(getContentSegmentation)
+        .then(getKeyNamingOptions)
+        .then(getProjects)
+        .then(getBranches)
+        .finally(hideLoading);
 
     var validationMessages = {};
     var allLanguagesOption;
+    var noBranchOption;
 
     var languages;
     var strings;
@@ -290,6 +315,40 @@
         $(`#${modal}`).show();
         $(`#${modal}-nav`).addClass('active');
         openedModal = modal;
+        switch (modal) {
+            case 'strings-mode':
+                openStringsMode();
+                break;
+            case 'translation':
+                cancelEditString();
+                openTranslationsTab();
+                break;
+            case 'settings':
+                cancelEditString();
+                break;
+        }
+    }
+
+    function contactUsClick() {
+        window.postMessage('contactUs');
+    }
+
+    function openTranslationsTab() {
+        if (!languages) {
+            showLoading();
+            return getLanguages()
+                .finally(hideLoading);
+        }
+    }
+
+    function openStringsMode() {
+        if (!strings || !files || !languages) {
+            showLoading();
+            return getFiles()
+                .then(getStrings)
+                .then(getLanguages)
+                .finally(hideLoading);
+        }
     }
 
     function showLoading() {
@@ -302,10 +361,6 @@
         $('#modalFade').hide();
     }
 
-    function contactUsClick() {
-        window.postMessage('contactUs');
-    }
-
     //settings
 
     function getCredentials() {
@@ -316,32 +371,49 @@
     }
 
     function saveCredentials() {
+        showLoading();
         const token = $('#token').val();
         const organization = $('#organization').val();
-        window.postMessage('saveCredentials', { token, organization })
+        return window.postMessage('saveCredentials', { token, organization })
             .then(getCredentials)
             .then(getProjects)
-            .then(saveProject);
+            .then(saveProject)
+            .then(getBranches)
+            .then(saveBranch)
+            .then(clearStorage)
+            .finally(hideLoading);
+    }
+
+    function onUpdateProject() {
+        showLoading();
+        return saveProject()
+            .then(getBranches)
+            .then(saveBranch)
+            .then(clearStorage)
+            .finally(hideLoading);
     }
 
     function saveProject() {
         const projectId = $('#projects option:selected').val();
-        window.postMessage('saveProject', projectId)
-            .then(clearStorage);
+        return window.postMessage('saveProject', projectId);
+    }
+
+    function saveBranch() {
+        const branchId = Number($('#branches option:selected').val());
+        return window.postMessage('saveBranch', branchId);
     }
 
     function saveOverrideTranslations() {
-        window.postMessage('saveOverrideTranslations', $('#overrideTranslations').prop('checked'));
+        return window.postMessage('saveOverrideTranslations', $('#overrideTranslations').prop('checked'));
     }
 
     function saveContentSegmentation() {
-        window.postMessage('saveContentSegmentation', $('#contentSegmentation').prop('checked'));
+        return window.postMessage('saveContentSegmentation', $('#contentSegmentation').prop('checked'));
     }
 
     function saveKeyNamingOption() {
         const option = Number($('#stringsKeyNaming option:selected').val());
-        window.postMessage('saveKeyPatternOption', option)
-            .then(clearStorage);
+        return window.postMessage('saveKeyPatternOption', option);
     }
 
     //translation
@@ -349,12 +421,12 @@
     function translateComponent(wholePage) {
         showLoading();
         const languageId = $('#languages option:selected').val();
-        window.postMessage('translate', languageId, wholePage).then(hideLoading);
+        return window.postMessage('translate', languageId, wholePage).finally(hideLoading);
     }
 
     function sendStrings(wholePage) {
         showLoading();
-        window.postMessage('sendStrings', wholePage).then(hideLoading);
+        return window.postMessage('sendStrings', wholePage).finally(hideLoading);
     }
 
     //strings mode
@@ -364,94 +436,29 @@
         const id = Number($(e).attr('int-id'));
         const identifier = $(e).attr('str-id');
         const text = $(e).text().trim();
-        window.postMessage('useString', [{ id, text, identifier }]).then(() => {
-            search();
-            hideLoading();
-        });
+        return window.postMessage('useString', [{ id, text, identifier }])
+            .then(search)
+            .finally(hideLoading);
     }
 
     function deselectString(e) {
         showLoading();
         const id = Number($(e).attr('int-id'));
-        window.postMessage('deselectString', id).then(() => {
-            search();
-            hideLoading();
-        });
+        return window.postMessage('deselectString', id)
+            .then(search)
+            .finally(hideLoading);
     }
 
     function uploadScreenshots() {
         showLoading();
-        window.postMessage('uploadScreenshots').then(hideLoading);
+        return window.postMessage('uploadScreenshots').finally(hideLoading);
     }
 
     function stringsPreview() {
         showLoading();
         const id = $('#languages-preview option:selected').val();
         const name = $('#languages-preview option:selected').text();
-        window.postMessage('stringsPreview', { id, name }).then(hideLoading);
-    }
-
-    function search() {
-        const editIcon = `
-            <svg class="float-right string-row-edit" onclick="openEditString(this);" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
-                <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
-            </svg>
-        `;
-
-        const checkIcon = `
-            <svg class="float-left" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
-            </svg>
-        `;
-
-        const checkIconBlank = `
-            <svg class="float-left" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" opacity="0.0" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
-            </svg>
-        `;
-
-        const infoIconTemplate = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info">
-                <title>Context:\n%context%\n\nIdentifier:\n%identifier%\n\nFile:\n%file%</title>
-                <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path>
-            </svg>
-        `;
-
-        let text = $('#search-text').val();
-        if (text) {
-            text = text.trim().toLowerCase();
-        }
-        const arr = strings || [];
-        const filteredStrings = (!text || text.length === 0)
-            ? arr
-            : arr.filter(str => str.text.toLowerCase().includes(text) || (str.identifier && str.identifier.toLowerCase().includes(text)));
-        window.postMessage('getUsedStrings')
-            .then((e) => {
-                const usedStrings = e[0];
-                const texts = filteredStrings.map(str => {
-                    const isUsed = usedStrings.includes(str.id);
-                    const file = files.find(f => f.id === str.fileId);
-                    const editable = file && editableFileTypes.includes(file.type);
-                    const infoIcon = infoIconTemplate
-                        .replace('%context%', str.context)
-                        .replace('%identifier%', str.identifier ? str.identifier : str.text)
-                        .replace('%file%', file ? file.name : '');
-                    return `
-                        ${isUsed ? checkIcon : checkIconBlank}${infoIcon}${editable ? editIcon : ''}
-                        <p
-                            class="string-row"
-                            onclick="useString(this)"
-                            ${isUsed ? 'oncontextmenu="deselectString(this);return false;"' : ''}
-                            int-id="${str.id}"
-                            ${!!str.identifier ? `str-id="${str.identifier}"` : ''}
-                        >
-                            ${str.text}
-                        </p>
-                    `;
-                });
-                $('#strings-container').find('p, svg').remove().end().append(texts);
-            });
+        return window.postMessage('stringsPreview', { id, name }).finally(hideLoading);
     }
 
     //strings management
@@ -594,10 +601,10 @@
                     if (!e[0].error) {
                         strings = strings.filter(e => e.id !== openedString);
                         cancelEditString();
-                        search();
+                        return search();
                     }
-                    hideLoading();
-                });
+                })
+                .finally(hideLoading);
         } else {
             cancelEditString();
         }
@@ -667,9 +674,9 @@
                 })
                 .then(() => {
                     cancelEditString();
-                    search();
-                    hideLoading();
-                });
+                    return search();
+                })
+                .finally(hideLoading);
             return;
         }
         $('#invalidString').text('');
@@ -693,10 +700,10 @@
                             return s;
                         });
                         cancelEditString();
-                        search();
+                        return search();
                     }
-                    hideLoading();
-                });
+                })
+                .finally(hideLoading);
         } else {
             //adding single string
             const identifier = $('#string-identifier').val();
@@ -739,29 +746,29 @@
                                 }])
                                 .then(() => {
                                     cancelEditString();
-                                    search();
+                                    return search();
                                 });
                         }
                     }
                 })
-                .then(hideLoading);
+                .finally(hideLoading);
         }
     }
 
     //data loading functions
 
     function getOverrideTranslations() {
-        window.postMessage('getOverrideTranslations')
+        return window.postMessage('getOverrideTranslations')
             .then(msg => $('#overrideTranslations').prop('checked', !!msg[0].overrideTranslations));
     }
 
     function getContentSegmentation() {
-        window.postMessage('getContentSegmentation')
+        return window.postMessage('getContentSegmentation')
             .then(msg => $('#contentSegmentation').prop('checked', !!msg[0].contentSegmentation));
     }
 
     function getKeyNamingOptions() {
-        window.postMessage('getKeyPatternOptions')
+        return window.postMessage('getKeyPatternOptions')
             .then(info => {
                 const options = info[0];
                 const html = options.map(o => {
@@ -776,7 +783,6 @@
     }
 
     function getProjects() {
-        showLoading();
         return window.postMessage('getProjects')
             .then(info => {
                 const projectsInfo = info[0];
@@ -788,13 +794,11 @@
                     }
                 }).join('');
                 $('#projects').find('option').remove().end().append(options);
-            })
-            .then(hideLoading);
+            });
     }
 
     function getLanguages() {
         if (!languages) {
-            showLoading();
             return window.postMessage('getLanguages')
                 .then(res => {
                     languages = res[0];
@@ -804,8 +808,7 @@
                     }).join('');
                     $('#languages').find('option').remove().end().append(options);
                     $('#languages-preview').find('option').remove().end().append(options);
-                })
-                .then(hideLoading);
+                });
         } else {
             return new Promise((res, rej) => {
                 res();
@@ -834,16 +837,10 @@
 
     function getStrings() {
         if (!strings) {
-            showLoading();
-            return getFiles()
-                .then(() => {
-                    return window.postMessage('getStrings')
-                        .then(res => {
-                            strings = res[0];
-                            search();
-                        })
-                        .then(getLanguages)
-                        .finally(hideLoading);
+            return window.postMessage('getStrings')
+                .then(res => {
+                    strings = res[0];
+                    return search();
                 });
         } else {
             return new Promise((res, rej) => {
@@ -852,12 +849,90 @@
         }
     }
 
+    function getBranches() {
+        return window.postMessage('getBranches')
+            .then(res => {
+                var resp = res[0];
+                var selectedBranch = resp.selectedBranchId;
+                let options = `<option value="-1" ${selectedBranch < 0 ? 'selected' : ''}>${noBranchOption || ''}</option>`;
+                options += resp.branches
+                    .map(br => {
+                        return `<option value="${br.id}" ${br.id === selectedBranch ? 'selected' : ''}>${br.name}</option>`;
+                    }).join('');
+                $('#branches').find('option').remove().end().append(options);
+            });
+    }
+
+    function search() {
+        const editIcon = `
+            <svg class="float-right string-row-edit" onclick="openEditString(this);" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
+                <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
+            </svg>
+        `;
+
+        const checkIcon = `
+            <svg class="float-left" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
+            </svg>
+        `;
+
+        const checkIconBlank = `
+            <svg class="float-left" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" opacity="0.0" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
+            </svg>
+        `;
+
+        const infoIconTemplate = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info">
+                <title>Context:\n%context%\n\nIdentifier:\n%identifier%\n\nFile:\n%file%</title>
+                <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path>
+            </svg>
+        `;
+
+        let text = $('#search-text').val();
+        if (text) {
+            text = text.trim().toLowerCase();
+        }
+        const arr = strings || [];
+        const filteredStrings = (!text || text.length === 0)
+            ? arr
+            : arr.filter(str => str.text.toLowerCase().includes(text) || (str.identifier && str.identifier.toLowerCase().includes(text)));
+        return window.postMessage('getUsedStrings')
+            .then((e) => {
+                const usedStrings = e[0];
+                const texts = filteredStrings.map(str => {
+                    const isUsed = usedStrings.includes(str.id);
+                    const file = files.find(f => f.id === str.fileId);
+                    const editable = file && editableFileTypes.includes(file.type);
+                    const infoIcon = infoIconTemplate
+                        .replace('%context%', str.context)
+                        .replace('%identifier%', str.identifier ? str.identifier : str.text)
+                        .replace('%file%', file ? file.name : '');
+                    return `
+                        ${isUsed ? checkIcon : checkIconBlank}${infoIcon}${editable ? editIcon : ''}
+                        <p
+                            class="string-row"
+                            onclick="useString(this)"
+                            ${isUsed ? 'oncontextmenu="deselectString(this);return false;"' : ''}
+                            int-id="${str.id}"
+                            ${!!str.identifier ? `str-id="${str.identifier}"` : ''}
+                        >
+                            ${str.text}
+                        </p>
+                    `;
+                });
+                $('#strings-container').find('p, svg').remove().end().append(texts);
+            });
+    }
+
     //texts
     function loadText() {
         window.postMessage('getTexts').then(e => {
             const uiTexts = e[0].ui;
             validationMessages = uiTexts.validation;
             allLanguagesOption = uiTexts.labels.allLanguagesOption;
+            noBranchOption = uiTexts.labels.noBranchOption;
             const labels = $('[crowdin-ui-text-label]');
             for (let i = 0; i < labels.length; i++) {
                 const label = $(labels[i]);

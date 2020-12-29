@@ -1,7 +1,7 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
-import { PROJECT_ID } from '../constants';
+import { PROJECT_ID, BRANCH_ID } from '../constants';
 import { handleError, createClient } from './http';
 import { default as displayTexts } from '../../assets/texts.json';
 
@@ -35,6 +35,40 @@ async function getProjects() {
         handleError(error);
         return {
             projects: []
+        };
+    }
+}
+
+async function getBranches() {
+    try {
+        if (!dom.getSelectedDocument()) {
+            throw displayTexts.notifications.warning.selectDocument;
+        }
+        const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+        if (!projectId) {
+            throw displayTexts.notifications.warning.selectProject;
+        }
+        ui.message(displayTexts.notifications.info.loadingBranches);
+        const { sourceFilesApi } = createClient();
+        const branches = await sourceFilesApi.withFetchAll().listProjectBranches(projectId);
+        let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
+        if (!branchId || !branches.data.map(b => b.data.id).includes(branchId)) {
+            branchId = -1;
+        }
+        return {
+            selectedBranchId: branchId,
+            branches: branches.data.map(p => {
+                return {
+                    id: p.data.id,
+                    name: p.data.name
+                };
+            })
+        }
+    } catch (error) {
+        handleError(error);
+        return {
+            selectedBranchId: -1,
+            branches: []
         };
     }
 }
@@ -75,9 +109,11 @@ async function getFiles() {
         if (!projectId) {
             throw displayTexts.notifications.warning.selectProject;
         }
+        let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
+        branchId = !!branchId && branchId > 0 ? branchId : undefined;
         ui.message(displayTexts.notifications.info.loadingFiles);
         const { sourceFilesApi } = createClient();
-        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId);
+        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId, undefined, undefined, undefined, true);
         return files.data.map(e => {
             return {
                 id: e.data.id,
@@ -101,7 +137,7 @@ async function getStrings() {
             throw displayTexts.notifications.warning.selectProject;
         }
         ui.message(displayTexts.notifications.info.loadingStrings);
-        const strings = await fetchStrings(projectId, createClient().sourceStringsApi);
+        const strings = await fetchStrings(projectId);
         if (strings.length === 0) {
             throw displayTexts.notifications.warning.noStrings;
         }
@@ -112,9 +148,18 @@ async function getStrings() {
     }
 }
 
-async function fetchStrings(projectId, sourceStringsApi) {
+async function fetchStrings(projectId) {
+    const { sourceStringsApi, sourceFilesApi } = createClient();
     const res = await sourceStringsApi.withFetchAll().listProjectStrings(projectId);
-    return convertCrowdinStringsToStrings(res.data);
+    let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
+    branchId = !!branchId && branchId > 0 ? branchId : undefined;
+    const strings = convertCrowdinStringsToStrings(res.data);
+    if (branchId) {
+        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId, undefined, undefined, undefined, true);
+        const fileIds = files.data.map(f => f.data.id);
+        return strings.filter(s => fileIds.includes(s.fileId));
+    }
+    return strings;
 }
 
 function convertCrowdinStringsToStrings(crowdinStrings) {
@@ -137,4 +182,4 @@ function convertCrowdinStringsToStrings(crowdinStrings) {
         .filter(e => e.text && e.text.length > 0);
 }
 
-export { getProjects, getLanguages, getFiles, getStrings, fetchStrings };
+export { getProjects, getBranches, getLanguages, getFiles, getStrings, fetchStrings };

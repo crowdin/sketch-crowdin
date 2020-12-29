@@ -35,8 +35,8 @@ async function uploadScreenshots() {
         artboards = artboards.filter(artboard => !translatedArtboards.includes(artboard.id));
 
         //removing obsolete tags
-        const { sourceStringsApi, screenshotsApi } = httpUtil.createClient();
-        const strings = await fetchStrings(projectId, sourceStringsApi);
+        const { screenshotsApi } = httpUtil.createClient();
+        const strings = await fetchStrings(projectId);
         const stringsIds = strings.map(st => st.id)
 
         const screenshotsBefore = [];

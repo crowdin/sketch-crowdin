@@ -640,11 +640,11 @@ select {
     font-size: 1rem;
 }
 
-.project-select label {
+.inline-select label {
     white-space: nowrap;
 }
 
-.project-select-holder {
+.inline-select-holder {
     overflow: hidden;
 
     select {
@@ -731,6 +731,11 @@ button .btn-icon {
     max-height: 200px;
     background-color: #ffffff;
     padding: 0;
+}
+
+.adv-settings-container {
+    overflow-y: scroll;
+    max-height: 190px;
 }
 
 .multi-add-string-form-container {

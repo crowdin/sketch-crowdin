@@ -1,7 +1,7 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
-import { PROJECT_ID, ACCESS_TOKEN_KEY, CONTENT_SEGMENTATION } from '../constants';
+import { PROJECT_ID, ACCESS_TOKEN_KEY, CONTENT_SEGMENTATION, BRANCH_ID } from '../constants';
 import * as domUtil from '../util/dom';
 import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
@@ -55,15 +55,18 @@ async function sendStrings(wholePage) {
 
 async function uploadStrings(page, artboard) {
     const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+    let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
+    branchId = !!branchId && branchId > 0 ? branchId : undefined;
     const { sourceFilesApi, uploadStorageApi } = httpUtil.createClient();
 
-    const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId);
+    const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId, branchId);
     let directory = directories.data.find(d => d.data.name === getDirectoryName(page));
     if (!directory) {
         ui.message(displayTexts.notifications.info.creatingNewDirectory);
         directory = await sourceFilesApi.createDirectory(projectId, {
             name: getDirectoryName(page),
-            title: page.name
+            title: page.name,
+            branchId
         });
     }
 
