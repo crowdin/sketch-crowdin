@@ -4,8 +4,8 @@ import * as domUtil from './dom';
 import { SYMBOL_TYPE, TEXT_TYPE } from '../constants';
 
 function convertOutsideTextToHtml(page) {
-    const outsideText = domUtil.getNonArtboardTexts(page);
-    const outsideSymbols = domUtil.getNonArtboardSymbols(page);
+    const outsideText = dom.find('Text', page).filter(e => !e.getParentArtboard());
+    const outsideSymbols = dom.find('SymbolInstance', page).filter(e => !e.getParentArtboard());
     let html = '<html>';
     html += '<body>';
     outsideText.forEach(t => html += `<div id="${t.id}" stype="${TEXT_TYPE}">${t.text}</div>`);
