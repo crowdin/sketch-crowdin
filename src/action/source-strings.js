@@ -32,6 +32,8 @@ function useString(strings) {
             throw displayTexts.notifications.warning.selectProject;
         }
 
+        const stringsToDeselect = [];
+
         strings.forEach(string => {
             const selectedText = !!string.selectedText
                 ? selectedTexts.find(st => {
@@ -78,14 +80,17 @@ function useString(strings) {
             if (tagIndex < 0) {
                 tags.push(tag);
             } else {
-                //TODO check override and deselect if needed previous string on UI
+                if (tags.filter(t => t.stringId === tags[tagIndex].stringId).length === 1) {
+                    //we are replacing single usage of the string
+                    stringsToDeselect.push(tags[tagIndex].stringId);
+                }
                 tags[tagIndex] = tag;
             }
             localStorage.saveTags(selectedDocument, tags);
         });
         return {
             error: false,
-            stringsToDeselect: []
+            stringsToDeselect
         };
     } catch (error) {
         httpUtil.handleError(error);
