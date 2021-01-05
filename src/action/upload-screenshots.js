@@ -63,9 +63,9 @@ async function uploadScreenshots() {
             if (!e.artboardId) {
                 return !!allTexts.find(t => t.id === e.id);
             }
-            const artboardTexts = artboardsTexts.find(e2 => e2.artboard.id === e.artboardId);
-            if (!!artboardTexts) {
-                const foundText = artboardTexts.texts.find(t => t.textId === e.id && t.type === e.type);
+            const artboardText = artboardsTexts.find(e2 => e2.artboard.id === e.artboardId);
+            if (!!artboardText) {
+                const foundText = artboardText.texts.find(t => t.textId === e.id && t.type === e.type);
                 if (!!foundText) {
                     tempTags.push({
                         ...e,

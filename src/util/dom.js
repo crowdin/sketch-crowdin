@@ -33,7 +33,7 @@ function getSelectedText(page) {
                 selectedTexts.push({
                     element: override,
                     type: SYMBOL_TYPE,
-                    id: override.id,
+                    id: symbol.id + '/' + override.id,
                     group,
                     artboard
                 });
@@ -135,30 +135,12 @@ function getTextElementsInArtboard(artboard) {
                         from: symbol,
                         to: artboard
                     });
-                    let parent = symbol;
-                    let parentId = parent.id;
                     let x = e.frame.x + newRect.x;
                     let y = e.frame.y + newRect.y;
                     const nestedSymbol = symbol.overrides.find(ov => __isSymbolOverrideSymbolInstance(ov) && override.path.startsWith(ov.path + '/'));
                     if (!!nestedSymbol) {
                         x += nestedSymbol.affectedLayer.frame.x;
                         y += nestedSymbol.affectedLayer.frame.y;
-                    }
-                    const parentSymbols = [];
-                    parentSymbols.push(symbol.id);
-                    while (parentId !== artboard.id) {
-                        let current = parent;
-                        parent = parent.parent;
-                        if (parent.type === 'SymbolMaster') {
-                            parent = __getSymbolIstance(artboardSymbols, current.id, parent.id);
-                            if (parent !== null) {
-                                parentSymbols.push(parent.id);
-                            }
-                        }
-                        if (!parent) {
-                            return null;
-                        }
-                        parentId = parent.id;
                     }
                     const frame = { ...e.frame };
                     if (x + e.frame.width >= container.x) {
@@ -167,7 +149,7 @@ function getTextElementsInArtboard(artboard) {
                     if (y + e.frame.height >= container.y) {
                         y = container.y - e.frame.height;
                     }
-                    return { x, y, textId: parentSymbols.reverse().join('/') + '/' + override.id, text, e, frame, type: SYMBOL_TYPE, override };
+                    return { x, y, textId: symbol.id + '/' + override.id, text, e, frame, type: SYMBOL_TYPE, override };
                 });
         })
         .reduce((x, y) => x.concat(y), []);
@@ -191,25 +173,6 @@ function __isSymbolOverrideText(override) {
 
 function __isSymbolOverrideSymbolInstance(override) {
     return override.affectedLayer.type === 'SymbolInstance' && override.property === 'symbolID';
-}
-
-//for nested symbols Sketch API returns SymbolMaster instead of SymbolInstance as a parent group
-//and therefore we cannot calculate (x,y) of the text
-//this function is a workaround to find proper parent element
-//https://github.com/sketch-hq/SketchAPI/issues/689
-function __getSymbolIstance(symbols, symbolInstanceChildId, symbolMasterParentId) {
-    for (let i = 0; i < symbols.length; i++) {
-        const symbol = symbols[i];
-        if (symbol.master.id === symbolMasterParentId) {
-            for (let j = 0; j < symbol.overrides.length; j++) {
-                const override = symbol.overrides[j];
-                if (override.affectedLayer.id === symbolInstanceChildId) {
-                    return symbol;
-                }
-            }
-        }
-    }
-    return null;
 }
 
 export {
