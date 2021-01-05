@@ -78,12 +78,20 @@ function useString(strings) {
             if (tagIndex < 0) {
                 tags.push(tag);
             } else {
+                //TODO check override and deselect if needed previous string on UI
                 tags[tagIndex] = tag;
             }
             localStorage.saveTags(selectedDocument, tags);
         });
+        return {
+            error: false,
+            stringsToDeselect: []
+        };
     } catch (error) {
         httpUtil.handleError(error);
+        return {
+            error: true
+        };
     }
 }
 
@@ -95,8 +103,14 @@ function deselectString(id) {
         }
         const tags = localStorage.getTags(selectedDocument).filter(t => t.stringId !== id);
         localStorage.saveTags(selectedDocument, tags);
+        return {
+            error: false
+        };
     } catch (error) {
         httpUtil.handleError(error);
+        return {
+            error: true
+        };
     }
 }
 
