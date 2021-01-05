@@ -137,11 +137,11 @@ function getTextElementsInArtboard(artboard) {
                     });
                     let x = e.frame.x + newRect.x;
                     let y = e.frame.y + newRect.y;
-                    const nestedSymbol = symbol.overrides.find(ov => __isSymbolOverrideSymbolInstance(ov) && override.path.startsWith(ov.path + '/'));
-                    if (!!nestedSymbol) {
+                    const nestedSymbols = symbol.overrides.filter(ov => __isSymbolOverrideSymbolInstance(ov) && override.path.startsWith(ov.path + '/'));
+                    nestedSymbols.forEach(nestedSymbol => {
                         x += nestedSymbol.affectedLayer.frame.x;
                         y += nestedSymbol.affectedLayer.frame.y;
-                    }
+                    });
                     const frame = { ...e.frame };
                     if (x + e.frame.width >= container.x) {
                         frame.width = container.x - x;
