@@ -135,8 +135,17 @@ function getTextElementsInArtboard(artboard) {
                         from: symbol,
                         to: artboard
                     });
-                    let x = e.frame.x + newRect.x;
-                    let y = e.frame.y + newRect.y;
+
+                    let parentSymbol = symbol.overrides.find(ov => __isSymbolOverrideSymbolInstance(ov) && ov.path + '/' + e.id === override.path);
+                    const master = parentSymbol ? parentSymbol.affectedLayer.master : symbol.master;
+                    const masterFrame = master.frame;
+                    const symbolFrame = parentSymbol ? parentSymbol.affectedLayer.frame : symbol.frame;
+                    parentSymbol = parentSymbol || symbol;
+
+                    const groupFrame = __findGroupFrameForText(e.id, master, []);
+
+                    let x = e.frame.x * (symbolFrame.width / masterFrame.width) + newRect.x + (groupFrame ? groupFrame.x : 0);
+                    let y = e.frame.y * (symbolFrame.height / masterFrame.height) + newRect.y + (groupFrame ? groupFrame.y : 0);
                     const nestedSymbols = symbol.overrides.filter(ov => __isSymbolOverrideSymbolInstance(ov) && override.path.startsWith(ov.path + '/'));
                     nestedSymbols.forEach(nestedSymbol => {
                         x += nestedSymbol.affectedLayer.frame.x;
@@ -173,6 +182,33 @@ function __isSymbolOverrideText(override) {
 
 function __isSymbolOverrideSymbolInstance(override) {
     return override.affectedLayer.type === 'SymbolInstance' && override.property === 'symbolID';
+}
+
+function __findGroupFrameForText(textId, group, previousFrames) {
+    for (const layer of group.layers) {
+        if (layer.type === 'Text' && layer.id === textId && group.type === 'Group') {
+            return previousFrames.reduce(
+                (ac, cur) => {
+                    ac.x += cur.x;
+                    ac.y += cur.y;
+                    return ac;
+                },
+                { x: 0, y: 0 }
+            )
+        } else if (layer.type === 'Group') {
+            const e = __findGroupFrameForText(
+                textId,
+                layer,
+                previousFrames.concat({
+                    x: layer.frame.x,
+                    y: layer.frame.y,
+                })
+            );
+            if (!!e) {
+                return e;
+            }
+        }
+    }
 }
 
 export {
