@@ -32,6 +32,8 @@ function useString(strings) {
             throw displayTexts.notifications.warning.selectProject;
         }
 
+        const stringsToDeselect = [];
+
         strings.forEach(string => {
             const selectedText = !!string.selectedText
                 ? selectedTexts.find(st => {
@@ -78,12 +80,23 @@ function useString(strings) {
             if (tagIndex < 0) {
                 tags.push(tag);
             } else {
+                if (tags.filter(t => t.stringId === tags[tagIndex].stringId).length === 1) {
+                    //we are replacing single usage of the string
+                    stringsToDeselect.push(tags[tagIndex].stringId);
+                }
                 tags[tagIndex] = tag;
             }
             localStorage.saveTags(selectedDocument, tags);
         });
+        return {
+            error: false,
+            stringsToDeselect
+        };
     } catch (error) {
         httpUtil.handleError(error);
+        return {
+            error: true
+        };
     }
 }
 
@@ -95,8 +108,14 @@ function deselectString(id) {
         }
         const tags = localStorage.getTags(selectedDocument).filter(t => t.stringId !== id);
         localStorage.saveTags(selectedDocument, tags);
+        return {
+            error: false
+        };
     } catch (error) {
         httpUtil.handleError(error);
+        return {
+            error: true
+        };
     }
 }
 

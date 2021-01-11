@@ -149,17 +149,12 @@ async function getStrings() {
 }
 
 async function fetchStrings(projectId) {
-    const { sourceStringsApi, sourceFilesApi } = createClient();
+    const { sourceStringsApi } = createClient();
     const res = await sourceStringsApi.withFetchAll().listProjectStrings(projectId);
     let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
     branchId = !!branchId && branchId > 0 ? branchId : undefined;
     const strings = convertCrowdinStringsToStrings(res.data);
-    if (branchId) {
-        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId, undefined, undefined, undefined, true);
-        const fileIds = files.data.map(f => f.data.id);
-        return strings.filter(s => fileIds.includes(s.fileId));
-    }
-    return strings;
+    return strings.filter(s => !branchId || s.branchId === branchId);
 }
 
 function convertCrowdinStringsToStrings(crowdinStrings) {
@@ -176,7 +171,7 @@ function convertCrowdinStringsToStrings(crowdinStrings) {
                     text.other || '';
             }
             return {
-                text, id: e.id, fileId: e.fileId, identifier: e.identifier, context: e.context
+                text, id: e.id, fileId: e.fileId, identifier: e.identifier, context: e.context, branchId: e.branchId
             }
         })
         .filter(e => e.text && e.text.length > 0);

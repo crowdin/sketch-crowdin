@@ -99,7 +99,8 @@
             "uploadTranslationsForArtboardButtonLabel": "Artboard",
             "loadingDialog": "Loading...",
             "allLanguagesOption": "All Languages",
-            "noBranchOption": "Not specified"
+            "noBranchOption": "Not specified",
+            "stringsReloadButtonLabel": "Fetch strings from Crowdin"
         },
         "details": {
             "translationsDetails": "Generate multi-language creative assets like banners or social media graphics. Send designs for translation and upload translated copies back.",
