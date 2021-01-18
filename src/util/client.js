@@ -114,16 +114,67 @@ async function getFiles() {
         ui.message(displayTexts.notifications.info.loadingFiles);
         const { sourceFilesApi } = createClient();
         const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId, undefined, undefined, undefined, true);
-        return files.data.map(e => {
-            return {
-                id: e.data.id,
-                name: e.data.path,
-                type: e.data.type
-            };
-        });
+        return files.data
+            .map(e => e.data)
+            .sort(sortFiles)
+            .map(e => {
+                return {
+                    id: e.id,
+                    name: e.path,
+                    type: e.type
+                };
+            });
     } catch (error) {
         handleError(error);
         return [];
+    }
+}
+
+function sortFiles(file1, file2) {
+    if (file1.branchId && !file2.branchId) {
+        return -1;
+    } else if (!file1.branchId && file2.branchId) {
+        return 1;
+    } else if (file1.branchId !== file2.branchId) {
+        const branch1 = file1.path.split('/')[1];
+        const branch2 = file2.path.split('/')[1];
+        return branch1.localeCompare(branch2);
+    } else {
+        const path1 = file1.path.split('/');
+        path1.shift();
+        const path2 = file2.path.split('/');
+        path2.shift();
+        for (let i = 0; ; i++) {
+            if (path1.length === i && path2.length > i) {
+                return 1;
+            } else if (path1.length > i && path2.length === i) {
+                return -1;
+            } else {
+                const isLast1 = path1.length === i + 1;
+                const isLast2 = path2.length === i + 1;
+                if (path1[i] !== path2[i]) {
+                    if (!isLast1 && isLast2) {
+                        return -1;
+                    } else if (isLast1 && !isLast2) {
+                        return 1;
+                    } else {
+                        if (path1[i] > path2[i]) {
+                            return 1;
+                        } else if (path1[i] < path2[i]) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                } else {
+                    if (!isLast1 && isLast2) {
+                        return -1;
+                    } else if (isLast1 && !isLast2) {
+                        return 1;
+                    }
+                }
+            }
+        }
     }
 }
 
