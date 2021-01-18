@@ -3,7 +3,7 @@
   "displayName": "Crowdin plugin for Sketch",
   "description": "Localize the UI before programming starts. Translate and preview any design with ease",
   "publisher": "Crowdin",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "engines": {
     "sketch": ">=3.0"
   },
