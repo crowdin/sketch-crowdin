@@ -5,6 +5,23 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1]
+
+### Added
+
+- Strings reload button ([#50](https://github.com/crowdin/sketch-crowdin/pull/50))
+- Sorted files based on several parameters ([#51](https://github.com/crowdin/sketch-crowdin/pull/51))
+
+### Updated
+
+- Improved strings select/deselect performance ([#50](https://github.com/crowdin/sketch-crowdin/pull/50))
+- Significantly improved text coordinates ([#50](https://github.com/crowdin/sketch-crowdin/pull/50))
+- Improved loading strings for the specific branch ([#50](https://github.com/crowdin/sketch-crowdin/pull/50))
+
+### Fixed
+
+- Fixed info icon color ([#50](https://github.com/crowdin/sketch-crowdin/pull/50))
+
 ## [2.3.0]
 
 ### Added
