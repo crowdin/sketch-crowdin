@@ -78,6 +78,7 @@
             "useStringDetailsText": "Use source string for your text component in the design",
             "addStringStringLabel": "String",
             "addStringIdentifierLabel": "Identifier",
+            "addStringMaxLengthLabel": "Translation Text Length Limit",
             "addStringFileLabel": "File",
             "addStringSaveButtonLabel": "Save",
             "addStringCancelButtonLabel": "Cancel",
@@ -107,11 +108,13 @@
             "stringsDetails": "Streamline UI localization. Get real texts from Crowdin and update source files with the new strings. Send screenshots for translators’ reference and preview the translated versions in Sketch.",
             "addStringStringDetails": "Fill in text string you'd like to add to the Crowdin project",
             "addStringIdentifierDetails": "A unique identifier of this string. It helps to match source and translated texts in your application",
+            "addStringMaxLengthDetails": "The maximum length of the translated text (0 — unlimited)",
             "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES."
         },
         "validation": {
             "addStringEmptyString": "Please, insert the source string",
             "addStringEmptyIdentifier": "Fill in the identifier for the source string",
+            "addStringInvalidMaxLength": "Max length should be zero or positive number",
             "addStringEmptyFile": "Select the source file to add the new string to"
         }
     }

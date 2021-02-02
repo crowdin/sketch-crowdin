@@ -158,7 +158,7 @@
                             <div id="new-string-form" style="display: none;">
                                 <div class="form-group">
                                     <div class="form-row">
-                                        <div class="col-3 text-right">
+                                        <div class="col-3 text-left">
                                             <label><abbr crowdin-ui-text-label="addStringIdentifierLabel"
                                                     crowdin-ui-text-details="addStringIdentifierDetails"></abbr></label>
                                         </div>
@@ -166,6 +166,16 @@
                                             <input type="text" class="form-control" id="string-identifier"
                                                 placeholder="identifier">
                                             <label style="color: red;" id="invalidIdentifier"></label>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-8 text-left">
+                                            <label><abbr crowdin-ui-text-label="addStringMaxLengthLabel"
+                                                    crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
+                                        </div>
+                                        <div class="col-4">
+                                            <input min="0" type="number" class="form-control" id="string-max-length" value="0">
+                                            <label style="color: red;" id="invalidMaxLength"></label>
                                         </div>
                                     </div>
                                 </div>
@@ -522,11 +532,13 @@
             if (selectedText.length === 0) {
                 $('#string-text').val('');
                 $('#string-identifier').val('');
+                $('#string-max-length').val('0');
                 $('#multi-string-form').hide();
                 $('#single-string-form').show();
             } else if (selectedText.length === 1) {
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
+                $('#string-max-length').val(selectedText[0].text.length * 1.3 | 0);
                 $('#multi-string-form').hide();
                 $('#single-string-form').show();
             } else {
@@ -625,6 +637,7 @@
         $('#edit-string').hide();
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
+        $('#invalidMaxLength').text('');
         $('#invalidFile').text('');
         selectedText.length = 0;
     }
@@ -717,6 +730,7 @@
         }
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
+        $('#invalidMaxLength').text('');
         $('#invalidFile').text('');
         const text = $('#string-text').val();
         if (!text || text.length === '') {
@@ -743,9 +757,14 @@
         } else {
             //adding single string
             const identifier = $('#string-identifier').val();
+            const maxLength = Number($('#string-max-length').val());
             const file = $('#string-files option:selected').val();
             if (!identifier || identifier.length === '') {
                 $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
+                return;
+            }
+            if ($('#string-max-length').val().length === 0 || isNaN(maxLength) || maxLength < 0) {
+                $('#invalidMaxLength').text(validationMessages.addStringInvalidMaxLength || 'Invalid');
                 return;
             }
             if (!file) {
@@ -756,6 +775,7 @@
             const req = {
                 text,
                 identifier,
+                maxLength,
                 fileId: Number(file)
             };
             window.postMessage('addString', req)
@@ -779,13 +799,13 @@
                                     text,
                                     identifier,
                                     selectedText: selectedText[0]
-                                }])
-                                .then(() => {
-                                    cancelEditString();
-                                    return search();
-                                });
+                                }]);
                         }
                     }
+                })
+                .then(() => {
+                    cancelEditString();
+                    return search();
                 })
                 .finally(hideLoading);
         }
