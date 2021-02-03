@@ -56,6 +56,8 @@
                             </p>
                             <button crowdin-ui-text-label="connectToCrowdinButton" type="button"
                                 class="btn btn-primary btn-sm" onclick="saveCredentials()"></button>
+                            <button crowdin-ui-text-label="logoutButton" type="button"
+                                class="btn btn-secondary btn-sm float-right" onclick="logout()"></button>
                         </div>
                     </fieldset>
                     <fieldset class="mt-4">
@@ -201,7 +203,7 @@
                                 class="btn btn-primary btn-sm" onclick="saveString();"></button>
                             <button crowdin-ui-text-label="addStringCancelButtonLabel" type="button"
                                 class="btn btn-secondary btn-sm ml-2" onclick="cancelEditString();"></button>
-                            <button crowdin-ui-text-label="addStringDeleteButtonLabel" type="button"
+                            <button id="string-delete-btn" crowdin-ui-text-label="addStringDeleteButtonLabel" type="button"
                                 class="btn btn-secondary btn-sm ml-auto" onclick="deleteString();"></button>
                         </div>
                     </fieldset>
@@ -410,6 +412,10 @@
             .finally(hideLoading);
     }
 
+    function logout() {
+        window.postMessage('logout').then(() => location.reload());
+    }
+
     function onUpdateProject() {
         showLoading();
         return saveProject()
@@ -508,6 +514,7 @@
     //strings management
 
     function openEditString(element) {
+        $('#string-delete-btn').show();
         const el = $(element);
         $('#list-strings').hide();
         $('#new-string-form').hide();
@@ -522,6 +529,7 @@
     }
 
     function openAddString() {
+        $('#string-delete-btn').hide();
         showLoading();
         window.postMessage('getSelectedText').then((e) => {
             selectedText = e[0];
