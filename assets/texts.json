@@ -115,6 +115,7 @@
         "validation": {
             "addStringEmptyString": "Please, insert the source string",
             "addStringEmptyIdentifier": "Fill in the identifier for the source string",
+            "addStringNotUniqueIdentifier": "Identifier should be unique",
             "addStringInvalidMaxLength": "Max length should be zero or positive number",
             "addStringEmptyFile": "Select the source file to add the new string to"
         }

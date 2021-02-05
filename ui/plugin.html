@@ -154,7 +154,8 @@
                             <div class="form-group">
                                 <label><abbr crowdin-ui-text-label="addStringStringLabel"
                                         crowdin-ui-text-details="addStringStringDetails"></abbr></label>
-                                <textarea class="form-control" id="string-text" placeholder="text"></textarea>
+                                <textarea oninput="updateMaxLength()" class="form-control" id="string-text"
+                                    placeholder="text"></textarea>
                                 <label style="color: red;" id="invalidString"></label>
                             </div>
                             <div id="new-string-form" style="display: none;">
@@ -176,7 +177,8 @@
                                                     crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
                                         </div>
                                         <div class="col-4">
-                                            <input min="0" type="number" class="form-control" id="string-max-length" value="0">
+                                            <input min="0" type="number" class="form-control" id="string-max-length"
+                                                value="0">
                                             <label style="color: red;" id="invalidMaxLength"></label>
                                         </div>
                                     </div>
@@ -203,8 +205,9 @@
                                 class="btn btn-primary btn-sm" onclick="saveString();"></button>
                             <button crowdin-ui-text-label="addStringCancelButtonLabel" type="button"
                                 class="btn btn-secondary btn-sm ml-2" onclick="cancelEditString();"></button>
-                            <button id="string-delete-btn" crowdin-ui-text-label="addStringDeleteButtonLabel" type="button"
-                                class="btn btn-secondary btn-sm ml-auto" onclick="deleteString();"></button>
+                            <button id="string-delete-btn" crowdin-ui-text-label="addStringDeleteButtonLabel"
+                                type="button" class="btn btn-secondary btn-sm ml-auto"
+                                onclick="deleteString();"></button>
                         </div>
                     </fieldset>
                     <fieldset>
@@ -667,7 +670,13 @@
         }
     }
 
+    function updateMaxLength() {
+        const text = $('#string-text').val() || '';
+        $('#string-max-length').val(text.length * 1.3 | 0);
+    }
+
     function saveString() {
+        const identifiers = (strings || []).map(s => s.identifier);
         if (selectedText.length > 1) {
             //adding multiple strings
             $('#multi-string-form div.form-group label').text('');
@@ -690,6 +699,11 @@
                     $(row.find('label')[1]).text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                     return;
                 }
+                if (identifiers.some(i => i === identifier)) {
+                    $(row.find('label')[1]).text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
+                    return;
+                }
+                identifiers.push(identifier);
                 newStrings.push({
                     text,
                     identifier,
@@ -769,6 +783,10 @@
             const file = $('#string-files option:selected').val();
             if (!identifier || identifier.length === '') {
                 $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
+                return;
+            }
+            if (identifiers.some(i => i === identifier)) {
+                $('#invalidIdentifier').text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
                 return;
             }
             if ($('#string-max-length').val().length === 0 || isNaN(maxLength) || maxLength < 0) {
