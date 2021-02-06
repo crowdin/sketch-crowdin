@@ -215,12 +215,16 @@
                         <div class="form-group">
                             <p crowdin-ui-text-label="previewStringsDetailsText" class="form-text"></p>
                             <div class="form-row">
-                                <div class="col">
+                                <div class="col-6">
                                     <select id="languages-preview" class="ml-1"></select>
                                 </div>
-                                <div class="col">
-                                    <button crowdin-ui-text-label="previewButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview()"></button>
+                                <div class="col-3">
+                                    <button crowdin-ui-text-label="previewAllButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview(true)"></button>
+                                </div>
+                                <div class="col-3">
+                                    <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview(false)"></button>
                                 </div>
                             </div>
                         </div>
@@ -498,11 +502,11 @@
         return window.postMessage('uploadScreenshots').finally(hideLoading);
     }
 
-    function stringsPreview() {
+    function stringsPreview(wholePage) {
         showLoading();
         const id = $('#languages-preview option:selected').val();
         const name = $('#languages-preview option:selected').text();
-        return window.postMessage('stringsPreview', { id, name }).finally(hideLoading);
+        return window.postMessage('stringsPreview', { id, name }, wholePage).finally(hideLoading);
     }
 
     function reloadStrings() {
