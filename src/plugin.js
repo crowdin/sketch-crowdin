@@ -19,7 +19,8 @@ import {
     getContentSegmentation,
     saveContentSegmentation,
     getKeyPatternOptions,
-    saveKeyPatternOption
+    saveKeyPatternOption,
+    logout
 } from './action/settings';
 
 const identifier = 'crowdin';
@@ -32,7 +33,7 @@ export default function start() {
     const options = {
         identifier,
         width: 400,
-        height: 700,
+        height: 720,
         hidesOnDeactivate: true,
         remembersWindowFrame: true,
         alwaysOnTop: true,
@@ -60,6 +61,7 @@ export default function start() {
     browserWindow.webContents.on('saveContentSegmentation', saveContentSegmentation);
     browserWindow.webContents.on('getKeyPatternOptions', getKeyPatternOptions);
     browserWindow.webContents.on('saveKeyPatternOption', saveKeyPatternOption);
+    browserWindow.webContents.on('logout', logout);
 
     //data
     browserWindow.webContents.on('getProjects', getProjects);

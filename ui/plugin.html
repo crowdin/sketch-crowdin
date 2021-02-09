@@ -56,6 +56,8 @@
                             </p>
                             <button crowdin-ui-text-label="connectToCrowdinButton" type="button"
                                 class="btn btn-primary btn-sm" onclick="saveCredentials()"></button>
+                            <button crowdin-ui-text-label="logoutButton" type="button"
+                                class="btn btn-secondary btn-sm float-right" onclick="logout()"></button>
                         </div>
                     </fieldset>
                     <fieldset class="mt-4">
@@ -152,7 +154,8 @@
                             <div class="form-group">
                                 <label><abbr crowdin-ui-text-label="addStringStringLabel"
                                         crowdin-ui-text-details="addStringStringDetails"></abbr></label>
-                                <textarea class="form-control" id="string-text" placeholder="text"></textarea>
+                                <textarea oninput="updateMaxLength()" class="form-control" id="string-text"
+                                    placeholder="text"></textarea>
                                 <label style="color: red;" id="invalidString"></label>
                             </div>
                             <div id="new-string-form" style="display: none;">
@@ -174,7 +177,8 @@
                                                     crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
                                         </div>
                                         <div class="col-4">
-                                            <input min="0" type="number" class="form-control" id="string-max-length" value="0">
+                                            <input min="0" type="number" class="form-control" id="string-max-length"
+                                                value="0">
                                             <label style="color: red;" id="invalidMaxLength"></label>
                                         </div>
                                     </div>
@@ -201,8 +205,9 @@
                                 class="btn btn-primary btn-sm" onclick="saveString();"></button>
                             <button crowdin-ui-text-label="addStringCancelButtonLabel" type="button"
                                 class="btn btn-secondary btn-sm ml-2" onclick="cancelEditString();"></button>
-                            <button crowdin-ui-text-label="addStringDeleteButtonLabel" type="button"
-                                class="btn btn-secondary btn-sm ml-auto" onclick="deleteString();"></button>
+                            <button id="string-delete-btn" crowdin-ui-text-label="addStringDeleteButtonLabel"
+                                type="button" class="btn btn-secondary btn-sm ml-auto"
+                                onclick="deleteString();"></button>
                         </div>
                     </fieldset>
                     <fieldset>
@@ -210,12 +215,16 @@
                         <div class="form-group">
                             <p crowdin-ui-text-label="previewStringsDetailsText" class="form-text"></p>
                             <div class="form-row">
-                                <div class="col">
+                                <div class="col-6">
                                     <select id="languages-preview" class="ml-1"></select>
                                 </div>
-                                <div class="col">
-                                    <button crowdin-ui-text-label="previewButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview()"></button>
+                                <div class="col-3">
+                                    <button crowdin-ui-text-label="previewAllButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview(true)"></button>
+                                </div>
+                                <div class="col-3">
+                                    <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview(false)"></button>
                                 </div>
                             </div>
                         </div>
@@ -410,6 +419,10 @@
             .finally(hideLoading);
     }
 
+    function logout() {
+        window.postMessage('logout').then(() => location.reload());
+    }
+
     function onUpdateProject() {
         showLoading();
         return saveProject()
@@ -489,11 +502,11 @@
         return window.postMessage('uploadScreenshots').finally(hideLoading);
     }
 
-    function stringsPreview() {
+    function stringsPreview(wholePage) {
         showLoading();
         const id = $('#languages-preview option:selected').val();
         const name = $('#languages-preview option:selected').text();
-        return window.postMessage('stringsPreview', { id, name }).finally(hideLoading);
+        return window.postMessage('stringsPreview', { id, name }, wholePage).finally(hideLoading);
     }
 
     function reloadStrings() {
@@ -508,6 +521,7 @@
     //strings management
 
     function openEditString(element) {
+        $('#string-delete-btn').show();
         const el = $(element);
         $('#list-strings').hide();
         $('#new-string-form').hide();
@@ -522,6 +536,7 @@
     }
 
     function openAddString() {
+        $('#string-delete-btn').hide();
         showLoading();
         window.postMessage('getSelectedText').then((e) => {
             selectedText = e[0];
@@ -659,7 +674,13 @@
         }
     }
 
+    function updateMaxLength() {
+        const text = $('#string-text').val() || '';
+        $('#string-max-length').val(text.length * 1.3 | 0);
+    }
+
     function saveString() {
+        const identifiers = (strings || []).map(s => s.identifier);
         if (selectedText.length > 1) {
             //adding multiple strings
             $('#multi-string-form div.form-group label').text('');
@@ -682,6 +703,11 @@
                     $(row.find('label')[1]).text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                     return;
                 }
+                if (identifiers.some(i => i === identifier)) {
+                    $(row.find('label')[1]).text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
+                    return;
+                }
+                identifiers.push(identifier);
                 newStrings.push({
                     text,
                     identifier,
@@ -761,6 +787,10 @@
             const file = $('#string-files option:selected').val();
             if (!identifier || identifier.length === '') {
                 $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
+                return;
+            }
+            if (identifiers.some(i => i === identifier)) {
+                $('#invalidIdentifier').text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
                 return;
             }
             if ($('#string-max-length').val().length === 0 || isNaN(maxLength) || maxLength < 0) {

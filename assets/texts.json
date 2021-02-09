@@ -74,6 +74,7 @@
             "organizationLabel": "Organization",
             "organizationDetailsText": "Fill in your organization domain name (for Crowdin Enterprise only)",
             "connectToCrowdinButton": "Connect to Crowdin",
+            "logoutButton": "Logout",
             "addStringButton": "Add String",
             "useStringDetailsText": "Use source string for your text component in the design",
             "addStringStringLabel": "String",
@@ -85,7 +86,8 @@
             "addStringDeleteButtonLabel": "Delete",
             "previewStringsLabel": "Preview Strings",
             "previewStringsDetailsText": "Preview translations from Crowdin for strings used in the designs",
-            "previewButtonLabel": "Preview",
+            "previewAllButtonLabel": "Page",
+            "previewSelectedButtonLabel": "Artboard",
             "uploadScreenshotsLabel": "Upload Screenshots",
             "uploadScreenshotsDetailsText": "Send screenshots of the artboards within the selected page with the tagged source strings you've used",
             "uploadScreenshotsButtonLabel": "Upload Screenshots",
@@ -114,6 +116,7 @@
         "validation": {
             "addStringEmptyString": "Please, insert the source string",
             "addStringEmptyIdentifier": "Fill in the identifier for the source string",
+            "addStringNotUniqueIdentifier": "Identifier should be unique",
             "addStringInvalidMaxLength": "Max length should be zero or positive number",
             "addStringEmptyFile": "Select the source file to add the new string to"
         }

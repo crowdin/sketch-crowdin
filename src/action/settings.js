@@ -122,6 +122,16 @@ function saveBranch(branchId) {
     }
 }
 
+function logout() {
+    if (!dom.getSelectedDocument()) {
+        ui.message(displayTexts.notifications.warning.selectDocument);
+        return;
+    }
+    settings.setSettingForKey(ORGANIZATION, undefined);
+    settings.setSettingForKey(ACCESS_TOKEN_KEY, undefined);
+    settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, undefined);
+}
+
 export {
     contactUs,
     getCredentials,
@@ -133,5 +143,6 @@ export {
     saveKeyPatternOption,
     saveCredentials,
     saveProject,
-    saveBranch
+    saveBranch,
+    logout
 };
