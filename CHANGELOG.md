@@ -5,6 +5,20 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2]
+
+### Added
+
+- Button to preview selected artboard ([#54](https://github.com/crowdin/sketch-crowdin/pull/54))
+- Max. length field to add string form ([#53](https://github.com/crowdin/sketch-crowdin/pull/53))
+- Logout button ([#54](https://github.com/crowdin/sketch-crowdin/pull/54))
+- Validation to not add string with not unique identifier ([#54](https://github.com/crowdin/sketch-crowdin/pull/54))
+
+### Updated
+
+- Removed delete button when adding new string ([#54](https://github.com/crowdin/sketch-crowdin/pull/54))
+- Updating max length every time when text was changed ([#54](https://github.com/crowdin/sketch-crowdin/pull/54))
+
 ## [2.3.1]
 
 ### Added
