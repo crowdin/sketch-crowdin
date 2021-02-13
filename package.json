@@ -28,6 +28,9 @@
       "!ui/plugin.html",
       "node_modules/bootstrap/dist/css/bootstrap.min.css*",
       "node_modules/bootstrap/dist/js/bootstrap.min.js*",
+      "node_modules/bootstrap-select/dist/css/bootstrap-select.min.css*",
+      "node_modules/bootstrap-select/dist/js/bootstrap-select.min.js*",
+      "node_modules/popper.js/dist/umd/popper.min.js*",
       "node_modules/jquery/dist/jquery.min.js*"
     ]
   },
@@ -42,10 +45,12 @@
   },
   "dependencies": {
     "@crowdin/crowdin-api-client": "1.10.3",
-    "cheerio": "^1.0.0-rc.3",
-    "sketch-module-web-view": "^3.4.1",
     "bootstrap": "4.5.0",
-    "jquery": "3.5.1"
+    "bootstrap-select": "^1.13.18",
+    "cheerio": "^1.0.0-rc.3",
+    "jquery": "3.5.1",
+    "popper.js": "^1.14.3",
+    "sketch-module-web-view": "^3.4.1"
   },
   "devDependencies": {
     "@babel/polyfill": "^7.7.0",

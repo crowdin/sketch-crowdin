@@ -2,9 +2,12 @@
 
 <head>
     <link rel="stylesheet" href="../bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../bootstrap-select/dist/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="../styles.css">
+    <script src="../popper.js/dist/umd/popper.min.js"></script>
     <script src="../jquery/dist/jquery.min.js"></script>
     <script src="../bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-select/dist/js/bootstrap-select.min.js"></script>
 </head>
 
 <body>
@@ -194,7 +197,7 @@
                                             crowdin-ui-text-details="addStringFileDetails"></abbr></label>
                                 </div>
                                 <div class="col-9">
-                                    <select id="string-files" class="ml-1" style="width: 100%;">
+                                    <select multiple id="string-files" class="ml-1" data-width="100%">
                                     </select>
                                     <label style="color: red;" id="invalidFile"></label>
                                 </div>
@@ -220,11 +223,13 @@
                                 </div>
                                 <div class="col-3">
                                     <button crowdin-ui-text-label="previewAllButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview(true)"></button>
+                                        class="btn btn-secondary btn-sm btn-block"
+                                        onclick="stringsPreview(true)"></button>
                                 </div>
                                 <div class="col-3">
                                     <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview(false)"></button>
+                                        class="btn btn-secondary btn-sm btn-block"
+                                        onclick="stringsPreview(false)"></button>
                                 </div>
                             </div>
                         </div>
@@ -654,6 +659,7 @@
         $('#invalidIdentifier').text('');
         $('#invalidMaxLength').text('');
         $('#invalidFile').text('');
+        $('#string-files').selectpicker('deselectAll');
         selectedText.length = 0;
     }
 
@@ -684,8 +690,8 @@
         if (selectedText.length > 1) {
             //adding multiple strings
             $('#multi-string-form div.form-group label').text('');
-            const file = $('#string-files option:selected').val();
-            if (!file) {
+            const files = $('#string-files option:selected').toArray();
+            if (files.length === 0) {
                 $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
                 return;
             }
@@ -711,39 +717,40 @@
                 newStrings.push({
                     text,
                     identifier,
-                    fileId: Number(file),
                     selectedText: selectedText[i]
                 });
             }
             showLoading();
             const addedStrings = [];
-            const promise = newStrings.reduce((acc, str) => {
-                return acc.then(() => {
-                    return window
-                        .postMessage('addString', {
-                            text: str.text,
-                            identifier: str.identifier,
-                            fileId: str.fileId
-                        })
-                        .then(e => {
-                            if (!e[0].error) {
-                                strings.push({
-                                    id: e[0].data.id,
-                                    text: str.text,
-                                    fileId: str.fileId,
-                                    identifier: str.identifier
-                                });
-                                addedStrings.push({
-                                    id: e[0].data.id,
-                                    ...str
-                                });
-                            }
-                        })
-                });
-            }, Promise.resolve());
-            promise
+            const promises = files.map(file => {
+                return newStrings.reduce((acc, str) => {
+                    return acc.then(() => {
+                        return window
+                            .postMessage('addString', {
+                                text: str.text,
+                                identifier: str.identifier,
+                                fileId: Number($(file).val())
+                            })
+                            .then(e => {
+                                if (!e[0].error) {
+                                    strings.push({
+                                        id: e[0].data.id,
+                                        text: str.text,
+                                        fileId: Number($(file).val()),
+                                        identifier: str.identifier
+                                    });
+                                    addedStrings.push({
+                                        id: e[0].data.id,
+                                        ...str
+                                    });
+                                }
+                            })
+                    });
+                }, Promise.resolve());
+            });
+            return Promise.all(promises)
                 .then(() => {
-                    if (addedStrings.length > 0) {
+                    if (addedStrings.length > 0 && files.length === 1) {
                         return window.postMessage('useString', addedStrings);
                     }
                 })
@@ -752,7 +759,6 @@
                     return search();
                 })
                 .finally(hideLoading);
-            return;
         }
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
@@ -766,7 +772,7 @@
         if (openedString) {
             //editing string
             showLoading();
-            window.postMessage('editString', { id: openedString, text })
+            return window.postMessage('editString', { id: openedString, text })
                 .then(e => {
                     if (!e[0].error) {
                         strings = strings.map(s => {
@@ -784,7 +790,7 @@
             //adding single string
             const identifier = $('#string-identifier').val();
             const maxLength = Number($('#string-max-length').val());
-            const file = $('#string-files option:selected').val();
+            const files = $('#string-files option:selected').toArray();
             if (!identifier || identifier.length === '') {
                 $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                 return;
@@ -797,40 +803,43 @@
                 $('#invalidMaxLength').text(validationMessages.addStringInvalidMaxLength || 'Invalid');
                 return;
             }
-            if (!file) {
+            if (files.length === 0) {
                 $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
                 return;
             }
             showLoading();
-            const req = {
-                text,
-                identifier,
-                maxLength,
-                fileId: Number(file)
-            };
-            window.postMessage('addString', req)
-                .then(e => {
-                    if (!e[0].error) {
-                        return e[0].data.id;
-                    };
-                })
-                .then(id => {
-                    if (id) {
-                        strings.push({
-                            id,
-                            text: text,
-                            fileId: Number(file),
-                            identifier: identifier
-                        });
-                        if (selectedText.length > 0) {
-                            return window
-                                .postMessage('useString', [{
-                                    id,
-                                    text,
-                                    identifier,
-                                    selectedText: selectedText[0]
-                                }]);
-                        }
+            const promises = files.map(file => {
+                const req = {
+                    text,
+                    identifier,
+                    maxLength,
+                    fileId: Number($(file).val())
+                };
+                return window.postMessage('addString', req)
+                    .then(e => {
+                        if (!e[0].error) {
+                            const id = e[0].data.id;
+                            strings.push({
+                                id,
+                                text: text,
+                                fileId: Number(file),
+                                identifier: identifier
+                            });
+                            return id;
+                        };
+                    });
+            });
+            return Promise.all(promises)
+                .then((ids) => {
+                    const id = ids.find(id => !!id);
+                    if (selectedText.length > 0 && files.length === 1) {
+                        return window
+                            .postMessage('useString', [{
+                                id,
+                                text,
+                                identifier,
+                                selectedText: selectedText[0]
+                            }]);
                     }
                 })
                 .then(() => {
@@ -934,6 +943,7 @@
                             return `<option value="${file.id}">${file.name}</option>`;
                         }).join('');
                     $('#string-files').find('option').remove().end().append(options);
+                    $('#string-files').selectpicker('refresh');
                 });
         } else {
             return new Promise((res, rej) => {
@@ -1052,7 +1062,12 @@
                 const key = details.attr('crowdin-ui-text-details');
                 details.attr('title', (uiTexts.details[key] || ''));
             }
+            applyCustomText(uiTexts.custom);
         });
+    }
+
+    function applyCustomText(texts) {
+        $('#string-files').attr('title', texts.stringFilesSelectPlaceholder);
     }
 
     loadText();
