@@ -648,9 +648,6 @@ select {
 .filter-option {
     font-size: 0.75rem;
 }
-.dropdown-item {
-    font-size: 0.75rem;
-}
 
 .inline-select label {
     white-space: nowrap;
@@ -806,6 +803,21 @@ button .btn-icon {
     font-size: 0.625rem;
     letter-spacing: 0.25px;
     font-weight: 500;
+}
+
+// bootsrap multiselect
+.dropdown-item {
+    font-size: 0.75rem;
+    &:hover {
+        background-color: var(--primaryColor);
+        color: white !important;
+    }
+}
+
+.dropdown-menu, .dropdown-toggle {
+    background-color: var(--buttonSecondaryBGColor) !important;
+    color: var(--textColor) !important;
+    border-color: var(--buttonSecondaryBGColor) !important;
 }
 
 /*THEMING*/
