@@ -812,9 +812,27 @@ button .btn-icon {
         background-color: var(--primaryColor);
         color: white !important;
     }
+    &.selected {
+        padding-left: 16px;
+        span.text {
+            margin-left: -4px;
+        }
+    }
+    span.text {
+        text-overflow: ellipsis;
+        overflow: hidden; 
+        width: 210px;
+        white-space: nowrap;
+    }
+    span.check-mark {
+        position: relative !important;
+        top: 0px !important;
+        margin-left: 6px;
+    }
 }
 
 .dropdown-menu, .dropdown-toggle {
+    width: 250px;
     background-color: var(--buttonSecondaryBGColor) !important;
     color: var(--textColor) !important;
     border-color: var(--buttonSecondaryBGColor) !important;

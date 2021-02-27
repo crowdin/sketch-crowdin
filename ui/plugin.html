@@ -195,7 +195,7 @@
                                             crowdin-ui-text-details="addStringFileDetails"></abbr></label>
                                 </div>
                                 <div class="col-9">
-                                    <select multiple id="string-files" class="ml-1" data-width="100%">
+                                    <select multiple id="string-files" data-size="10" class="ml-1" data-width="100%">
                                     </select>
                                     <label style="color: red;" id="invalidFile"></label>
                                 </div>
@@ -815,7 +815,7 @@
                             strings.push({
                                 id,
                                 text: text,
-                                fileId: Number(file),
+                                fileId: Number($(file).val()),
                                 identifier: identifier
                             });
                             return id;
@@ -933,7 +933,7 @@
                     const options = files
                         .filter(file => editableFileTypes.includes(file.type))
                         .map(file => {
-                            return `<option value="${file.id}">${file.name}</option>`;
+                            return `<option value="${file.id}" data-title="qwe">${file.name}</option>`;
                         }).join('');
                     $('#string-files').find('option').remove().end().append(options);
                     $('#string-files').selectpicker('refresh');
