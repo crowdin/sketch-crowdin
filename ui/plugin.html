@@ -2,9 +2,12 @@
 
 <head>
     <link rel="stylesheet" href="../bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../bootstrap-select/dist/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="../styles.css">
+    <script src="../popper.js/dist/umd/popper.min.js"></script>
     <script src="../jquery/dist/jquery.min.js"></script>
     <script src="../bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-select/dist/js/bootstrap-select.min.js"></script>
 </head>
 
 <body>
@@ -154,8 +157,7 @@
                             <div class="form-group">
                                 <label><abbr crowdin-ui-text-label="addStringStringLabel"
                                         crowdin-ui-text-details="addStringStringDetails"></abbr></label>
-                                <textarea oninput="updateMaxLength()" class="form-control" id="string-text"
-                                    placeholder="text"></textarea>
+                                <textarea class="form-control" id="string-text" placeholder="text"></textarea>
                                 <label style="color: red;" id="invalidString"></label>
                             </div>
                             <div id="new-string-form" style="display: none;">
@@ -177,8 +179,7 @@
                                                     crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
                                         </div>
                                         <div class="col-4">
-                                            <input min="0" type="number" class="form-control" id="string-max-length"
-                                                value="0">
+                                            <input min="0" type="number" class="form-control" id="string-max-length">
                                             <label style="color: red;" id="invalidMaxLength"></label>
                                         </div>
                                     </div>
@@ -194,7 +195,7 @@
                                             crowdin-ui-text-details="addStringFileDetails"></abbr></label>
                                 </div>
                                 <div class="col-9">
-                                    <select id="string-files" class="ml-1" style="width: 100%;">
+                                    <select multiple id="string-files" data-size="10" class="ml-1" data-width="100%">
                                     </select>
                                     <label style="color: red;" id="invalidFile"></label>
                                 </div>
@@ -220,11 +221,13 @@
                                 </div>
                                 <div class="col-3">
                                     <button crowdin-ui-text-label="previewAllButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview(true)"></button>
+                                        class="btn btn-secondary btn-sm btn-block"
+                                        onclick="stringsPreview(true)"></button>
                                 </div>
                                 <div class="col-3">
                                     <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block" onclick="stringsPreview(false)"></button>
+                                        class="btn btn-secondary btn-sm btn-block"
+                                        onclick="stringsPreview(false)"></button>
                                 </div>
                             </div>
                         </div>
@@ -547,13 +550,13 @@
             if (selectedText.length === 0) {
                 $('#string-text').val('');
                 $('#string-identifier').val('');
-                $('#string-max-length').val('0');
+                $('#string-max-length').val('');
                 $('#multi-string-form').hide();
                 $('#single-string-form').show();
             } else if (selectedText.length === 1) {
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
-                $('#string-max-length').val(selectedText[0].text.length * 1.3 | 0);
+                $('#string-max-length').val('');
                 $('#multi-string-form').hide();
                 $('#single-string-form').show();
             } else {
@@ -654,6 +657,7 @@
         $('#invalidIdentifier').text('');
         $('#invalidMaxLength').text('');
         $('#invalidFile').text('');
+        $('#string-files').selectpicker('deselectAll');
         selectedText.length = 0;
     }
 
@@ -674,18 +678,13 @@
         }
     }
 
-    function updateMaxLength() {
-        const text = $('#string-text').val() || '';
-        $('#string-max-length').val(text.length * 1.3 | 0);
-    }
-
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
         if (selectedText.length > 1) {
             //adding multiple strings
             $('#multi-string-form div.form-group label').text('');
-            const file = $('#string-files option:selected').val();
-            if (!file) {
+            const files = $('#string-files option:selected').toArray();
+            if (files.length === 0) {
                 $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
                 return;
             }
@@ -711,39 +710,40 @@
                 newStrings.push({
                     text,
                     identifier,
-                    fileId: Number(file),
                     selectedText: selectedText[i]
                 });
             }
             showLoading();
             const addedStrings = [];
-            const promise = newStrings.reduce((acc, str) => {
-                return acc.then(() => {
-                    return window
-                        .postMessage('addString', {
-                            text: str.text,
-                            identifier: str.identifier,
-                            fileId: str.fileId
-                        })
-                        .then(e => {
-                            if (!e[0].error) {
-                                strings.push({
-                                    id: e[0].data.id,
-                                    text: str.text,
-                                    fileId: str.fileId,
-                                    identifier: str.identifier
-                                });
-                                addedStrings.push({
-                                    id: e[0].data.id,
-                                    ...str
-                                });
-                            }
-                        })
-                });
-            }, Promise.resolve());
-            promise
+            const promises = files.map(file => {
+                return newStrings.reduce((acc, str) => {
+                    return acc.then(() => {
+                        return window
+                            .postMessage('addString', {
+                                text: str.text,
+                                identifier: str.identifier,
+                                fileId: Number($(file).val())
+                            })
+                            .then(e => {
+                                if (!e[0].error) {
+                                    strings.push({
+                                        id: e[0].data.id,
+                                        text: str.text,
+                                        fileId: Number($(file).val()),
+                                        identifier: str.identifier
+                                    });
+                                    addedStrings.push({
+                                        id: e[0].data.id,
+                                        ...str
+                                    });
+                                }
+                            })
+                    });
+                }, Promise.resolve());
+            });
+            return Promise.all(promises)
                 .then(() => {
-                    if (addedStrings.length > 0) {
+                    if (addedStrings.length > 0 && files.length === 1) {
                         return window.postMessage('useString', addedStrings);
                     }
                 })
@@ -752,7 +752,6 @@
                     return search();
                 })
                 .finally(hideLoading);
-            return;
         }
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
@@ -766,7 +765,7 @@
         if (openedString) {
             //editing string
             showLoading();
-            window.postMessage('editString', { id: openedString, text })
+            return window.postMessage('editString', { id: openedString, text })
                 .then(e => {
                     if (!e[0].error) {
                         strings = strings.map(s => {
@@ -784,7 +783,7 @@
             //adding single string
             const identifier = $('#string-identifier').val();
             const maxLength = Number($('#string-max-length').val());
-            const file = $('#string-files option:selected').val();
+            const files = $('#string-files option:selected').toArray();
             if (!identifier || identifier.length === '') {
                 $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                 return;
@@ -793,44 +792,47 @@
                 $('#invalidIdentifier').text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
                 return;
             }
-            if ($('#string-max-length').val().length === 0 || isNaN(maxLength) || maxLength < 0) {
+            if ($('#string-max-length').val().length !== 0 && (isNaN(maxLength) || maxLength < 0)) {
                 $('#invalidMaxLength').text(validationMessages.addStringInvalidMaxLength || 'Invalid');
                 return;
             }
-            if (!file) {
+            if (files.length === 0) {
                 $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
                 return;
             }
             showLoading();
-            const req = {
-                text,
-                identifier,
-                maxLength,
-                fileId: Number(file)
-            };
-            window.postMessage('addString', req)
-                .then(e => {
-                    if (!e[0].error) {
-                        return e[0].data.id;
-                    };
-                })
-                .then(id => {
-                    if (id) {
-                        strings.push({
-                            id,
-                            text: text,
-                            fileId: Number(file),
-                            identifier: identifier
-                        });
-                        if (selectedText.length > 0) {
-                            return window
-                                .postMessage('useString', [{
-                                    id,
-                                    text,
-                                    identifier,
-                                    selectedText: selectedText[0]
-                                }]);
-                        }
+            const promises = files.map(file => {
+                const req = {
+                    text,
+                    identifier,
+                    maxLength: $('#string-max-length').val().length === 0 ? undefined : maxLength,
+                    fileId: Number($(file).val())
+                };
+                return window.postMessage('addString', req)
+                    .then(e => {
+                        if (!e[0].error) {
+                            const id = e[0].data.id;
+                            strings.push({
+                                id,
+                                text: text,
+                                fileId: Number($(file).val()),
+                                identifier: identifier
+                            });
+                            return id;
+                        };
+                    });
+            });
+            return Promise.all(promises)
+                .then((ids) => {
+                    const id = ids.find(id => !!id);
+                    if (selectedText.length > 0 && files.length === 1) {
+                        return window
+                            .postMessage('useString', [{
+                                id,
+                                text,
+                                identifier,
+                                selectedText: selectedText[0]
+                            }]);
                     }
                 })
                 .then(() => {
@@ -931,9 +933,10 @@
                     const options = files
                         .filter(file => editableFileTypes.includes(file.type))
                         .map(file => {
-                            return `<option value="${file.id}">${file.name}</option>`;
+                            return `<option value="${file.id}" data-title="qwe">${file.name}</option>`;
                         }).join('');
                     $('#string-files').find('option').remove().end().append(options);
+                    $('#string-files').selectpicker('refresh');
                 });
         } else {
             return new Promise((res, rej) => {
@@ -972,26 +975,26 @@
 
     function search() {
         const editIcon = `
-            <svg class="float-right string-row-edit" onclick="openEditString(this);" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <svg class="float-right string-row-edit string-row-icon" onclick="openEditString(this);" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
                 <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
             </svg>
         `;
 
         const checkIcon = `
-            <svg checkicon class="float-left" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <svg checkicon class="float-left string-row-icon" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
             </svg>
         `;
 
         const checkIconBlank = `
-            <svg checkicon class="float-left" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" opacity="0.0" xmlns="http://www.w3.org/2000/svg">
+            <svg checkicon class="float-left string-row-icon" width="16px" height="16px" viewBox="0 0 16 16" fill="currentColor" opacity="0.0" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
             </svg>
         `;
 
         const infoIconTemplate = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info string-row-icon" fill="currentColor">
                 <title>Context:\n%context%\n\nIdentifier:\n%identifier%\n\nFile:\n%file%</title>
                 <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path>
             </svg>
@@ -1052,7 +1055,12 @@
                 const key = details.attr('crowdin-ui-text-details');
                 details.attr('title', (uiTexts.details[key] || ''));
             }
+            applyCustomText(uiTexts.custom);
         });
+    }
+
+    function applyCustomText(texts) {
+        $('#string-files').attr('title', texts.stringFilesSelectPlaceholder);
     }
 
     loadText();
