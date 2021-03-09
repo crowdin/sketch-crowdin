@@ -48,18 +48,18 @@
                         <label crowdin-ui-text-label="connectionDetailsLabel" class="fieldset-label"></label>
                         <div class="form-group">
                             <label crowdin-ui-text-label="tokenLabel"></label>
-                            <input type="text" class="form-control" id="token">
+                            <input type="text" class="form-control" id="token" onchange="$('#connect-btn').attr('disabled', false);">
                             <p crowdin-ui-text-label="tokenDetailsText" class="form-text text-muted help-text mb-3">
                             </p>
                         </div>
                         <div class="form-group">
                             <label crowdin-ui-text-label="organizationLabel"></label>
-                            <input type="text" class="form-control" id="organization">
+                            <input type="text" class="form-control" id="organization" onchange="$('#connect-btn').attr('disabled', false);">
                             <p crowdin-ui-text-label="organizationDetailsText" class="form-text text-muted help-text">
                             </p>
-                            <button crowdin-ui-text-label="connectToCrowdinButton" type="button"
+                            <button id="connect-btn" crowdin-ui-text-label="connectToCrowdinButton" type="button"
                                 class="btn btn-primary btn-sm" onclick="saveCredentials()"></button>
-                            <button crowdin-ui-text-label="logoutButton" type="button"
+                            <button id="logout-btn" crowdin-ui-text-label="logoutButton" type="button"
                                 class="btn btn-secondary btn-sm float-right" onclick="logout()"></button>
                         </div>
                     </fieldset>
@@ -405,6 +405,8 @@
         return window.postMessage('getCredentials').then(creds => {
             $('#organization').val(creds[0].organization);
             $('#token').val(creds[0].token);
+            $('#connect-btn').attr('disabled', !!creds[0].token);
+            $('#logout-btn').attr('disabled', !creds[0].token);
         });
     }
 
@@ -412,6 +414,8 @@
         showLoading();
         const token = $('#token').val();
         const organization = $('#organization').val();
+        $('#connect-btn').attr('disabled', true);
+        $('#logout-btn').attr('disabled', false);
         return window.postMessage('saveCredentials', { token, organization })
             .then(getCredentials)
             .then(getProjects)
