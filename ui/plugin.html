@@ -734,7 +734,8 @@
                                         id: e[0].data.id,
                                         text: str.text,
                                         fileId: Number($(file).val()),
-                                        identifier: str.identifier
+                                        identifier: str.identifier,
+                                        context: str.identifier
                                     });
                                     addedStrings.push({
                                         id: e[0].data.id,
@@ -796,7 +797,7 @@
                 $('#invalidIdentifier').text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
                 return;
             }
-            if ($('#string-max-length').val().length !== 0 && (isNaN(maxLength) || maxLength < 0)) {
+            if (!$('#string-max-length')[0].validity.valid) {
                 $('#invalidMaxLength').text(validationMessages.addStringInvalidMaxLength || 'Invalid');
                 return;
             }
@@ -820,7 +821,8 @@
                                 id,
                                 text: text,
                                 fileId: Number($(file).val()),
-                                identifier: identifier
+                                identifier: identifier,
+                                context: identifier
                             });
                             return id;
                         };
