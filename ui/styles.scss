@@ -1,3 +1,5 @@
+$spacer: 1rem !default;
+
 :root {
     color-scheme: light dark;
     --app-bg: rgb(242, 242, 241);
@@ -486,6 +488,11 @@ body {
     margin: 0;
     background: var(--app-bg);
     color: var(--textColor);
+
+    a,
+    .link {
+        color: var(--primaryColor);
+    }
 }
 
 .main-container {
@@ -512,13 +519,6 @@ body {
 
 hr {
     border-top: var(--borderRule);
-}
-
-body {
-    a,
-    .link {
-        color: var(--primaryColor);
-    }
 }
 
 p {
@@ -564,6 +564,10 @@ fieldset {
     + fieldset {
         margin-top: 1.5rem;
     }
+}
+
+.invalid-feedback {
+    display: block;
 }
 
 [type="search"] {
@@ -643,6 +647,16 @@ fieldset {
 
 select {
     font-size: 1rem;
+}
+
+.bootstrap-select {
+    // fix for safari
+    & > .btn {
+        max-height: 32px !important;
+    }
+    & > .btn > .filter-option {
+        max-height: 18px !important;
+    }
 }
 
 .filter-option {
@@ -748,10 +762,20 @@ button .btn-icon {
 }
 
 .multi-add-string-form-container {
-    overflow-y: scroll;
-    overflow-x: hidden;
-    max-height: 160px;
-    margin-bottom: 10px;
+    label {
+        font-weight: 500;
+        font-size: 0.8125rem;
+    }
+
+    .strings-holder {
+        overflow-y: scroll;
+        overflow-x: hidden;
+        max-height: 160px;
+        margin-bottom: 10px;
+    }
+    .form-row + .form-row {
+        margin-top: $spacer;
+    }
 }
 
 .string-row {
