@@ -158,48 +158,35 @@
                                 <label><abbr crowdin-ui-text-label="addStringStringLabel"
                                         crowdin-ui-text-details="addStringStringDetails"></abbr></label>
                                 <textarea class="form-control" id="string-text" placeholder="text"></textarea>
-                                <label style="color: red;" id="invalidString"></label>
+                                <div class="invalid-feedback" id="invalidString"></div>
                             </div>
                             <div id="new-string-form" style="display: none;">
                                 <div class="form-group">
-                                    <div class="form-row">
-                                        <div class="col-3 text-left">
-                                            <label><abbr crowdin-ui-text-label="addStringIdentifierLabel"
-                                                    crowdin-ui-text-details="addStringIdentifierDetails"></abbr></label>
-                                        </div>
-                                        <div class="col-9">
-                                            <input type="text" class="form-control" id="string-identifier"
-                                                placeholder="identifier">
-                                            <label style="color: red;" id="invalidIdentifier"></label>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="col-8 text-left">
-                                            <label><abbr crowdin-ui-text-label="addStringMaxLengthLabel"
-                                                    crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
-                                        </div>
-                                        <div class="col-4">
-                                            <input min="0" type="number" class="form-control" id="string-max-length">
-                                            <label style="color: red;" id="invalidMaxLength"></label>
-                                        </div>
+                                    <label><abbr crowdin-ui-text-details="addStringIdentifierDetails" crowdin-ui-text-label="addStringIdentifierLabel"></abbr></label>
+                                    <input class="form-control" id="string-identifier" placeholder="identifier" type="text">
+                                    <div class="invalid-feedback" id="invalidIdentifier"></div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-8 col-form-label" for="string-max-length"><abbr crowdin-ui-text-label="addStringMaxLengthLabel"
+                                                crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
+                                    <div class="col-4">
+                                        <input min="0" type="number" class="form-control" id="string-max-length">
+                                        <div class="invalid-feedback" id="invalidMaxLength"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div id="multi-string-form" class="multi-add-string-form-container" style="display: none;">
-                        </div>
-                        <div id="string-file-container" class="form-group mt-3">
-                            <div class="form-row mb-3">
-                                <div class="col-3 text-right">
-                                    <label><abbr crowdin-ui-text-label="addStringFileLabel"
-                                            crowdin-ui-text-details="addStringFileDetails"></abbr></label>
-                                </div>
-                                <div class="col-9">
-                                    <select multiple id="string-files" data-size="10" class="ml-1" data-width="100%">
-                                    </select>
-                                    <label style="color: red;" id="invalidFile"></label>
-                                </div>
+                            <div class="multi-strings-form__header row">
+                                <label crowdin-ui-text-label="addStringStringLabel" class="col"></label>
+                                <label crowdin-ui-text-label="addStringIdentifierLabel" class="col"></label>
                             </div>
+                            <div class="strings-holder"></div>
+                        </div>
+                        <div id="string-file-container" class="form-group mt-2">
+                            <label for="string-files"><abbr crowdin-ui-text-label="addStringFileLabel" crowdin-ui-text-details="addStringFileDetails"></abbr></label>
+                            <select class="form-control" id="string-files" multiple size="8"></select>
+                            <div class="invalid-feedback" id="invalidFile"></div>
                         </div>
                         <div class="button-holder d-flex flex-row">
                             <button crowdin-ui-text-label="addStringSaveButtonLabel" type="button"
@@ -570,21 +557,21 @@
                     const identifier = generateIdentifier(e, identifiers);
                     identifiers.push(identifier);
                     rowsHtml += `
-                    <div class="form-row" style="padding-bottom: 10px;">
+                    <div class="form-row">
                         <div class="col">
                             <textarea class="form-control" placeholder="text">${e.text}</textarea>
-                            <label style="color: red;"></label>
+                            <div class="invalid-feedback"></div>
                         </div>
                         <div class="col">
-                            <input type="text" class="form-control" placeholder="identifier" value="${identifier}" style="margin-top: 13px;">
-                            <label style="color: red;"></label>
+                            <input type="text" class="form-control" placeholder="identifier" value="${identifier}">
+                            <div class="invalid-feedback"></div>
                         </div>
                     </div>
                     `;
                 });
                 const html = `<div class="form-group">${rowsHtml}</div>`;
-                $('#multi-string-form').empty();
-                $('#multi-string-form').append(html);
+                $('#multi-string-form .strings-holder').empty();
+                $('#multi-string-form .strings-holder').append(html);
                 $('#single-string-form').hide();
                 $('#multi-string-form').show();
             }
@@ -686,7 +673,7 @@
         const identifiers = (strings || []).map(s => s.identifier);
         if (selectedText.length > 1) {
             //adding multiple strings
-            $('#multi-string-form div.form-group label').text('');
+            $('#multi-string-form div.form-group .invalid-feedback').text('');
             const files = $('#string-files option:selected').toArray();
             if (files.length === 0) {
                 $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
@@ -699,15 +686,15 @@
                 const text = $(row.find('textarea')[0]).val();
                 const identifier = $(row.find('input')[0]).val();
                 if (!text || text.length === '') {
-                    $(row.find('label')[0]).text(validationMessages.addStringEmptyString || 'Invalid');
+                    $(row.find('.invalid-feedback')[0]).text(validationMessages.addStringEmptyString || 'Invalid');
                     return;
                 }
                 if (!identifier || identifier.length === '') {
-                    $(row.find('label')[1]).text(validationMessages.addStringEmptyIdentifier || 'Invalid');
+                    $(row.find('.invalid-feedback')[1]).text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                     return;
                 }
                 if (identifiers.some(i => i === identifier)) {
-                    $(row.find('label')[1]).text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
+                    $(row.find('.invalid-feedback')[1]).text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
                     return;
                 }
                 identifiers.push(identifier);
