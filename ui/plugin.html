@@ -1000,7 +1000,11 @@
         const arr = strings || [];
         const filteredStrings = (!text || text.length === 0)
             ? arr
-            : arr.filter(str => str.text.toLowerCase().includes(text) || (str.identifier && str.identifier.toLowerCase().includes(text)));
+            : arr.filter(str => 
+                    str.text.toLowerCase().includes(text) || 
+                    (str.identifier && str.identifier.toLowerCase().includes(text)) ||
+                    (str.context && str.context.toLowerCase().includes(text))
+                );
         return window.postMessage('getUsedStrings')
             .then((e) => {
                 const usedStrings = e[0];
