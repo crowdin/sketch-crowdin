@@ -1004,10 +1004,11 @@
                     (str.identifier && str.identifier.toLowerCase().includes(text)) ||
                     (str.context && str.context.toLowerCase().includes(text))
                 );
+        const limited = filteredStrings.length > 1000 ? filteredStrings.slice(0, 1000) : filteredStrings;
         return window.postMessage('getUsedStrings')
             .then((e) => {
                 const usedStrings = e[0];
-                const texts = filteredStrings.map(str => {
+                const texts = limited.map(str => {
                     const isUsed = usedStrings.includes(str.id);
                     const file = files.find(f => f.id === str.fileId);
                     const editable = file && editableFileTypes.includes(file.type);
