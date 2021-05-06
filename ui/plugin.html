@@ -133,7 +133,7 @@
                         <div class="row">
                             <div class="col-11">
                                 <div class="search-wrapper">
-                                    <input type="search" id="search-text" class="w-100" oninput="search()"
+                                    <input type="search" id="search-text" class="w-100" oninput="debounceSearch()"
                                         placeholder="Search">
                                 </div>
                             </div>
@@ -963,6 +963,12 @@
                     }).join('');
                 $('#branches').find('option').remove().end().append(options);
             });
+    }
+
+    var searchTimer;
+    function debounceSearch() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(search, 700);
     }
 
     function search() {
