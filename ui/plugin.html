@@ -1015,8 +1015,8 @@
         `;
 
         const infoIconTemplate = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info string-row-icon" fill="currentColor">
-                <title>Context:\n%context%\n\nIdentifier:\n%identifier%\n\nFile:\n%file%</title>
+            <svg id="%str-info-icon-identifier%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info string-row-icon" fill="currentColor">
+                <title></title>
                 <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path>
             </svg>
         `;
@@ -1041,10 +1041,7 @@
                     const isUsed = usedStrings.includes(str.id);
                     const file = files.find(f => f.id === str.fileId);
                     const editable = file && editableFileTypes.includes(file.type);
-                    const infoIcon = infoIconTemplate
-                        .replace('%context%', str.context)
-                        .replace('%identifier%', str.identifier ? str.identifier : str.text)
-                        .replace('%file%', file ? file.name : '');
+                    const infoIcon = infoIconTemplate.replace('%str-info-icon-identifier%', `str-info-icon-${str.id}`);
                     return `
                         ${isUsed ? checkIcon : checkIconBlank}${infoIcon}${editable ? editIcon : ''}
                         <p
@@ -1060,7 +1057,10 @@
                 $('#strings-container').find('p, svg').remove().end().append(texts);
                 limited.forEach(str => {
                     //adding text here via "text" method to avoid issues with strings which contain html tags
-                    $('#strings-container').find(`p[int-id=${str.id}]`).text(str.text)
+                    const file = files.find(f => f.id === str.fileId);
+                    const infoText = `Context:\n${str.context}\n\nIdentifier:\n${str.identifier ? str.identifier : str.text}\n\nFile:\n${file ? file.name : ''}`;
+                    $('#strings-container').find(`p[int-id=${str.id}]`).text(str.text);
+                    $('#strings-container').find(`svg[id=str-info-icon-${str.id}`).find('title').text(infoText);
                 });
             });
     }
