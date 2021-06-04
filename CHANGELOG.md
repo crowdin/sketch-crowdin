@@ -5,6 +5,17 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.6]
+
+### Updated
+
+- Updated dependencies ([#72](https://github.com/crowdin/sketch-crowdin/pull/72))
+- Added delay in search strings ([#69](https://github.com/crowdin/sketch-crowdin/pull/69))
+
+### Fixed
+
+- Fixed strings rendering ([#64](https://github.com/crowdin/sketch-crowdin/pull/64))
+
 ## [2.3.5]
 
 ### Added

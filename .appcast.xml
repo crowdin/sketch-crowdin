@@ -55,5 +55,8 @@
         <item>
             <enclosure url="https://github.com/crowdin/sketch-crowdin/releases/download/2.3.5/sketch-crowdin.sketchplugin.zip" sparkle:version="2.3.5"/>
         </item>
+        <item>
+            <enclosure url="https://github.com/crowdin/sketch-crowdin/releases/download/2.3.6/sketch-crowdin.sketchplugin.zip" sparkle:version="2.3.6"/>
+        </item>
     </channel>
 </rss>
