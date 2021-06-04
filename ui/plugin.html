@@ -48,13 +48,15 @@
                         <label crowdin-ui-text-label="connectionDetailsLabel" class="fieldset-label"></label>
                         <div class="form-group">
                             <label crowdin-ui-text-label="tokenLabel"></label>
-                            <input type="text" class="form-control" id="token" onchange="$('#connect-btn').attr('disabled', false);">
+                            <input type="text" class="form-control" id="token"
+                                onchange="$('#connect-btn').attr('disabled', false);">
                             <p crowdin-ui-text-label="tokenDetailsText" class="form-text text-muted help-text mb-3">
                             </p>
                         </div>
                         <div class="form-group">
                             <label crowdin-ui-text-label="organizationLabel"></label>
-                            <input type="text" class="form-control" id="organization" onchange="$('#connect-btn').attr('disabled', false);">
+                            <input type="text" class="form-control" id="organization"
+                                onchange="$('#connect-btn').attr('disabled', false);">
                             <p crowdin-ui-text-label="organizationDetailsText" class="form-text text-muted help-text">
                             </p>
                             <button id="connect-btn" crowdin-ui-text-label="connectToCrowdinButton" type="button"
@@ -162,13 +164,16 @@
                             </div>
                             <div id="new-string-form" style="display: none;">
                                 <div class="form-group">
-                                    <label><abbr crowdin-ui-text-details="addStringIdentifierDetails" crowdin-ui-text-label="addStringIdentifierLabel"></abbr></label>
-                                    <input class="form-control" id="string-identifier" placeholder="identifier" type="text">
+                                    <label><abbr crowdin-ui-text-details="addStringIdentifierDetails"
+                                            crowdin-ui-text-label="addStringIdentifierLabel"></abbr></label>
+                                    <input class="form-control" id="string-identifier" placeholder="identifier"
+                                        type="text">
                                     <div class="invalid-feedback" id="invalidIdentifier"></div>
                                 </div>
                                 <div class="form-group row">
-                                    <label class="col-8 col-form-label" for="string-max-length"><abbr crowdin-ui-text-label="addStringMaxLengthLabel"
-                                                crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
+                                    <label class="col-8 col-form-label" for="string-max-length"><abbr
+                                            crowdin-ui-text-label="addStringMaxLengthLabel"
+                                            crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
                                     <div class="col-4">
                                         <input min="0" type="number" class="form-control" id="string-max-length">
                                         <div class="invalid-feedback" id="invalidMaxLength"></div>
@@ -184,7 +189,8 @@
                             <div class="strings-holder"></div>
                         </div>
                         <div id="string-file-container" class="form-group mt-2">
-                            <label for="string-files"><abbr crowdin-ui-text-label="addStringFileLabel" crowdin-ui-text-details="addStringFileDetails"></abbr></label>
+                            <label for="string-files"><abbr crowdin-ui-text-label="addStringFileLabel"
+                                    crowdin-ui-text-details="addStringFileDetails"></abbr></label>
                             <select class="form-control" id="string-files" multiple size="8"></select>
                             <div class="invalid-feedback" id="invalidFile"></div>
                         </div>
@@ -889,12 +895,16 @@
                 const projectsInfo = info[0];
                 const options = projectsInfo.projects.map(pr => {
                     if (pr.id === projectsInfo.selectedProjectId) {
-                        return `<option value="${pr.id}" selected>${pr.name}</option>`;
+                        return `<option value="${pr.id}" selected></option>`;
                     } else {
-                        return `<option value="${pr.id}">${pr.name}</option>`;
+                        return `<option value="${pr.id}"></option>`;
                     }
                 }).join('');
                 $('#projects').find('option').remove().end().append(options);
+                projectsInfo.projects.forEach(pr => {
+                    //adding text here via "text" method to avoid issues with strings which contain html tags
+                    $('#projects').find(`option[value=${pr.id}]`).text(pr.name);
+                });
             });
     }
 
@@ -905,10 +915,15 @@
                     languages = res[0];
                     let options = `<option value="-1">${allLanguagesOption || ''}</option>`;
                     options += languages.map(lan => {
-                        return `<option value="${lan.id}">${lan.name}</option>`;
+                        return `<option value="${lan.id}"></option>`;
                     }).join('');
                     $('#languages').find('option').remove().end().append(options);
                     $('#languages-preview').find('option').remove().end().append(options);
+                    languages.forEach(lan => {
+                        //adding text here via "text" method to avoid issues with strings which contain html tags
+                        $('#languages').find(`option[value=${lan.id}]`).text(lan.name);
+                        $('#languages-preview').find(`option[value=${lan.id}]`).text(lan.name);
+                    });
                 });
         } else {
             return new Promise((res, rej) => {
@@ -922,12 +937,16 @@
             return window.postMessage('getFiles')
                 .then(res => {
                     files = res[0];
-                    const options = files
-                        .filter(file => editableFileTypes.includes(file.type))
+                    const supportedFiles = files.filter(file => editableFileTypes.includes(file.type));
+                    const options = supportedFiles
                         .map(file => {
-                            return `<option value="${file.id}" data-title="qwe">${file.name}</option>`;
+                            return `<option value="${file.id}"></option>`;
                         }).join('');
                     $('#string-files').find('option').remove().end().append(options);
+                    supportedFiles.forEach(file => {
+                        //adding text here via "text" method to avoid issues with strings which contain html tags
+                        $('#string-files').find(`option[value=${file.id}]`).text(file.name);
+                    });
                     $('#string-files').selectpicker('refresh');
                 });
         } else {
@@ -959,9 +978,13 @@
                 let options = `<option value="-1" ${selectedBranch < 0 ? 'selected' : ''}>${noBranchOption || ''}</option>`;
                 options += resp.branches
                     .map(br => {
-                        return `<option value="${br.id}" ${br.id === selectedBranch ? 'selected' : ''}>${br.name}</option>`;
+                        return `<option value="${br.id}" ${br.id === selectedBranch ? 'selected' : ''}></option>`;
                     }).join('');
                 $('#branches').find('option').remove().end().append(options);
+                resp.branches.forEach(br => {
+                    //adding text here via "text" method to avoid issues with strings which contain html tags
+                    $('#branches').find(`option[value=${br.id}]`).text(br.name);
+                });
             });
     }
 
@@ -992,8 +1015,8 @@
         `;
 
         const infoIconTemplate = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info string-row-icon" fill="currentColor">
-                <title>Context:\n%context%\n\nIdentifier:\n%identifier%\n\nFile:\n%file%</title>
+            <svg id="%str-info-icon-identifier%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" class="float-right string-row-info string-row-icon" fill="currentColor">
+                <title></title>
                 <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path>
             </svg>
         `;
@@ -1005,11 +1028,11 @@
         const arr = strings || [];
         const filteredStrings = (!text || text.length === 0)
             ? arr
-            : arr.filter(str => 
-                    str.text.toLowerCase().includes(text) || 
-                    (str.identifier && str.identifier.toLowerCase().includes(text)) ||
-                    (str.context && str.context.toLowerCase().includes(text))
-                );
+            : arr.filter(str =>
+                str.text.toLowerCase().includes(text) ||
+                (str.identifier && str.identifier.toLowerCase().includes(text)) ||
+                (str.context && str.context.toLowerCase().includes(text))
+            );
         const limited = filteredStrings.length > 1000 ? filteredStrings.slice(0, 1000) : filteredStrings;
         return window.postMessage('getUsedStrings')
             .then((e) => {
@@ -1018,10 +1041,7 @@
                     const isUsed = usedStrings.includes(str.id);
                     const file = files.find(f => f.id === str.fileId);
                     const editable = file && editableFileTypes.includes(file.type);
-                    const infoIcon = infoIconTemplate
-                        .replace('%context%', str.context)
-                        .replace('%identifier%', str.identifier ? str.identifier : str.text)
-                        .replace('%file%', file ? file.name : '');
+                    const infoIcon = infoIconTemplate.replace('%str-info-icon-identifier%', `str-info-icon-${str.id}`);
                     return `
                         ${isUsed ? checkIcon : checkIconBlank}${infoIcon}${editable ? editIcon : ''}
                         <p
@@ -1031,11 +1051,17 @@
                             int-id="${str.id}"
                             ${!!str.identifier ? `str-id="${str.identifier}"` : ''}
                         >
-                            ${str.text}
                         </p>
                     `;
                 });
                 $('#strings-container').find('p, svg').remove().end().append(texts);
+                limited.forEach(str => {
+                    //adding text here via "text" method to avoid issues with strings which contain html tags
+                    const file = files.find(f => f.id === str.fileId);
+                    const infoText = `Context:\n${str.context}\n\nIdentifier:\n${str.identifier ? str.identifier : str.text}\n\nFile:\n${file ? file.name : ''}`;
+                    $('#strings-container').find(`p[int-id=${str.id}]`).text(str.text);
+                    $('#strings-container').find(`svg[id=str-info-icon-${str.id}`).find('title').text(infoText);
+                });
             });
     }
 
