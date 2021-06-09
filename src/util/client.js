@@ -222,10 +222,35 @@ function convertCrowdinStringsToStrings(crowdinStrings) {
                     text.other || '';
             }
             return {
-                text, id: e.id, fileId: e.fileId, identifier: e.identifier, context: e.context, branchId: e.branchId
+                text, id: e.id, fileId: e.fileId, identifier: e.identifier, context: e.context, branchId: e.branchId, labelIds: e.labelIds
             }
         })
         .filter(e => e.text && e.text.length > 0);
 }
 
-export { getProjects, getBranches, getLanguages, getFiles, getStrings, fetchStrings };
+async function getLabels() {
+    try {
+        if (!dom.getSelectedDocument()) {
+            throw displayTexts.notifications.warning.selectDocument;
+        }
+        const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+        if (!projectId) {
+            throw displayTexts.notifications.warning.selectProject;
+        }
+        ui.message(displayTexts.notifications.info.loadingLabels);
+        const { labelsApi } = createClient();
+        const languages = await labelsApi.withFetchAll().listLabels(projectId);
+        return languages.data
+            .map(l => {
+                return {
+                    id: l.data.id,
+                    title: l.data.title
+                };
+            });
+    } catch (error) {
+        handleError(error);
+        return [];
+    }
+}
+
+export { getProjects, getBranches, getLanguages, getFiles, getStrings, fetchStrings, getLabels };

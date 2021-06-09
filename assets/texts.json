@@ -26,6 +26,7 @@
             "loadingLanguages": "Loading list of languages",
             "loadingFiles": "Loading list of files",
             "loadingStrings": "Loading strings",
+            "loadingLabels": "Loading labels",
             "projectSaved": "Project saved",
             "branchSaved": "Branch saved",
             "overrideTranslationsSaved": "Override translations flag updated",
@@ -81,6 +82,7 @@
             "addStringIdentifierLabel": "Identifier",
             "addStringMaxLengthLabel": "Translation Text Length Limit",
             "addStringFileLabel": "File",
+            "addStringLabelLabel": "Label",
             "addStringSaveButtonLabel": "Save",
             "addStringCancelButtonLabel": "Cancel",
             "addStringDeleteButtonLabel": "Delete",
@@ -111,7 +113,8 @@
             "addStringStringDetails": "Fill in text string you'd like to add to the Crowdin project",
             "addStringIdentifierDetails": "A unique identifier of this string. It helps to match source and translated texts in your application",
             "addStringMaxLengthDetails": "The maximum length of the translated text (0 — unlimited)",
-            "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES."
+            "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES.",
+            "addStringLabelDetails": "Specify labels for string(s) which then will be used in search or export functionality"
         },
         "validation": {
             "addStringEmptyString": "Please, insert the source string",
@@ -121,7 +124,8 @@
             "addStringEmptyFile": "Select one or more source files to add the new string to"
         },
         "custom": {
-            "stringFilesSelectPlaceholder": "Select one or more source files"
+            "stringFilesSelectPlaceholder": "Select one or more source files",
+            "stringLabelsSelectPlaceholder": "Select string labels"
         }
     }
 }
