@@ -1078,7 +1078,8 @@
             : arr.filter(str =>
                 str.text.toLowerCase().includes(text) ||
                 (str.identifier && str.identifier.toLowerCase().includes(text)) ||
-                (str.context && str.context.toLowerCase().includes(text))
+                (str.context && str.context.toLowerCase().includes(text)) ||
+                (str.labelIds && str.labelIds.length > 0 && labels.filter(l => str.labelIds.includes(l.id)).some(l => l.title.toLowerCase().includes(text)))
             );
         const limited = filteredStrings.length > 1000 ? filteredStrings.slice(0, 1000) : filteredStrings;
         return window.postMessage('getUsedStrings')
