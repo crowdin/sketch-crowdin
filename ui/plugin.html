@@ -194,6 +194,11 @@
                             <select class="form-control" id="string-files" multiple size="8"></select>
                             <div class="invalid-feedback" id="invalidFile"></div>
                         </div>
+                        <div id="string-label-container" class="form-group mt-2">
+                            <label for="string-labels"><abbr crowdin-ui-text-label="addStringLabelLabel"
+                                    crowdin-ui-text-details="addStringLabelDetails"></abbr></label>
+                            <select class="form-control" id="string-labels" multiple size="8"></select>
+                        </div>
                         <div class="button-holder d-flex flex-row">
                             <button crowdin-ui-text-label="addStringSaveButtonLabel" type="button"
                                 class="btn btn-primary btn-sm" onclick="saveString();"></button>
@@ -204,35 +209,37 @@
                                 onclick="deleteString();"></button>
                         </div>
                     </fieldset>
-                    <fieldset>
-                        <label crowdin-ui-text-label="previewStringsLabel" class="fieldset-label"></label>
-                        <div class="form-group">
-                            <p crowdin-ui-text-label="previewStringsDetailsText" class="form-text"></p>
-                            <div class="form-row">
-                                <div class="col-6">
-                                    <select id="languages-preview" class="ml-1"></select>
-                                </div>
-                                <div class="col-3">
-                                    <button crowdin-ui-text-label="previewAllButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block"
-                                        onclick="stringsPreview(true)"></button>
-                                </div>
-                                <div class="col-3">
-                                    <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block"
-                                        onclick="stringsPreview(false)"></button>
+                    <div id="strings-preview">
+                        <fieldset>
+                            <label crowdin-ui-text-label="previewStringsLabel" class="fieldset-label"></label>
+                            <div class="form-group">
+                                <p crowdin-ui-text-label="previewStringsDetailsText" class="form-text"></p>
+                                <div class="form-row">
+                                    <div class="col-6">
+                                        <select id="languages-preview" class="ml-1"></select>
+                                    </div>
+                                    <div class="col-3">
+                                        <button crowdin-ui-text-label="previewAllButtonLabel" type="button"
+                                            class="btn btn-secondary btn-sm btn-block"
+                                            onclick="stringsPreview(true)"></button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
+                                            class="btn btn-secondary btn-sm btn-block"
+                                            onclick="stringsPreview(false)"></button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </fieldset>
-                    <fieldset>
-                        <label crowdin-ui-text-label="uploadScreenshotsLabel" class="fieldset-label"></label>
-                        <div class="form-group">
-                            <p crowdin-ui-text-label="uploadScreenshotsDetailsText" class="form-text"></p>
-                            <button crowdin-ui-text-label="uploadScreenshotsButtonLabel" type="button"
-                                class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()"></button>
-                        </div>
-                    </fieldset>
+                        </fieldset>
+                        <fieldset>
+                            <label crowdin-ui-text-label="uploadScreenshotsLabel" class="fieldset-label"></label>
+                            <div class="form-group">
+                                <p crowdin-ui-text-label="uploadScreenshotsDetailsText" class="form-text"></p>
+                                <button crowdin-ui-text-label="uploadScreenshotsButtonLabel" type="button"
+                                    class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()"></button>
+                            </div>
+                        </fieldset>
+                    </div>
                 </form>
             </div>
 
@@ -324,6 +331,7 @@
     var languages;
     var strings;
     var files;
+    var labels;
     var openedString;
     var selectedText = [];
 
@@ -333,6 +341,7 @@
         strings = undefined;
         languages = undefined;
         files = undefined;
+        labels = undefined;
         openedString = undefined;
         selectedText.length = 0;
     }
@@ -373,9 +382,10 @@
     }
 
     function openStringsMode() {
-        if (!strings || !files || !languages) {
+        if (!strings || !files || !languages || !labels) {
             showLoading();
             return getFiles()
+                .then(getLabels)
                 .then(getStrings)
                 .then(getLanguages)
                 .finally(hideLoading);
@@ -512,8 +522,10 @@
     function reloadStrings() {
         strings = undefined;
         files = undefined;
+        labels = undefined;
         showLoading();
         return getFiles()
+            .then(getLabels)
             .then(getStrings)
             .finally(hideLoading);
     }
@@ -524,9 +536,11 @@
         $('#string-delete-btn').show();
         const el = $(element);
         $('#list-strings').hide();
+        $('#strings-preview').hide();
         $('#new-string-form').hide();
         $('#multi-string-form').hide();
         $('#string-file-container').hide();
+        $('#string-label-container').hide();
         $('#single-string-form').show();
         $('#edit-string').show();
         const text = el.next().text().trim();
@@ -541,8 +555,10 @@
         window.postMessage('getSelectedText').then((e) => {
             selectedText = e[0];
             $('#list-strings').hide();
+            $('#strings-preview').hide();
             $('#new-string-form').show();
             $('#string-file-container').show();
+            $('#string-label-container').show();
             $('#edit-string').show();
             if (selectedText.length === 0) {
                 $('#string-text').val('');
@@ -649,11 +665,13 @@
 
     function cancelEditString() {
         $('#list-strings').show();
+        $('#strings-preview').show();
         $('#edit-string').hide();
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidMaxLength').text('');
         $('#invalidFile').text('');
+        $('#string-labels').selectpicker('deselectAll');
         selectedText.length = 0;
     }
 
@@ -680,6 +698,7 @@
             //adding multiple strings
             $('#multi-string-form div.form-group .invalid-feedback').text('');
             const files = $('#string-files option:selected').toArray();
+            const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             if (files.length === 0) {
                 $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
                 return;
@@ -718,7 +737,8 @@
                             .postMessage('addString', {
                                 text: str.text,
                                 identifier: str.identifier,
-                                fileId: Number($(file).val())
+                                fileId: Number($(file).val()),
+                                labelIds: labelIds.length > 0 ? labelIds : undefined
                             })
                             .then(e => {
                                 if (!e[0].error) {
@@ -727,7 +747,8 @@
                                         text: str.text,
                                         fileId: Number($(file).val()),
                                         identifier: str.identifier,
-                                        context: str.identifier
+                                        context: str.identifier,
+                                        labelIds
                                     });
                                     addedStrings.push({
                                         id: e[0].data.id,
@@ -781,6 +802,7 @@
             const identifier = $('#string-identifier').val();
             const maxLength = Number($('#string-max-length').val());
             const files = $('#string-files option:selected').toArray();
+            const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             if (!identifier || identifier.length === '') {
                 $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                 return;
@@ -803,7 +825,8 @@
                     text,
                     identifier,
                     maxLength: $('#string-max-length').val().length === 0 ? undefined : maxLength,
-                    fileId: Number($(file).val())
+                    fileId: Number($(file).val()),
+                    labelIds: labelIds.length > 0 ? labelIds : undefined
                 };
                 return window.postMessage('addString', req)
                     .then(e => {
@@ -814,7 +837,8 @@
                                 text: text,
                                 fileId: Number($(file).val()),
                                 identifier: identifier,
-                                context: identifier
+                                context: identifier,
+                                labelIds
                             });
                             return id;
                         };
@@ -956,6 +980,29 @@
         }
     }
 
+    function getLabels() {
+        if (!labels) {
+            return window.postMessage('getLabels')
+                .then(res => {
+                    labels = res[0];
+                    const options = labels
+                        .map(label => {
+                            return `<option value="${label.id}"></option>`;
+                        }).join('');
+                    $('#string-labels').find('option').remove().end().append(options);
+                    labels.forEach(label => {
+                        //adding text here via "text" method to avoid issues with strings which contain html tags
+                        $('#string-labels').find(`option[value=${label.id}]`).text(label.title);
+                    });
+                    $('#string-labels').selectpicker('refresh');
+                });
+        } else {
+            return new Promise((res, rej) => {
+                res();
+            });
+        }
+    }
+
     function getStrings() {
         if (!strings) {
             return window.postMessage('getStrings')
@@ -1031,7 +1078,8 @@
             : arr.filter(str =>
                 str.text.toLowerCase().includes(text) ||
                 (str.identifier && str.identifier.toLowerCase().includes(text)) ||
-                (str.context && str.context.toLowerCase().includes(text))
+                (str.context && str.context.toLowerCase().includes(text)) ||
+                (str.labelIds && str.labelIds.length > 0 && labels.filter(l => str.labelIds.includes(l.id)).some(l => l.title.toLowerCase().includes(text)))
             );
         const limited = filteredStrings.length > 1000 ? filteredStrings.slice(0, 1000) : filteredStrings;
         return window.postMessage('getUsedStrings')
@@ -1058,7 +1106,10 @@
                 limited.forEach(str => {
                     //adding text here via "text" method to avoid issues with strings which contain html tags
                     const file = files.find(f => f.id === str.fileId);
-                    const infoText = `Context:\n${str.context}\n\nIdentifier:\n${str.identifier ? str.identifier : str.text}\n\nFile:\n${file ? file.name : ''}`;
+                    let infoText = `Context:\n${str.context}\n\nIdentifier:\n${str.identifier ? str.identifier : str.text}\n\nFile:\n${file ? file.name : ''}`;
+                    if (str.labelIds && str.labelIds.length > 0) {
+                        infoText += `\n\nLabels:\n${labels.filter(l => str.labelIds.includes(l.id)).map(l => l.title).join(',')}`;
+                    }
                     $('#strings-container').find(`p[int-id=${str.id}]`).text(str.text);
                     $('#strings-container').find(`svg[id=str-info-icon-${str.id}`).find('title').text(infoText);
                 });
@@ -1090,6 +1141,7 @@
 
     function applyCustomText(texts) {
         $('#string-files').attr('title', texts.stringFilesSelectPlaceholder);
+        $('#string-labels').attr('title', texts.stringLabelsSelectPlaceholder);
     }
 
     loadText();
