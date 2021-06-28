@@ -6,6 +6,8 @@ import * as httpUtil from '../util/http';
 import { PatchOperation } from '@crowdin/crowdin-api-client';
 import { default as displayTexts } from '../../assets/texts.json';
 import { truncateLongText } from '../util/string';
+import * as localStorage from '../util/local-storage';
+import { updateText } from '../util/dom';
 
 async function addString(req) {
     const callback = async (projectId) => {
@@ -21,11 +23,14 @@ async function editString(string) {
     const { id, text } = string;
     const callback = async (projectId) => {
         const { sourceStringsApi } = httpUtil.createClient();
-        await sourceStringsApi.editString(projectId, id, [{
+        const string = await sourceStringsApi.editString(projectId, id, [{
             path: '/text',
             value: text,
             op: PatchOperation.REPLACE
         }]);
+        const tags = localStorage.getTags(dom.getSelectedDocument());
+        const stringTags = tags.filter(t => t.stringId === id);
+        stringTags.forEach(tag => updateText(tag, text, !!string.data.identifier ? string.data.identifier : text));
     };
     return await executeOperartion(callback);
 }
