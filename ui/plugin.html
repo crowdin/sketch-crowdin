@@ -215,7 +215,7 @@
                             <div class="form-group">
                                 <p crowdin-ui-text-label="previewStringsDetailsText" class="form-text"></p>
                                 <div class="form-row">
-                                    <div class="col-6">
+                                    <div class="col-6 inline-select-holder">
                                         <select id="languages-preview" class="ml-1"></select>
                                     </div>
                                     <div class="col-3">
@@ -264,9 +264,11 @@
                     </fieldset>
                     <fieldset>
                         <label crowdin-ui-text-label="getTranslationsLabel" class="fieldset-label"></label>
-                        <div class="form-group">
+                        <div class="form-group inline-select d-flex flex-row">
                             <label crowdin-ui-text-label="getTranslationsLanguageLabel"></label>
-                            <select id="languages" class="ml-1"></select>
+                            <div class="inline-select-holder ml-2">
+                                <select id="languages"></select>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label crowdin-ui-text-label="uploadTranslationsLabelFor"></label>

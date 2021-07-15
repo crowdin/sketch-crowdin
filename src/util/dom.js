@@ -176,6 +176,27 @@ function getSymbolTexts(symbol) {
         });
 }
 
+function updateText(tag, stringText, identifier) {
+    if (tag.type === TEXT_TYPE) {
+        const text = dom.find('Text').find(t => t.id === tag.id);
+        if (text) {
+            text.text = stringText;
+            text.name = identifier;
+        }
+    } else if (tag.type === SYMBOL_TYPE) {
+        dom
+            .find('SymbolInstance')
+            .forEach(s =>
+                s.overrides
+                    .filter(override => __isSymbolOverrideText(override))
+                    .filter(o => `${s.id}/${o.id}` === tag.id)
+                    .forEach(o => {
+                        o.value = stringText;
+                    })
+            );
+    }
+}
+
 function __isSymbolOverrideText(override) {
     return override.affectedLayer.type === 'Text' && override.property === 'stringValue';
 }
@@ -217,5 +238,6 @@ export {
     removeGeneratedArtboards,
     getSelectedText,
     getSymbolTexts,
-    getTextElementsInArtboard
+    getTextElementsInArtboard,
+    updateText
 };
