@@ -35,8 +35,8 @@ function useString(strings) {
         const stringsToDeselect = [];
 
         strings.forEach(string => {
-            const selectedText = !!string.selectedText
-                ? selectedTexts.find(st => {
+            const selectedTextElements = !!string.selectedText
+                ? selectedTexts.filter(st => {
                     if (!!string.selectedText.artboardId) {
                         return !!st.artboard
                             && st.artboard.id === string.selectedText.artboardId
@@ -48,45 +48,46 @@ function useString(strings) {
                             && st.type === string.selectedText.type;
                     }
                 })
-                : selectedTexts[0];
-            if (!selectedText) {
+                : selectedTexts;
+            if (selectedTextElements.length === 0) {
                 return;
             }
+            selectedTextElements.forEach(selectedText => {
+                const id = string.id;
+                const text = string.text;
 
-            const id = string.id;
-            const text = string.text;
-
-            if (selectedText.type === TEXT_TYPE) {
-                selectedText.element.text = text;
-                selectedText.element.name = !!string.identifier ? string.identifier : text;
-            } else {
-                selectedText.element.value = text;
-            }
-
-            const artboard = selectedText.artboard;
-            const tags = localStorage.getTags(selectedDocument);
-            const tagIndex = tags.findIndex(t =>
-                t.id === selectedText.id
-                && t.type === selectedText.type
-                && t.pageId === selectedPage.id
-            );
-            const tag = {
-                id: selectedText.id,
-                type: selectedText.type,
-                artboardId: !!artboard ? artboard.id : undefined,
-                pageId: selectedPage.id,
-                stringId: id
-            };
-            if (tagIndex < 0) {
-                tags.push(tag);
-            } else {
-                if (tags.filter(t => t.stringId === tags[tagIndex].stringId).length === 1) {
-                    //we are replacing single usage of the string
-                    stringsToDeselect.push(tags[tagIndex].stringId);
+                if (selectedText.type === TEXT_TYPE) {
+                    selectedText.element.text = text;
+                    selectedText.element.name = !!string.identifier ? string.identifier : text;
+                } else {
+                    selectedText.element.value = text;
                 }
-                tags[tagIndex] = tag;
-            }
-            localStorage.saveTags(selectedDocument, tags);
+
+                const artboard = selectedText.artboard;
+                const tags = localStorage.getTags(selectedDocument);
+                const tagIndex = tags.findIndex(t =>
+                    t.id === selectedText.id
+                    && t.type === selectedText.type
+                    && t.pageId === selectedPage.id
+                );
+                const tag = {
+                    id: selectedText.id,
+                    type: selectedText.type,
+                    artboardId: !!artboard ? artboard.id : undefined,
+                    pageId: selectedPage.id,
+                    stringId: id
+                };
+                if (tagIndex < 0) {
+                    tags.push(tag);
+                } else {
+                    if (tags.filter(t => t.stringId === tags[tagIndex].stringId).length === 1) {
+                        //we are replacing single usage of the string
+                        stringsToDeselect.push(tags[tagIndex].stringId);
+                    }
+                    tags[tagIndex] = tag;
+                }
+                localStorage.saveTags(selectedDocument, tags);
+            });
         });
         return {
             error: false,
