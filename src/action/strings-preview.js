@@ -67,12 +67,12 @@ async function stringsPreview(options, wholePage) {
         }
         for (let i = 0; i < selectedLanguages.length; i++) {
             const lang = selectedLanguages[i];
-            ui.message(displayTexts.notifications.info.loadingTranslationsForLanguage.replace('%name%', lang.name));
+            !cachedTranslations && ui.message(displayTexts.notifications.info.loadingTranslationsForLanguage.replace('%name%', lang.name));
             const res = cachedTranslations || await stringTranslationsApi.withFetchAll().listLanguageTranslations(projectId, lang.id);
             if (!!wholePage) {
-                extractPageTranslations(lang.name, selectedDocument, selectedPage, res.data);
+                extractPageTranslations(lang.name, selectedDocument, selectedPage, res.data, previewMode === 'duplicate');
             } else {
-                extractArtboardTranslations(lang.name, selectedDocument, selectedPage, artboard, res.data)
+                extractArtboardTranslations(lang.name, selectedDocument, selectedPage, artboard, res.data, previewMode === 'duplicate');
             }
         }
     } catch (error) {
@@ -81,13 +81,18 @@ async function stringsPreview(options, wholePage) {
 }
 
 
-function extractPageTranslations(languageName, document, page, translations) {
+function extractPageTranslations(languageName, document, page, translations, previewInDuplicate) {
     const tags = localStorage.getTags(document);
-    localStorage.removeTranslatedElements(document, page.id, languageName, 'page');
-    const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, page.id, languageName, 'page');
-    const newPage = page.duplicate();
-    localStorage.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
-    newPage.name = `${newPage.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
+    let newPage;
+    if (previewInDuplicate) {
+        localStorage.removeTranslatedElements(document, page.id, languageName, 'page');
+        const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, page.id, languageName, 'page');
+        newPage = page.duplicate();
+        localStorage.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
+        newPage.name = `${newPage.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
+    } else {
+        newPage = page;
+    }
 
     const originalStrings = dom.find('Text', page);
     const texts = dom.find('Text', newPage);
@@ -123,23 +128,29 @@ function extractPageTranslations(languageName, document, page, translations) {
             }
         });
 
-    domUtil.removeGeneratedArtboards(document, page, newPage);
-    document.selectedPage = newPage;
-    ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', truncateLongText(newPage.name)));
-
+    if (previewInDuplicate) {
+        domUtil.removeGeneratedArtboards(document, page, newPage);
+        document.selectedPage = newPage;
+        ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', truncateLongText(newPage.name)));
+    }
 }
 
-function extractArtboardTranslations(languageName, document, page, artboard, translations) {
+function extractArtboardTranslations(languageName, document, page, artboard, translations, previewInDuplicate) {
     const tags = localStorage.getTags(document);
-    localStorage.removeTranslatedElements(document, artboard.id, languageName, 'artboard');
-    const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, artboard.id, languageName, 'artboard');
-    const newArtboard = artboard.duplicate();
-    localStorage.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
-    newArtboard.name = `${newArtboard.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
-    newArtboard.selected = true;
-    artboard.selected = false;
-    //by default duplicate will appear in the same place as original
-    domUtil.offsetArtboard(page, newArtboard);
+    let newArtboard;
+    if (previewInDuplicate) {
+        localStorage.removeTranslatedElements(document, artboard.id, languageName, 'artboard');
+        const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, artboard.id, languageName, 'artboard');
+        newArtboard = artboard.duplicate();
+        localStorage.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
+        newArtboard.name = `${newArtboard.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
+        newArtboard.selected = true;
+        artboard.selected = false;
+        //by default duplicate will appear in the same place as original
+        domUtil.offsetArtboard(page, newArtboard);
+    } else {
+        newArtboard = artboard;
+    }
 
     const originalStrings = dom.find('Text', artboard);
     const texts = dom.find('Text', newArtboard);
@@ -176,7 +187,9 @@ function extractArtboardTranslations(languageName, document, page, artboard, tra
             }
         });
 
-    ui.message(displayTexts.notifications.info.translatedArtboardCreated.replace('%name%', truncateLongText(newArtboard.name)));
+    if (previewInDuplicate) {
+        ui.message(displayTexts.notifications.info.translatedArtboardCreated.replace('%name%', truncateLongText(newArtboard.name)));
+    }
 }
 
 export { stringsPreview };
