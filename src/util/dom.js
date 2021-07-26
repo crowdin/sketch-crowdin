@@ -14,7 +14,7 @@ function getSelectedText(page) {
     symbols.forEach(symbol =>
         symbol.overrides
             .filter(override => __isSymbolOverrideText(override))
-            .filter(o => !selectedTexts.find(s => s.type === SYMBOL_TYPE && s.element.id === o.id))
+            .filter(o => !selectedTexts.find(s => s.type === SYMBOL_TYPE && s.id === symbol.id + '/' + o.id))
             .filter(o => o.selected)
             .forEach(override => {
                 let parent = symbol.parent;
