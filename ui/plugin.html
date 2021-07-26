@@ -211,12 +211,18 @@
                     </fieldset>
                     <div id="strings-preview">
                         <fieldset>
-                            <label crowdin-ui-text-label="previewStringsLabel" class="fieldset-label"></label>
+                            <!--neeeded to create space between fieldset borders-->
+                            <label class="fieldset-select-space">&nbsp;</label>
+                            <select id="preview-mode-option" class="fieldset-select" onchange="onPreviewModeChange();">
+                                <option value="duplicate" crowdin-ui-text-label="previewStringsInDuplicateLabel">
+                                </option>
+                                <option value="current" crowdin-ui-text-label="previewStringsInCurrentLabel"></option>
+                            </select>
                             <div class="form-group">
                                 <p crowdin-ui-text-label="previewStringsDetailsText" class="form-text"></p>
-                                <div class="form-row">
+                                <div id="preview-in-current-mode" class="form-row" style="display: none;">
                                     <div class="col-6 inline-select-holder">
-                                        <select id="languages-preview" class="ml-1"></select>
+                                        <select id="languages-preview-current" class="ml-1"></select>
                                     </div>
                                     <div class="col-3">
                                         <button crowdin-ui-text-label="previewAllButtonLabel" type="button"
@@ -227,6 +233,39 @@
                                         <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
                                             class="btn btn-secondary btn-sm btn-block"
                                             onclick="stringsPreview(false)"></button>
+                                    </div>
+                                </div>
+                                <div id="preview-in-duplicate-mode">
+                                    <div class="form-row">
+                                        <div class="col-6">
+                                            <input onclick="onPreviewModeSubOptionChange(true);" type="radio"
+                                                id="preview-mode-with-language" name="preview-mode-sub-option"
+                                                value="true" checked />
+                                            <label crowdin-ui-text-label="previewStringsWithLanguageLabel"></label>
+                                        </div>
+                                        <div class="col-6 inline-select-holder">
+                                            <select id="languages-preview-duplicate" class="ml-1 mt-1"></select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-6">
+                                            <input onclick="onPreviewModeSubOptionChange(false);" type="radio"
+                                                id="preview-mode-with-keys" name="preview-mode-sub-option"
+                                                value="false" />
+                                            <label crowdin-ui-text-label="previewStringsWithKeysLabel"></label>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-6">
+                                            <button crowdin-ui-text-label="previewAllButtonLabel" type="button"
+                                                class="btn btn-secondary btn-sm btn-block"
+                                                onclick="stringsPreview(true)"></button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
+                                                class="btn btn-secondary btn-sm btn-block"
+                                                onclick="stringsPreview(false)"></button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -330,6 +369,7 @@
     var allLanguagesOption;
     var noBranchOption;
 
+    var sourceLanguage;
     var languages;
     var strings;
     var files;
@@ -340,6 +380,7 @@
     //basic functions
 
     function clearStorage() {
+        sourceLanguage = undefined;
         strings = undefined;
         languages = undefined;
         files = undefined;
@@ -384,9 +425,10 @@
     }
 
     function openStringsMode() {
-        if (!strings || !files || !languages || !labels) {
+        if (!sourceLanguage || !strings || !files || !languages || !labels) {
             showLoading();
             return getFiles()
+                .then(getSourceLanguage)
                 .then(getLabels)
                 .then(getStrings)
                 .then(getLanguages)
@@ -482,6 +524,29 @@
 
     //strings mode
 
+    function onPreviewModeChange() {
+        const previewMode = $('#preview-mode-option option:selected').val();
+        onPreviewModeSubOptionChange(true);
+        $('#preview-mode-with-language').click();
+        if (previewMode === 'duplicate') {
+            $('#preview-in-current-mode').hide();
+            $('#preview-in-duplicate-mode').show();
+            $('#languages-preview-duplicate').val('-1');
+        } else {
+            $('#preview-in-duplicate-mode').hide();
+            $('#preview-in-current-mode').show();
+            $('#languages-preview-current').val(sourceLanguage ? sourceLanguage.id : '-1');
+        }
+    }
+
+    function onPreviewModeSubOptionChange(value) {
+        if (!value) {
+            $('#languages-preview-duplicate').attr('disabled', 'true');
+        } else {
+            $('#languages-preview-duplicate').removeAttr('disabled');
+        }
+    }
+
     function useString(e) {
         showLoading();
         const id = Number($(e).attr('int-id'));
@@ -516,9 +581,42 @@
 
     function stringsPreview(wholePage) {
         showLoading();
-        const id = $('#languages-preview option:selected').val();
-        const name = $('#languages-preview option:selected').text();
-        return window.postMessage('stringsPreview', { id, name }, wholePage).finally(hideLoading);
+        const previewMode = $('#preview-mode-option option:selected').val();
+        let langId;
+        let langName;
+        let translations;
+        if (previewMode === 'duplicate') {
+            const suboption = $("input[name='preview-mode-sub-option']:checked").val();
+            if (suboption === 'true') {
+                langId = $('#languages-preview-duplicate option:selected').val();
+                langName = $('#languages-preview-duplicate option:selected').text();
+            } else {
+                langId = 'keys';
+                langName = 'keys';
+                translations = (strings || []).map(s => {
+                    return {
+                        data: {
+                            stringId: s.id,
+                            text: s.identifier || `string ${s.id}`
+                        }
+                    };
+                });
+            }
+        } else {
+            langId = $('#languages-preview-current option:selected').val();
+            langName = $('#languages-preview-current option:selected').text();
+            if (sourceLanguage && langId === sourceLanguage.id) {
+                translations = (strings || []).map(s => {
+                    return {
+                        data: {
+                            stringId: s.id,
+                            text: s.text
+                        }
+                    };
+                });
+            }
+        }
+        return window.postMessage('stringsPreview', { langId, langName, previewMode, translations }, wholePage).finally(hideLoading);
     }
 
     function reloadStrings() {
@@ -915,6 +1013,20 @@
             });
     }
 
+    function getSourceLanguage() {
+        if (!sourceLanguage) {
+            return window.postMessage('getSourceLanguage')
+                .then(info => {
+                    sourceLanguage = info[0].sourceLanguage;
+                });
+        } else {
+            return new Promise((res, rej) => {
+                res();
+            });
+        }
+
+    }
+
     function getProjects() {
         return window.postMessage('getProjects')
             .then(info => {
@@ -939,17 +1051,26 @@
             return window.postMessage('getLanguages')
                 .then(res => {
                     languages = res[0];
-                    let options = `<option value="-1">${allLanguagesOption || ''}</option>`;
-                    options += languages.map(lan => {
+                    const allLangOption = `<option value="-1">${allLanguagesOption || ''}</option>`;
+                    const sourceLangOption = `<option value="${sourceLanguage ? sourceLanguage.id : -1}"></option>`;
+                    const optionsForDuplicateMode = allLangOption + languages.map(lan => {
                         return `<option value="${lan.id}"></option>`;
                     }).join('');
-                    $('#languages').find('option').remove().end().append(options);
-                    $('#languages-preview').find('option').remove().end().append(options);
+                    const optionsForCurrentMode = sourceLangOption + languages.map(lan => {
+                        return `<option value="${lan.id}"></option>`;
+                    }).join('');
+                    $('#languages').find('option').remove().end().append(optionsForDuplicateMode);
+                    $('#languages-preview-duplicate').find('option').remove().end().append(optionsForDuplicateMode);
+                    $('#languages-preview-current').find('option').remove().end().append(optionsForCurrentMode);
                     languages.forEach(lan => {
                         //adding text here via "text" method to avoid issues with strings which contain html tags
                         $('#languages').find(`option[value=${lan.id}]`).text(lan.name);
-                        $('#languages-preview').find(`option[value=${lan.id}]`).text(lan.name);
+                        $('#languages-preview-duplicate').find(`option[value=${lan.id}]`).text(lan.name);
+                        $('#languages-preview-current').find(`option[value=${lan.id}]`).text(lan.name);
                     });
+                    if (sourceLanguage) {
+                        $('#languages-preview-current').find(`option[value=${sourceLanguage.id}]`).text(sourceLanguage.name);
+                    }
                 });
         } else {
             return new Promise((res, rej) => {

@@ -8,8 +8,15 @@ import * as domUtil from '../util/dom';
 import { default as displayTexts } from '../../assets/texts.json';
 import { truncateLongText } from '../util/string';
 
-async function stringsPreview(language, wholePage) {
+async function stringsPreview(options, wholePage) {
     try {
+        const language = {
+            id: options.langId,
+            name: options.langName
+        };
+        //TODO handle preview mode in current page
+        const previewMode = options.previewMode;
+        const cachedTranslations = options.translations && { data: options.translations };
         if (!language) {
             throw displayTexts.notifications.warning.selectLanguage;
         }
@@ -61,7 +68,7 @@ async function stringsPreview(language, wholePage) {
         for (let i = 0; i < selectedLanguages.length; i++) {
             const lang = selectedLanguages[i];
             ui.message(displayTexts.notifications.info.loadingTranslationsForLanguage.replace('%name%', lang.name));
-            const res = await stringTranslationsApi.withFetchAll().listLanguageTranslations(projectId, lang.id);
+            const res = cachedTranslations || await stringTranslationsApi.withFetchAll().listLanguageTranslations(projectId, lang.id);
             if (!!wholePage) {
                 extractPageTranslations(lang.name, selectedDocument, selectedPage, res.data);
             } else {

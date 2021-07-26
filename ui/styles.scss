@@ -557,6 +557,21 @@ fieldset {
         z-index: 1;
     }
 
+    .fieldset-select {
+        position: absolute;
+        top: -0.625rem;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-bottom: 0;
+        padding: 0 1rem;
+        z-index: 1;
+    }
+
+    .fieldset-select-space {
+        @extend .fieldset-label;
+        padding: 0 7rem;
+    }
+
     .form-group:last-child {
         margin-bottom: 0;
     }
@@ -758,7 +773,7 @@ button .btn-icon {
 
 .adv-settings-container {
     overflow-y: scroll;
-    max-height: 190px;
+    max-height: 250px;
 }
 
 .multi-add-string-form-container {

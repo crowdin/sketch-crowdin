@@ -39,6 +39,30 @@ async function getProjects() {
     }
 }
 
+async function getSourceLanguage() {
+    try {
+        if (!dom.getSelectedDocument()) {
+            throw displayTexts.notifications.warning.selectDocument;
+        }
+        const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+        if (!projectId) {
+            throw displayTexts.notifications.warning.selectProject;
+        }
+        ui.message(displayTexts.notifications.info.loadingSourceLanguage);
+        const { languagesApi, projectsGroupsApi } = createClient();
+        const project = await projectsGroupsApi.getProject(projectId);
+        const sourceLanguage = await languagesApi.getLanguage(project.data.sourceLanguageId);
+        return {
+            sourceLanguage: sourceLanguage.data
+        }
+    } catch (error) {
+        handleError(error);
+        return {
+            sourceLanguage: null
+        };
+    }
+}
+
 async function getBranches() {
     try {
         if (!dom.getSelectedDocument()) {
@@ -253,4 +277,4 @@ async function getLabels() {
     }
 }
 
-export { getProjects, getBranches, getLanguages, getFiles, getStrings, fetchStrings, getLabels };
+export { getProjects, getBranches, getLanguages, getFiles, getStrings, fetchStrings, getLabels, getSourceLanguage };
