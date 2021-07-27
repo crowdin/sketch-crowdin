@@ -14,7 +14,6 @@ async function stringsPreview(options, wholePage) {
             id: options.langId,
             name: options.langName
         };
-        //TODO handle preview mode in current page
         const previewMode = options.previewMode;
         const cachedTranslations = options.translations && { data: options.translations };
         if (!language) {
