@@ -5,6 +5,24 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0]
+
+### Added
+
+- Option to preview strings translations in the current page ([#81](https://github.com/crowdin/sketch-crowdin/pull/81))
+- Option to update texts linked to strings changed in Crowdin ([#81](https://github.com/crowdin/sketch-crowdin/pull/81))
+- Option to preview string keys ([#81](https://github.com/crowdin/sketch-crowdin/pull/81))
+- Recursive search for selected text elements for strings mass adding ([#83](https://github.com/crowdin/sketch-crowdin/pull/83))
+
+### Updated
+
+- Dependencies update ([#78](https://github.com/crowdin/sketch-crowdin/pull/78)), ([#82](https://github.com/crowdin/sketch-crowdin/pull/82))
+
+### Fixed
+
+- Fix: fixed issue with use single string in multiple places ([#80](https://github.com/crowdin/sketch-crowdin/pull/80))
+- Fix: updating text in design if source string was edited ([#79](https://github.com/crowdin/sketch-crowdin/pull/79))
+
 ## [2.3.7]
 
 ### Added
