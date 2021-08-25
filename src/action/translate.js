@@ -104,6 +104,9 @@ async function extractArtboardTranslations(projectId, selectedLanguages, transla
             const lang = selectedLanguages[i];
             //in sequential manner instead of parallel because back end produce incorrect results
             const html = await getFile(translationsApi, projectId, foundFile.data.id, lang.data.id);
+            if (!html) {
+                continue;
+            }
             ui.message(displayTexts.notifications.info.translationsForLanguageLoaded.replace('%name%', lang.data.name));
             fileForEachLanguage.push({ html, languageName: lang.data.name });
         }
@@ -162,9 +165,10 @@ async function extractPageTranslations(projectId, selectedLanguages, translation
         for (let i = 0; i < selectedLanguages.length; i++) {
             const lang = selectedLanguages[i];
             //in sequential manner instead of parallel because back end produce incorrect results
-            const files = await Promise.all(
+            let files = await Promise.all(
                 projectFiles.data.map(file => getFile(translationsApi, projectId, file.data.id, lang.data.id))
             );
+            files = files.filter(f => !!f);
             ui.message(displayTexts.notifications.info.translationsForLanguageLoaded.replace('%name%', lang.data.name));
             filesForEachLanguage.push({ files, languageName: lang.data.name });
         }
@@ -216,6 +220,9 @@ async function extractPageTranslations(projectId, selectedLanguages, translation
 
 async function getFile(translationsApi, projectId, fileId, targetLanguageId) {
     const downloadLink = await translationsApi.buildProjectFileTranslation(projectId, fileId, { targetLanguageId });
+    if (!downloadLink || !downloadLink.data) {
+        return;
+    }
     const resp = await fetch(downloadLink.data.url);
     const blob = await resp.blob();
     const html = NSString.alloc().initWithData_encoding(blob, NSUTF8StringEncoding);

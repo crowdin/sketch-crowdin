@@ -1,6 +1,6 @@
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
-import { getProjects, getBranches, getLanguages, getStrings, getFiles, getLabels } from './util/client';
+import { getProjects, getBranches, getLanguages, getStrings, getFiles, getLabels, getSourceLanguage } from './util/client';
 import { sendStrings } from './action/send-strings';
 import { useString, getSelectedText, getUsedStrings, deselectString } from './action/source-strings';
 import { translate } from './action/translate';
@@ -33,7 +33,7 @@ export default function start() {
     const options = {
         identifier,
         width: 400,
-        height: 700,
+        height: 760,
         hidesOnDeactivate: true,
         remembersWindowFrame: true,
         alwaysOnTop: true,
@@ -65,6 +65,7 @@ export default function start() {
 
     //data
     browserWindow.webContents.on('getProjects', getProjects);
+    browserWindow.webContents.on('getSourceLanguage', getSourceLanguage);
     browserWindow.webContents.on('getBranches', getBranches);
     browserWindow.webContents.on('getLanguages', getLanguages);
     browserWindow.webContents.on('getStrings', getStrings);
