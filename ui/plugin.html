@@ -262,7 +262,8 @@
                                                 onclick="stringsPreview(true)"></button>
                                         </div>
                                         <div class="col-6">
-                                            <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
+                                            <button id="string-preview-artboard-btn"
+                                                crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
                                                 class="btn btn-secondary btn-sm btn-block"
                                                 onclick="stringsPreview(false)"></button>
                                         </div>
@@ -294,7 +295,8 @@
                                         class="btn btn-secondary btn-sm btn-block" onclick="sendStrings(true)"></button>
                                 </div>
                                 <div class="col">
-                                    <button crowdin-ui-text-label="sendTextsForArtboardButtonLabel" type="button"
+                                    <button id="upload-artboard-btn"
+                                        crowdin-ui-text-label="sendTextsForArtboardButtonLabel" type="button"
                                         class="btn btn-secondary btn-sm btn-block"
                                         onclick="sendStrings(false)"></button>
                                 </div>
@@ -318,8 +320,9 @@
                                         onclick="translateComponent(true)"></button>
                                 </div>
                                 <div class="col">
-                                    <button crowdin-ui-text-label="uploadTranslationsForArtboardButtonLabel"
-                                        type="button" class="btn btn-secondary btn-sm btn-block"
+                                    <button id="translate-artboard-btn"
+                                        crowdin-ui-text-label="uploadTranslationsForArtboardButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block"
                                         onclick="translateComponent(false)"></button>
                                 </div>
                             </div>
@@ -364,6 +367,19 @@
         .then(getProjects)
         .then(getBranches)
         .finally(hideLoading);
+
+    setInterval(() => {
+        window.postMessage('isArtboardSelected').then(e => {
+            const disabled = !e[0].selected;
+            const title = disabled ? validationMessages.artboardNotSelected : '';
+            $('#string-preview-artboard-btn').attr('disabled', disabled);
+            $('#string-preview-artboard-btn').attr('title', title);
+            $('#translate-artboard-btn').attr('disabled', disabled);
+            $('#translate-artboard-btn').attr('title', title);
+            $('#upload-artboard-btn').attr('disabled', disabled);
+            $('#upload-artboard-btn').attr('title', title);
+        });
+    }, 100);
 
     var validationMessages = {};
     var allLanguagesOption;

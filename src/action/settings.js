@@ -13,6 +13,7 @@ import {
     BRANCH_ID
 } from '../constants';
 import { default as displayTexts } from '../../assets/texts.json';
+import * as domUtil from '../util/dom';
 
 function contactUs() {
     NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://crowdin.com/contacts"));
@@ -132,6 +133,25 @@ function logout() {
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, undefined);
 }
 
+function isArtboardSelected() {
+    try {
+        const selectedDocument = dom.getSelectedDocument();
+        if (!selectedDocument) {
+            throw displayTexts.notifications.warning.selectDocument;
+        }
+        const selectedPage = selectedDocument ? selectedDocument.selectedPage : undefined;
+
+        if (!selectedPage) {
+            throw displayTexts.notifications.warning.selectPage;
+        }
+        return {
+            selected: domUtil.getSelectedArtboards(selectedPage).length > 0
+        }
+    } catch (error) {
+        httpUtil.handleError(error);
+    }
+}
+
 export {
     contactUs,
     getCredentials,
@@ -144,5 +164,6 @@ export {
     saveCredentials,
     saveProject,
     saveBranch,
-    logout
+    logout,
+    isArtboardSelected
 };

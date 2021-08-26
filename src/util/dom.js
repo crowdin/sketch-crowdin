@@ -2,8 +2,15 @@ import dom from 'sketch/dom';
 import * as localStorage from './local-storage';
 import { TEXT_TYPE, SYMBOL_TYPE } from '../constants';
 
+/**
+ * @deprecated 
+ */
 function getSelectedArtboard(page) {
     return dom.find('Artboard', page).find(e => e.selected);
+}
+
+function getSelectedArtboards(page) {
+    return dom.find('Artboard, [selected=true]', page);
 }
 
 function getSelectedText(page) {
@@ -238,6 +245,7 @@ function __findGroupFrameForText(textId, group, previousFrames) {
 
 export {
     getSelectedArtboard,
+    getSelectedArtboards,
     offsetArtboard,
     removeGeneratedArtboards,
     getSelectedText,

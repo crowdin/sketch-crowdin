@@ -20,7 +20,8 @@ import {
     saveContentSegmentation,
     getKeyPatternOptions,
     saveKeyPatternOption,
-    logout
+    logout,
+    isArtboardSelected
 } from './action/settings';
 
 const identifier = 'crowdin';
@@ -87,6 +88,9 @@ export default function start() {
     browserWindow.webContents.on('sendStrings', sendStrings);
     browserWindow.webContents.on('translate', translate);
     browserWindow.webContents.on('uploadScreenshots', uploadScreenshots);
+
+    //other
+    browserWindow.webContents.on('isArtboardSelected', isArtboardSelected);
 };
 
 export function onShutdown() {
