@@ -23,7 +23,7 @@ async function translate(languageId, wholePage) {
         const projectId = settings.documentSettingForKey(selectedDocument, PROJECT_ID);
         let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
         branchId = !!branchId && branchId > 0 ? branchId : undefined;
-        let artboard;
+        let artboards;
 
         if (!selectedPage) {
             throw displayTexts.notifications.warning.selectPage;
@@ -37,18 +37,18 @@ async function translate(languageId, wholePage) {
         if (!projectId) {
             throw displayTexts.notifications.warning.selectProject;
         }
-        const translatedPages = localStorage.getListOfTranslatedElements(selectedDocument, 'page');
+        const translatedPages = localStorage.getListOfTranslatedPages(selectedDocument);
         if (!!wholePage) {
             if (translatedPages.includes(selectedPage.id)) {
                 throw displayTexts.notifications.warning.generatedPageCannotBeTranslated;
             }
         } else {
-            artboard = domUtil.getSelectedArtboard(selectedPage);
-            if (!artboard) {
+            artboards = domUtil.getSelectedArtboards(selectedPage);
+            if (artboards.length === 0) {
                 throw displayTexts.notifications.warning.selectArtboard;
             }
-            const translatedArtboard = localStorage.getListOfTranslatedElements(selectedDocument, 'artboard');
-            if (translatedArtboard.includes(artboard.id) || translatedPages.includes(artboard.parent.id)) {
+            const translatedSelected = artboards.some(artboard => translatedPages.includes(artboard.parent.id));
+            if (translatedSelected) {
                 throw displayTexts.notifications.warning.generatedArtboardCannotBeTranslated;
             }
         }
@@ -73,19 +73,11 @@ async function translate(languageId, wholePage) {
                 const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId, branchId);
                 const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
                 if (!directory) {
-                    if (wholePage) {
-                        throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(selectedPage.name));
-                    } else {
-                        throw displayTexts.notifications.warning.noTranslationsForArtboard.replace('%name%', truncateLongText(artboard.name));
-                    }
+                    throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(selectedPage.name));
                 }
                 const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, undefined, directory.data.id);
                 ui.message(displayTexts.notifications.info.downloadingTranslations);
-                if (wholePage) {
-                    await extractPageTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, projectFiles);
-                } else {
-                    await extractArtboardTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, artboard, projectFiles);
-                }
+                await extractPageTranslations(projectId, selectedLanguages, translationsApi, selectedDocument, selectedPage, projectFiles, artboards);
             } catch (error) {
                 httpUtil.handleError(error);
             }
@@ -95,78 +87,18 @@ async function translate(languageId, wholePage) {
     }
 }
 
-async function extractArtboardTranslations(projectId, selectedLanguages, translationsApi, document, page, artboard, projectFiles) {
-    const foundFile = projectFiles.data.find(file => file.data.name === getFileName(artboard));
-    if (!!foundFile) {
-        ui.message(displayTexts.notifications.info.loadingTranslations);
-        const fileForEachLanguage = [];
-        for (let i = 0; i < selectedLanguages.length; i++) {
-            const lang = selectedLanguages[i];
-            //in sequential manner instead of parallel because back end produce incorrect results
-            const html = await getFile(translationsApi, projectId, foundFile.data.id, lang.data.id);
-            if (!html) {
-                continue;
-            }
-            ui.message(displayTexts.notifications.info.translationsForLanguageLoaded.replace('%name%', lang.data.name));
-            fileForEachLanguage.push({ html, languageName: lang.data.name });
-        }
-        fileForEachLanguage.forEach(e => {
-            const { html, languageName } = e;
-            const translations = htmlUtil.parseHtmlForText(html);
-            localStorage.removeTranslatedElements(document, artboard.id, languageName, 'artboard');
-            const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, artboard.id, languageName, 'artboard');
-            const newArtboard = artboard.duplicate();
-            localStorage.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
-            newArtboard.name = `${newArtboard.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
-            newArtboard.selected = true;
-            artboard.selected = false;
-            //by default duplicate will appear in the same place as original
-            domUtil.offsetArtboard(page, newArtboard);
-            const originalStrings = dom.find('Text', artboard);
-            const texts = dom.find('Text', newArtboard);
-            const originalSymbols = dom.find('SymbolInstance', artboard);
-            const symbols = dom.find('SymbolInstance', newArtboard);
-            translations
-                .filter(tr => tr.type === TEXT_TYPE)
-                .forEach(translation => {
-                    for (let i = 0; i < originalStrings.length; i++) {
-                        const originalString = originalStrings[i];
-                        if (originalString.id === translation.id && i < texts.length) {
-                            texts[i].text = translation.text;
-                        }
-                    }
-                });
-            translations
-                .filter(tr => tr.type === SYMBOL_TYPE)
-                .forEach(translation => {
-                    const textId = translation.id
-                    for (let i = 0; i < originalSymbols.length; i++) {
-                        const originalSymbol = originalSymbols[i];
-                        for (let j = 0; j < originalSymbol.overrides.length; j++) {
-                            const override = originalSymbol.overrides[j];
-                            if (originalSymbol.id + '/' + override.id === textId) {
-                                symbols[i].overrides[j].value = translation.text;
-                                return;
-                            }
-                        }
-                    }
-                });
-            ui.message(displayTexts.notifications.info.translatedArtboardCreated.replace('%name%', truncateLongText(newArtboard.name)));
-        });
-    } else {
-        throw displayTexts.notifications.warning.noTranslationsForArtboard.replace('%name%', truncateLongText(artboard.name));
-    }
-}
-
-async function extractPageTranslations(projectId, selectedLanguages, translationsApi, document, page, projectFiles) {
+async function extractPageTranslations(projectId, selectedLanguages, translationsApi, document, page, projectFiles, artboards) {
     if (projectFiles.data.length > 0) {
+        const artboardFileNames = artboards && artboards.map(getFileName);
         ui.message(displayTexts.notifications.info.loadingTranslations);
         const filesForEachLanguage = [];
         for (let i = 0; i < selectedLanguages.length; i++) {
             const lang = selectedLanguages[i];
             //in sequential manner instead of parallel because back end produce incorrect results
             let files = await Promise.all(
-                projectFiles.data.map(file => getFile(translationsApi, projectId, file.data.id, lang.data.id))
+                projectFiles.data
+                    .filter(file => !artboardFileNames || artboardFileNames.includes(file.data.name))
+                    .map(file => getFile(translationsApi, projectId, file.data.id, lang.data.id))
             );
             files = files.filter(f => !!f);
             ui.message(displayTexts.notifications.info.translationsForLanguageLoaded.replace('%name%', lang.data.name));
@@ -175,10 +107,10 @@ async function extractPageTranslations(projectId, selectedLanguages, translation
         filesForEachLanguage.forEach(e => {
             const { files, languageName } = e;
             const translations = files.flatMap(file => htmlUtil.parseHtmlForText(file));
-            localStorage.removeTranslatedElements(document, page.id, languageName, 'page');
-            const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, page.id, languageName, 'page');
+            localStorage.removeTranslatedPages(document, page.id, languageName);
+            const amountOfTranslatedElements = localStorage.getAmountOfTranslatedPages(document, page.id, languageName);
             const newPage = page.duplicate();
-            localStorage.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
+            localStorage.addTranslatedPage(document, page.id, newPage.id, languageName);
             newPage.name = `${newPage.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
             const originalStrings = dom.find('Text', page);
             const texts = dom.find('Text', newPage);
@@ -209,7 +141,7 @@ async function extractPageTranslations(projectId, selectedLanguages, translation
                         }
                     }
                 });
-            domUtil.removeGeneratedArtboards(document, page, newPage);
+            artboards && domUtil.removeGeneratedArtboards(page, newPage, artboards.map(artboard => artboard.id));
             document.selectedPage = newPage;
             ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', truncateLongText(newPage.name)));
         });

@@ -29,22 +29,22 @@ async function sendStrings(wholePage) {
             throw displayTexts.notifications.warning.selectProject;
         }
 
-        const translatedPages = localStorage.getListOfTranslatedElements(selectedDocument, 'page');
+        const translatedPages = localStorage.getListOfTranslatedPages(selectedDocument);
         if (!!wholePage) {
             if (translatedPages.includes(selectedPage.id)) {
                 throw displayTexts.notifications.warning.generatedPageCannotBeTranslated;
             }
             await uploadStrings(selectedPage);
         } else {
-            const artboard = domUtil.getSelectedArtboard(selectedPage);
-            if (!artboard) {
+            const artboards = domUtil.getSelectedArtboards(selectedPage);
+            if (!artboards.length === 0) {
                 throw displayTexts.notifications.warning.selectArtboard;
             }
-            const translatedArtboards = localStorage.getListOfTranslatedElements(selectedDocument, 'artboard');
-            if (translatedArtboards.includes(artboard.id) || translatedPages.includes(artboard.parent.id)) {
+            const translatedSelected = artboards.some(artboard => translatedPages.includes(artboard.parent.id));
+            if (translatedSelected) {
                 throw displayTexts.notifications.warning.generatedArtboardCannotBeTranslated;
             }
-            await uploadStrings(selectedPage, artboard);
+            await uploadStrings(selectedPage, artboards);
         }
 
         ui.message(displayTexts.notifications.info.stringsUploadedToCrowdin);
@@ -53,7 +53,7 @@ async function sendStrings(wholePage) {
     }
 }
 
-async function uploadStrings(page, artboard) {
+async function uploadStrings(page, selectedArtboards) {
     const projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
     let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
     branchId = !!branchId && branchId > 0 ? branchId : undefined;
@@ -71,17 +71,12 @@ async function uploadStrings(page, artboard) {
     }
 
     const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, undefined, directory.data.id);
-    if (!!artboard) {
-        await uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directory.data.id);
-        return;
-    }
-    const artboards = dom.find('Artboard', page);
-    const translatedArtboards = localStorage.getListOfTranslatedElements(dom.getSelectedDocument(), 'artboard');
+    const artboards = selectedArtboards || dom.find('Artboard', page);
     const promises = artboards
-        .filter(artboard => !translatedArtboards.includes(artboard.id))
         .map(artboard => uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directory.data.id));
-    promises.push(uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directory.data.id));
-
+    if (!selectedArtboards) {
+        promises.push(uploadLeftovers(uploadStorageApi, sourceFilesApi, projectFiles, page, projectId, directory.data.id));
+    }
     await Promise.all(promises);
 }
 
