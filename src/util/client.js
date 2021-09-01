@@ -225,11 +225,10 @@ async function getStrings() {
 
 async function fetchStrings(projectId) {
     const { sourceStringsApi } = createClient();
-    const res = await sourceStringsApi.withFetchAll().listProjectStrings(projectId);
     let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
     branchId = !!branchId && branchId > 0 ? branchId : undefined;
-    const strings = convertCrowdinStringsToStrings(res.data);
-    return strings.filter(s => !branchId || s.branchId === branchId);
+    const res = await sourceStringsApi.withFetchAll().listProjectStrings(projectId, { branchId });
+    return convertCrowdinStringsToStrings(res.data);
 }
 
 function convertCrowdinStringsToStrings(crowdinStrings) {
