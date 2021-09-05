@@ -702,14 +702,22 @@
                     const identifier = generateIdentifier(e, identifiers);
                     identifiers.push(identifier);
                     rowsHtml += `
-                    <div class="form-row">
-                        <div class="col">
+                    <div class="form-row" id="mass-adding-string-${identifier}">
+                        <div class="col-6">
                             <textarea class="form-control" placeholder="text">${e.text}</textarea>
                             <div class="invalid-feedback"></div>
                         </div>
-                        <div class="col">
+                        <div class="col-5">
                             <input type="text" class="form-control" placeholder="identifier" value="${identifier}">
                             <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-1">
+                            <svg onclick="removeStringFromForm('${identifier}')" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="string-row-delete">
+                                <g>
+                                <rect transform="rotate(45 7.74139 8.43104)" height="1" width="10" y="7.93104" x="2.74139" stroke="null"  fill="currentColor"/>
+                                <rect transform="rotate(-45 7.82759 8.17242)" height="1" width="10" y="7.67242" x="2.82759" stroke="null" fill="currentColor"/>
+                                </g>
+                            </svg>
                         </div>
                     </div>
                     `;
@@ -816,6 +824,15 @@
         }
     }
 
+    function removeStringFromForm(identifier) {
+        $(`#mass-adding-string-${identifier}`).hide();
+        const rows = $('#multi-string-form div.form-group div.form-row');
+        const removed = rows.toArray().filter(e => !$(e).is(':visible'));
+        if (selectedText.length - 1 === removed.length) {
+            $('#multi-string-form .strings-holder svg').hide();
+        }
+    }
+
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
         if (selectedText.length > 1) {
@@ -832,6 +849,9 @@
             const rows = $('#multi-string-form div.form-group div.form-row');
             for (let i = 0; i < rows.length; i++) {
                 const row = $(rows[i]);
+                if (!row.is(':visible')) {
+                    continue;
+                }
                 const text = $(row.find('textarea')[0]).val();
                 const identifier = $(row.find('input')[0]).val();
                 if (!text || text.length === '') {
