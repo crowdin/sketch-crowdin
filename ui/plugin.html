@@ -199,6 +199,10 @@
                                     crowdin-ui-text-details="addStringLabelDetails"></abbr></label>
                             <select class="form-control" id="string-labels" multiple size="8"></select>
                         </div>
+                        <div id="string-push-hidden-container" class="form-group mt-2">
+                            <label crowdin-ui-text-label="addStringAddHiddenLabel"></label>
+                            <input type="checkbox" class="ml-1 mt-1" id="pushHiddenStrings" checked>
+                        </div>
                         <div class="button-holder d-flex flex-row">
                             <button crowdin-ui-text-label="addStringSaveButtonLabel" type="button"
                                 class="btn btn-primary btn-sm" onclick="saveString();"></button>
@@ -657,6 +661,7 @@
         $('#multi-string-form').hide();
         $('#string-file-container').hide();
         $('#string-label-container').hide();
+        $('#string-push-hidden-container').hide();
         $('#single-string-form').show();
         $('#edit-string').show();
         const text = el.next().text().trim();
@@ -681,12 +686,14 @@
                 $('#string-identifier').val('');
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
+                $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
             } else if (selectedText.length === 1) {
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
+                $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
             } else {
                 let rowsHtml = '';
@@ -712,6 +719,7 @@
                 $('#multi-string-form .strings-holder').append(html);
                 $('#single-string-form').hide();
                 $('#multi-string-form').show();
+                $('#string-push-hidden-container').show();
             }
             openedString = undefined;
             hideLoading();
@@ -811,6 +819,7 @@
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
         if (selectedText.length > 1) {
+            const pushHidden = $('#pushHiddenStrings').prop('checked');
             //adding multiple strings
             $('#multi-string-form div.form-group .invalid-feedback').text('');
             const files = $('#string-files option:selected').toArray();
@@ -836,6 +845,9 @@
                 if (identifiers.some(i => i === identifier)) {
                     $(row.find('.invalid-feedback')[1]).text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
                     return;
+                }
+                if (!pushHidden && selectedText[i].hidden) {
+                    continue;
                 }
                 identifiers.push(identifier);
                 newStrings.push({

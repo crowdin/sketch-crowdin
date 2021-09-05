@@ -17,9 +17,11 @@ function getSelectedText(page) {
                 .filter(o => !selectedTexts.find(s => s.type === SYMBOL_TYPE && s.id === symbol.id + '/' + o.id))
                 .filter(o => !onlySelected || o.selected)
                 .forEach(override => {
+                    let hidden = symbol.hidden;
                     let parent = symbol.parent;
                     let group;
                     while (parent.id !== page.id) {
+                        hidden = hidden || parent.hidden;
                         if (parent.type === 'Group') {
                             group = parent;
                             break;
@@ -35,16 +37,19 @@ function getSelectedText(page) {
                         type: SYMBOL_TYPE,
                         id: symbol.id + '/' + override.id,
                         group,
-                        artboard
+                        artboard,
+                        hidden
                     });
                 })
         );
         texts
             .filter(e => !selectedTexts.find(s => s.type === TEXT_TYPE && s.element.id === e.id))
             .forEach(text => {
+                let hidden = text.hidden;
                 let parent = text.parent;
                 let group;
                 while (parent.id !== page.id) {
+                    hidden = hidden || parent.hidden;
                     if (parent.type === 'Group') {
                         group = parent;
                         break;
@@ -59,7 +64,8 @@ function getSelectedText(page) {
                     type: TEXT_TYPE,
                     id: text.id,
                     group,
-                    artboard: text.getParentArtboard()
+                    artboard: text.getParentArtboard(),
+                    hidden
                 });
             });
     };
