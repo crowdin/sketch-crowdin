@@ -26,7 +26,7 @@
                             onclick="openModal('strings-mode');"></a>
                     </li>
                     <li class="nav-item">
-                        <a crowdin-ui-text-label="settingsTab" id="settings-nav" class="nav-link active" href="#"
+                        <a crowdin-ui-text-label="settingsTab" id="settings-nav" class="nav-link" href="#"
                             onclick="openModal('settings');"></a>
                     </li>
                 </ul>
@@ -36,7 +36,7 @@
             </div>
         </nav>
         <main role="main">
-            <div class="container" id="settings">
+            <div class="container" id="settings" style="display: none;">
                 <form>
                     <div class="form-group inline-select d-flex flex-row">
                         <label crowdin-ui-text-label="selectProjectLabel"></label>
@@ -359,8 +359,7 @@
 
     const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties', 'xliff'];
 
-    //initial view
-    var openedModal = 'settings';
+    var openedModal;
 
     //initialization of the settings modal
     showLoading();
@@ -370,7 +369,14 @@
         .then(getKeyNamingOptions)
         .then(getProjects)
         .then(getBranches)
-        .finally(hideLoading);
+        .finally(() => {
+            if (projectsInfo && projectsInfo.projects && projectsInfo.projects.length > 0) {
+                openModal('strings-mode');
+            } else {
+                openModal('settings');
+                hideLoading();
+            }
+        });
 
     setInterval(() => {
         window.postMessage('isArtboardSelected').then(e => {
@@ -389,6 +395,7 @@
     var allLanguagesOption;
     var noBranchOption;
 
+    var projectsInfo;
     var sourceLanguage;
     var languages;
     var strings;
@@ -1078,7 +1085,7 @@
     function getProjects() {
         return window.postMessage('getProjects')
             .then(info => {
-                const projectsInfo = info[0];
+                projectsInfo = info[0];
                 const options = projectsInfo.projects.map(pr => {
                     if (pr.id === projectsInfo.selectedProjectId) {
                         return `<option value="${pr.id}" selected></option>`;

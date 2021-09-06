@@ -44,7 +44,7 @@
     "sass-dev": "node-sass ui/styles.scss sketch-crowdin.sketchplugin/Contents/Resources/styles.css"
   },
   "dependencies": {
-    "@crowdin/crowdin-api-client": "1.11.5",
+    "@crowdin/crowdin-api-client": "1.11.7",
     "bootstrap": "4.5.0",
     "bootstrap-select": "^1.13.18",
     "cheerio": "^1.0.0-rc.3",
