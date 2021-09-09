@@ -823,6 +823,11 @@ button .btn-icon {
 .string-row-delete {
     cursor: pointer;
     margin-top: 6px;
+    margin-left: -6px;
+}
+
+.max-width-40 {
+    max-width: 40%;
 }
 
 .plugin-tabs {

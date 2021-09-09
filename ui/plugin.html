@@ -714,7 +714,7 @@
                             <textarea class="form-control" placeholder="text">${e.text}</textarea>
                             <div class="invalid-feedback"></div>
                         </div>
-                        <div class="col-5">
+                        <div class="col-5 max-width-40">
                             <input type="text" class="form-control" placeholder="identifier" value="${identifier}">
                             <div class="invalid-feedback"></div>
                         </div>
@@ -832,7 +832,7 @@
     }
 
     function removeStringFromForm(identifier) {
-        $(`#mass-adding-string-${identifier}`).hide();
+        $(`[id="mass-adding-string-${identifier}"]`).hide();
         const rows = $('#multi-string-form div.form-group div.form-row');
         const removed = rows.toArray().filter(e => !$(e).is(':visible'));
         if (selectedText.length - 1 === removed.length) {
