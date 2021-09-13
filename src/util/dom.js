@@ -1,9 +1,8 @@
 import dom from 'sketch/dom';
-import * as localStorage from './local-storage';
 import { TEXT_TYPE, SYMBOL_TYPE } from '../constants';
 
-function getSelectedArtboard(page) {
-    return dom.find('Artboard', page).find(e => e.selected);
+function getSelectedArtboards(page) {
+    return dom.find('Artboard, [selected=true]', page);
 }
 
 function getSelectedText(page) {
@@ -18,9 +17,11 @@ function getSelectedText(page) {
                 .filter(o => !selectedTexts.find(s => s.type === SYMBOL_TYPE && s.id === symbol.id + '/' + o.id))
                 .filter(o => !onlySelected || o.selected)
                 .forEach(override => {
+                    let hidden = symbol.hidden;
                     let parent = symbol.parent;
                     let group;
                     while (parent.id !== page.id) {
+                        hidden = hidden || parent.hidden;
                         if (parent.type === 'Group') {
                             group = parent;
                             break;
@@ -36,16 +37,19 @@ function getSelectedText(page) {
                         type: SYMBOL_TYPE,
                         id: symbol.id + '/' + override.id,
                         group,
-                        artboard
+                        artboard,
+                        hidden
                     });
                 })
         );
         texts
             .filter(e => !selectedTexts.find(s => s.type === TEXT_TYPE && s.element.id === e.id))
             .forEach(text => {
+                let hidden = text.hidden;
                 let parent = text.parent;
                 let group;
                 while (parent.id !== page.id) {
+                    hidden = hidden || parent.hidden;
                     if (parent.type === 'Group') {
                         group = parent;
                         break;
@@ -60,7 +64,8 @@ function getSelectedText(page) {
                     type: TEXT_TYPE,
                     id: text.id,
                     group,
-                    artboard: text.getParentArtboard()
+                    artboard: text.getParentArtboard(),
+                    hidden
                 });
             });
     };
@@ -83,13 +88,12 @@ function offsetArtboard(page, artboard) {
     artboard.frame.offset(0, - (artboard.frame.y - minY + artboard.frame.height + 100));
 }
 
-function removeGeneratedArtboards(document, sourcePage, duplicatePage) {
-    const generatedArtboards = localStorage.getListOfTranslatedElements(document, 'artboard');
+function removeGeneratedArtboards(sourcePage, duplicatePage, sourceArtboardIds) {
     const sourceArtboards = dom.find('Artboard', sourcePage);
     const duplicateArtboards = dom.find('Artboard', duplicatePage);
     for (let i = 0; i < sourceArtboards.length; i++) {
         const sourceArtboard = sourceArtboards[i];
-        if (generatedArtboards.includes(sourceArtboard.id) && i < duplicateArtboards.length) {
+        if (!sourceArtboardIds.includes(sourceArtboard.id) && i < duplicateArtboards.length) {
             duplicateArtboards[i].remove();
         }
     }
@@ -237,7 +241,7 @@ function __findGroupFrameForText(textId, group, previousFrames) {
 }
 
 export {
-    getSelectedArtboard,
+    getSelectedArtboards,
     offsetArtboard,
     removeGeneratedArtboards,
     getSelectedText,

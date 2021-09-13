@@ -1,19 +1,18 @@
 import settings from 'sketch/settings';
-import dom from 'sketch/dom';
 import { OVERRIDE_TRANSLATIONS } from '../constants';
 
-function removeTranslatedElements(doc, sourceElementId, languageName, type) {
-    //remove translated elements which were deleted manually by user
-    syncStorage(doc, sourceElementId, languageName, type);
+function removeTranslatedPages(doc, sourceElementId, languageName) {
+    //remove translated pages which were deleted manually by user
+    syncStorage(doc, sourceElementId, languageName);
     const remove = !!settings.documentSettingForKey(doc, OVERRIDE_TRANSLATIONS);
     if (!remove) {
         return;
     }
-    const elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-${type}s`);
-    const translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-${type}s`);
-    const deletedTranslatedElementIds = [];
-    if (!!elements) {
-        let arr = elements
+    const pages = settings.documentSettingForKey(doc, `crowdin-${languageName}-pages`);
+    const translatedPages = settings.documentSettingForKey(doc, `crowdin-translated-pages`);
+    const deletedTranslatedPageIds = [];
+    if (!!pages) {
+        let arr = pages
             .split(',')
             .map(p => {
                 const parts = p.split('=>');
@@ -25,46 +24,29 @@ function removeTranslatedElements(doc, sourceElementId, languageName, type) {
         arr
             .filter(p => p.sourceId === sourceElementId)
             .forEach(foundRecord => {
-                let elementToRemove;
-                if (type === 'page') {
-                    elementToRemove = doc.pages.find(p => p.id === foundRecord.translatedId);
-                } else if (type === 'artboard') {
-                    for (let i = 0; i < doc.pages.length; i++) {
-                        const page = doc.pages[i];
-                        const artboards = dom.find('Artboard', page);
-                        for (let j = 0; j < artboards.length; j++) {
-                            if (artboards[j].id === foundRecord.translatedId) {
-                                elementToRemove = artboards[j];
-                                break;
-                            }
-                        }
-                        if (!!elementToRemove) {
-                            break;
-                        }
-                    }
-                }
-                deletedTranslatedElementIds.push(foundRecord.translatedId);
-                if (!!elementToRemove) {
-                    elementToRemove.remove();
+                let pageToRemove = doc.pages.find(p => p.id === foundRecord.translatedId);
+                deletedTranslatedPageIds.push(foundRecord.translatedId);
+                if (!!pageToRemove) {
+                    pageToRemove.remove();
                 }
             });
-        if (!!translatedElements) {
-            const translatedElementsNew = translatedElements.split(',').filter(p => !deletedTranslatedElementIds.includes(p)).join(',');
-            settings.setDocumentSettingForKey(doc, `crowdin-translated-${type}s`, translatedElementsNew);
+        if (!!translatedPages) {
+            const translatedPagesNew = translatedPages.split(',').filter(p => !deletedTranslatedPageIds.includes(p)).join(',');
+            settings.setDocumentSettingForKey(doc, `crowdin-translated-pages`, translatedPagesNew);
         }
         const newValue = arr
             .filter(p => p.sourceId !== sourceElementId)
             .map(p => `${p.sourceId}=>${p.translatedId}`)
             .join(',');
-        settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-${type}s`, newValue);
+        settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-pages`, newValue);
     }
 }
 
-function getAmountOfTranslatedElements(doc, sourceElementId, languageName, type) {
-    const elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-${type}s`);
+function getAmountOfTranslatedPages(doc, pageId, languageName) {
+    const pages = settings.documentSettingForKey(doc, `crowdin-${languageName}-pages`);
     let amount = 0;
-    if (!!elements) {
-        amount = elements
+    if (!!pages) {
+        amount = pages
             .split(',')
             .map(p => {
                 const parts = p.split('=>');
@@ -73,17 +55,17 @@ function getAmountOfTranslatedElements(doc, sourceElementId, languageName, type)
                     translatedId: parts[1]
                 }
             })
-            .filter(e => e.sourceId === sourceElementId).length;
+            .filter(e => e.sourceId === pageId).length;
     }
     return amount;
 }
 
-function syncStorage(doc, sourceElementId, languageName, type) {
-    const elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-${type}s`);
-    const translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-${type}s`);
-    const deletedTranslatedElementIds = [];
-    if (!!elements) {
-        const updatedArr = elements
+function syncStorage(doc, sourceElementId, languageName) {
+    const pages = settings.documentSettingForKey(doc, `crowdin-${languageName}-pages`);
+    const translatedPages = settings.documentSettingForKey(doc, `crowdin-translated-pages`);
+    const deletedTranslatedPageIds = [];
+    if (!!pages) {
+        const updatedArr = pages
             .split(',')
             .map(p => {
                 const parts = p.split('=>');
@@ -94,43 +76,29 @@ function syncStorage(doc, sourceElementId, languageName, type) {
             })
             .filter(foundRecord => {
                 if (foundRecord.sourceId === sourceElementId) {
-                    if (type === 'page') {
-                        const exists = !!doc.pages.find(p => p.id === foundRecord.translatedId);
-                        if (!exists) {
-                            deletedTranslatedElementIds.push(foundRecord.translatedId);
-                        }
-                        return exists;
-                    } else if (type === 'artboard') {
-                        for (let i = 0; i < doc.pages.length; i++) {
-                            const page = doc.pages[i];
-                            const artboards = dom.find('Artboard', page);
-                            for (let j = 0; j < artboards.length; j++) {
-                                if (artboards[j].id === foundRecord.translatedId) {
-                                    return true;
-                                }
-                            }
-                        }
-                        deletedTranslatedElementIds.push(foundRecord.translatedId);
-                        return false;
+                    const exists = !!doc.pages.find(p => p.id === foundRecord.translatedId);
+                    if (!exists) {
+                        deletedTranslatedPageIds.push(foundRecord.translatedId);
                     }
+                    return exists;
                 }
                 return true;
             })
             .map(p => `${p.sourceId}=>${p.translatedId}`)
             .join(',');
-        settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-${type}s`, updatedArr);
-        if (!!translatedElements) {
-            const translatedElementsNew = translatedElements.split(',').filter(p => !deletedTranslatedElementIds.includes(p)).join(',');
-            settings.setDocumentSettingForKey(doc, `crowdin-translated-${type}s`, translatedElementsNew);
+        settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-pages`, updatedArr);
+        if (!!translatedPages) {
+            const translatedPagesNew = translatedPages.split(',').filter(p => !deletedTranslatedPageIds.includes(p)).join(',');
+            settings.setDocumentSettingForKey(doc, `crowdin-translated-pages`, translatedPagesNew);
         }
     }
 }
 
-function addTranslatedElement(doc, sourceElementId, translatedId, languageName, type) {
-    //remove translated elements which were deleted manually by user
-    syncStorage(doc, sourceElementId, languageName, type);
-    let elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-${type}s`);
-    let translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-${type}s`);
+function addTranslatedPage(doc, sourceElementId, translatedId, languageName) {
+    //remove translated pages which were deleted manually by user
+    syncStorage(doc, sourceElementId, languageName);
+    let elements = settings.documentSettingForKey(doc, `crowdin-${languageName}-pages`);
+    let translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-pages`);
     if (!elements) {
         elements = `${sourceElementId}=>${translatedId}`;
         translatedElements = translatedId;
@@ -138,12 +106,12 @@ function addTranslatedElement(doc, sourceElementId, translatedId, languageName, 
         elements += `,${sourceElementId}=>${translatedId}`;
         translatedElements += `,${translatedId}`;
     }
-    settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-${type}s`, elements);
-    settings.setDocumentSettingForKey(doc, `crowdin-translated-${type}s`, translatedElements);
+    settings.setDocumentSettingForKey(doc, `crowdin-${languageName}-pages`, elements);
+    settings.setDocumentSettingForKey(doc, `crowdin-translated-pages`, translatedElements);
 }
 
-function getListOfTranslatedElements(doc, type) {
-    const translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-${type}s`);
+function getListOfTranslatedPages(doc) {
+    const translatedElements = settings.documentSettingForKey(doc, `crowdin-translated-pages`);
     if (!translatedElements) {
         return [];
     }
@@ -163,10 +131,10 @@ function saveTags(doc, tags) {
 }
 
 export {
-    removeTranslatedElements,
-    getAmountOfTranslatedElements,
-    addTranslatedElement,
-    getListOfTranslatedElements,
+    removeTranslatedPages,
+    getAmountOfTranslatedPages,
+    addTranslatedPage,
+    getListOfTranslatedPages,
     getTags,
     saveTags
 };

@@ -820,6 +820,16 @@ button .btn-icon {
     margin-top: 3px;
 }
 
+.string-row-delete {
+    cursor: pointer;
+    margin-top: 6px;
+    margin-left: -6px;
+}
+
+.max-width-40 {
+    max-width: 40%;
+}
+
 .plugin-tabs {
     padding: 0 0.5rem;
     background-color: var(--app-bg);

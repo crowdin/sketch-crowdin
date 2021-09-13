@@ -38,19 +38,19 @@ async function stringsPreview(options, wholePage) {
         if (!projectId) {
             throw displayTexts.notifications.warning.selectProject;
         }
-        let artboard;
-        const translatedPages = localStorage.getListOfTranslatedElements(selectedDocument, 'page');
+        let artboards;
+        const translatedPages = localStorage.getListOfTranslatedPages(selectedDocument);
         if (!!wholePage) {
             if (translatedPages.includes(selectedPage.id)) {
                 throw displayTexts.notifications.warning.generatedPageCannotBeTranslated;
             }
         } else {
-            artboard = domUtil.getSelectedArtboard(selectedPage);
-            if (!artboard) {
+            artboards = domUtil.getSelectedArtboards(selectedPage);
+            if (artboards.length === 0) {
                 throw displayTexts.notifications.warning.selectArtboard;
             }
-            const translatedArtboard = localStorage.getListOfTranslatedElements(selectedDocument, 'artboard');
-            if (translatedArtboard.includes(artboard.id) || translatedPages.includes(artboard.parent.id)) {
+            const translatedSelected = artboards.some(artboard => translatedPages.includes(artboard.parent.id));
+            if (translatedSelected) {
                 throw displayTexts.notifications.warning.generatedArtboardCannotBeTranslated;
             }
         }
@@ -68,11 +68,7 @@ async function stringsPreview(options, wholePage) {
             const lang = selectedLanguages[i];
             !cachedTranslations && ui.message(displayTexts.notifications.info.loadingTranslationsForLanguage.replace('%name%', lang.name));
             const res = cachedTranslations || await stringTranslationsApi.withFetchAll().listLanguageTranslations(projectId, lang.id);
-            if (!!wholePage) {
-                extractPageTranslations(lang.name, selectedDocument, selectedPage, res.data, previewMode === 'duplicate');
-            } else {
-                extractArtboardTranslations(lang.name, selectedDocument, selectedPage, artboard, res.data, previewMode === 'duplicate');
-            }
+            extractPageTranslations(lang.name, selectedDocument, selectedPage, res.data, previewMode === 'duplicate', artboards);
         }
     } catch (error) {
         httpUtil.handleError(error);
@@ -80,14 +76,15 @@ async function stringsPreview(options, wholePage) {
 }
 
 
-function extractPageTranslations(languageName, document, page, translations, previewInDuplicate) {
+function extractPageTranslations(languageName, document, page, translations, previewInDuplicate, artboards) {
+    const artboardIds = artboards && artboards.map(a => a.id);
     const tags = localStorage.getTags(document);
     let newPage;
     if (previewInDuplicate) {
-        localStorage.removeTranslatedElements(document, page.id, languageName, 'page');
-        const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, page.id, languageName, 'page');
+        localStorage.removeTranslatedPages(document, page.id, languageName);
+        const amountOfTranslatedElements = localStorage.getAmountOfTranslatedPages(document, page.id, languageName);
         newPage = page.duplicate();
-        localStorage.addTranslatedElement(document, page.id, newPage.id, languageName, 'page');
+        localStorage.addTranslatedPage(document, page.id, newPage.id, languageName);
         newPage.name = `${newPage.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
     } else {
         newPage = page;
@@ -99,6 +96,7 @@ function extractPageTranslations(languageName, document, page, translations, pre
     const symbols = dom.find('SymbolInstance', newPage);
     tags
         .filter(tag => tag.pageId === page.id)
+        .filter(tag => !artboardIds || artboardIds.includes(tag.artboardId))
         .forEach(tag => {
             const translation = translations.map(e => e.data).find(e => e.stringId === tag.stringId);
             if (!translation) {
@@ -128,66 +126,9 @@ function extractPageTranslations(languageName, document, page, translations, pre
         });
 
     if (previewInDuplicate) {
-        domUtil.removeGeneratedArtboards(document, page, newPage);
+        artboardIds && domUtil.removeGeneratedArtboards(page, newPage, artboardIds);
         document.selectedPage = newPage;
         ui.message(displayTexts.notifications.info.translatedPageCreated.replace('%name%', truncateLongText(newPage.name)));
-    }
-}
-
-function extractArtboardTranslations(languageName, document, page, artboard, translations, previewInDuplicate) {
-    const tags = localStorage.getTags(document);
-    let newArtboard;
-    if (previewInDuplicate) {
-        localStorage.removeTranslatedElements(document, artboard.id, languageName, 'artboard');
-        const amountOfTranslatedElements = localStorage.getAmountOfTranslatedElements(document, artboard.id, languageName, 'artboard');
-        newArtboard = artboard.duplicate();
-        localStorage.addTranslatedElement(document, artboard.id, newArtboard.id, languageName, 'artboard');
-        newArtboard.name = `${newArtboard.name} (${languageName})${amountOfTranslatedElements > 0 ? ` (${amountOfTranslatedElements + 1})` : ''}`;
-        newArtboard.selected = true;
-        artboard.selected = false;
-        //by default duplicate will appear in the same place as original
-        domUtil.offsetArtboard(page, newArtboard);
-    } else {
-        newArtboard = artboard;
-    }
-
-    const originalStrings = dom.find('Text', artboard);
-    const texts = dom.find('Text', newArtboard);
-    const originalSymbols = dom.find('SymbolInstance', artboard);
-    const symbols = dom.find('SymbolInstance', newArtboard);
-    tags
-        .filter(tag => tag.pageId === page.id)
-        .filter(tag => tag.artboardId === artboard.id)
-        .forEach(tag => {
-            const translation = translations.map(e => e.data).find(e => e.stringId === tag.stringId);
-            if (!translation) {
-                return;
-            }
-            const translationText = translation.text || (translation.plurals || []).map(e => e.text).find(e => !!e);
-            if (!translationText) {
-                return;
-            }
-            if (tag.type === TEXT_TYPE) {
-                const index = originalStrings.findIndex(e => e.id === tag.id);
-                if (index >= 0) {
-                    texts[index].text = translationText;
-                }
-            } else if (tag.type === SYMBOL_TYPE) {
-                for (let i = 0; i < originalSymbols.length; i++) {
-                    const originalSymbol = originalSymbols[i];
-                    for (let j = 0; j < originalSymbol.overrides.length; j++) {
-                        const override = originalSymbol.overrides[j];
-                        if (originalSymbol.id + '/' + override.id === tag.id) {
-                            symbols[i].overrides[j].value = translationText;
-                            return;
-                        }
-                    }
-                }
-            }
-        });
-
-    if (previewInDuplicate) {
-        ui.message(displayTexts.notifications.info.translatedArtboardCreated.replace('%name%', truncateLongText(newArtboard.name)));
     }
 }
 

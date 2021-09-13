@@ -146,7 +146,8 @@ function getSelectedText() {
             elementName,
             artboardId,
             type: selectedText.type,
-            elementId: selectedText.element.id
+            elementId: selectedText.element.id,
+            hidden: selectedText.hidden
         };
     });
 }

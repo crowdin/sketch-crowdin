@@ -26,7 +26,7 @@
                             onclick="openModal('strings-mode');"></a>
                     </li>
                     <li class="nav-item">
-                        <a crowdin-ui-text-label="settingsTab" id="settings-nav" class="nav-link active" href="#"
+                        <a crowdin-ui-text-label="settingsTab" id="settings-nav" class="nav-link" href="#"
                             onclick="openModal('settings');"></a>
                     </li>
                 </ul>
@@ -36,7 +36,7 @@
             </div>
         </nav>
         <main role="main">
-            <div class="container" id="settings">
+            <div class="container" id="settings" style="display: none;">
                 <form>
                     <div class="form-group inline-select d-flex flex-row">
                         <label crowdin-ui-text-label="selectProjectLabel"></label>
@@ -199,6 +199,10 @@
                                     crowdin-ui-text-details="addStringLabelDetails"></abbr></label>
                             <select class="form-control" id="string-labels" multiple size="8"></select>
                         </div>
+                        <div id="string-push-hidden-container" class="form-group mt-2">
+                            <label crowdin-ui-text-label="addStringAddHiddenLabel"></label>
+                            <input type="checkbox" class="ml-1 mt-1" id="pushHiddenStrings" checked>
+                        </div>
                         <div class="button-holder d-flex flex-row">
                             <button crowdin-ui-text-label="addStringSaveButtonLabel" type="button"
                                 class="btn btn-primary btn-sm" onclick="saveString();"></button>
@@ -262,7 +266,8 @@
                                                 onclick="stringsPreview(true)"></button>
                                         </div>
                                         <div class="col-6">
-                                            <button crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
+                                            <button id="string-preview-artboard-btn"
+                                                crowdin-ui-text-label="previewSelectedButtonLabel" type="button"
                                                 class="btn btn-secondary btn-sm btn-block"
                                                 onclick="stringsPreview(false)"></button>
                                         </div>
@@ -294,7 +299,8 @@
                                         class="btn btn-secondary btn-sm btn-block" onclick="sendStrings(true)"></button>
                                 </div>
                                 <div class="col">
-                                    <button crowdin-ui-text-label="sendTextsForArtboardButtonLabel" type="button"
+                                    <button id="upload-artboard-btn"
+                                        crowdin-ui-text-label="sendTextsForArtboardButtonLabel" type="button"
                                         class="btn btn-secondary btn-sm btn-block"
                                         onclick="sendStrings(false)"></button>
                                 </div>
@@ -318,8 +324,9 @@
                                         onclick="translateComponent(true)"></button>
                                 </div>
                                 <div class="col">
-                                    <button crowdin-ui-text-label="uploadTranslationsForArtboardButtonLabel"
-                                        type="button" class="btn btn-secondary btn-sm btn-block"
+                                    <button id="translate-artboard-btn"
+                                        crowdin-ui-text-label="uploadTranslationsForArtboardButtonLabel" type="button"
+                                        class="btn btn-secondary btn-sm btn-block"
                                         onclick="translateComponent(false)"></button>
                                 </div>
                             </div>
@@ -352,8 +359,7 @@
 
     const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties', 'xliff'];
 
-    //initial view
-    var openedModal = 'settings';
+    var openedModal;
 
     //initialization of the settings modal
     showLoading();
@@ -363,12 +369,33 @@
         .then(getKeyNamingOptions)
         .then(getProjects)
         .then(getBranches)
-        .finally(hideLoading);
+        .finally(() => {
+            if (projectsInfo && projectsInfo.projects && projectsInfo.projects.length > 0) {
+                openModal('strings-mode');
+            } else {
+                openModal('settings');
+                hideLoading();
+            }
+        });
+
+    setInterval(() => {
+        window.postMessage('isArtboardSelected').then(e => {
+            const disabled = !e[0].selected;
+            const title = disabled ? validationMessages.artboardNotSelected : '';
+            $('#string-preview-artboard-btn').attr('disabled', disabled);
+            $('#string-preview-artboard-btn').attr('title', title);
+            $('#translate-artboard-btn').attr('disabled', disabled);
+            $('#translate-artboard-btn').attr('title', title);
+            $('#upload-artboard-btn').attr('disabled', disabled);
+            $('#upload-artboard-btn').attr('title', title);
+        });
+    }, 100);
 
     var validationMessages = {};
     var allLanguagesOption;
     var noBranchOption;
 
+    var projectsInfo;
     var sourceLanguage;
     var languages;
     var strings;
@@ -641,6 +668,7 @@
         $('#multi-string-form').hide();
         $('#string-file-container').hide();
         $('#string-label-container').hide();
+        $('#string-push-hidden-container').hide();
         $('#single-string-form').show();
         $('#edit-string').show();
         const text = el.next().text().trim();
@@ -665,12 +693,14 @@
                 $('#string-identifier').val('');
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
+                $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
             } else if (selectedText.length === 1) {
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
+                $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
             } else {
                 let rowsHtml = '';
@@ -679,14 +709,22 @@
                     const identifier = generateIdentifier(e, identifiers);
                     identifiers.push(identifier);
                     rowsHtml += `
-                    <div class="form-row">
-                        <div class="col">
+                    <div class="form-row" id="mass-adding-string-${identifier}">
+                        <div class="col-6">
                             <textarea class="form-control" placeholder="text">${e.text}</textarea>
                             <div class="invalid-feedback"></div>
                         </div>
-                        <div class="col">
+                        <div class="col-5 max-width-40">
                             <input type="text" class="form-control" placeholder="identifier" value="${identifier}">
                             <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-1">
+                            <svg onclick="removeStringFromForm('${identifier}')" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="string-row-delete">
+                                <g>
+                                <rect transform="rotate(45 7.74139 8.43104)" height="1" width="10" y="7.93104" x="2.74139" stroke="null"  fill="currentColor"/>
+                                <rect transform="rotate(-45 7.82759 8.17242)" height="1" width="10" y="7.67242" x="2.82759" stroke="null" fill="currentColor"/>
+                                </g>
+                            </svg>
                         </div>
                     </div>
                     `;
@@ -696,6 +734,7 @@
                 $('#multi-string-form .strings-holder').append(html);
                 $('#single-string-form').hide();
                 $('#multi-string-form').show();
+                $('#string-push-hidden-container').show();
             }
             openedString = undefined;
             hideLoading();
@@ -792,9 +831,19 @@
         }
     }
 
+    function removeStringFromForm(identifier) {
+        $(`[id="mass-adding-string-${identifier}"]`).hide();
+        const rows = $('#multi-string-form div.form-group div.form-row');
+        const removed = rows.toArray().filter(e => !$(e).is(':visible'));
+        if (selectedText.length - 1 === removed.length) {
+            $('#multi-string-form .strings-holder svg').hide();
+        }
+    }
+
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
         if (selectedText.length > 1) {
+            const pushHidden = $('#pushHiddenStrings').prop('checked');
             //adding multiple strings
             $('#multi-string-form div.form-group .invalid-feedback').text('');
             const files = $('#string-files option:selected').toArray();
@@ -807,6 +856,9 @@
             const rows = $('#multi-string-form div.form-group div.form-row');
             for (let i = 0; i < rows.length; i++) {
                 const row = $(rows[i]);
+                if (!row.is(':visible')) {
+                    continue;
+                }
                 const text = $(row.find('textarea')[0]).val();
                 const identifier = $(row.find('input')[0]).val();
                 if (!text || text.length === '') {
@@ -820,6 +872,9 @@
                 if (identifiers.some(i => i === identifier)) {
                     $(row.find('.invalid-feedback')[1]).text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
                     return;
+                }
+                if (!pushHidden && selectedText[i].hidden) {
+                    continue;
                 }
                 identifiers.push(identifier);
                 newStrings.push({
@@ -1030,7 +1085,7 @@
     function getProjects() {
         return window.postMessage('getProjects')
             .then(info => {
-                const projectsInfo = info[0];
+                projectsInfo = info[0];
                 const options = projectsInfo.projects.map(pr => {
                     if (pr.id === projectsInfo.selectedProjectId) {
                         return `<option value="${pr.id}" selected></option>`;

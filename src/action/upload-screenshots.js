@@ -29,10 +29,8 @@ async function uploadScreenshots() {
         }
 
         let tags = localStorage.getTags(selectedDocument);
-        let artboards = dom.find('Artboard', selectedPage);
+        const artboards = dom.find('Artboard', selectedPage);
         const allTexts = dom.find('Text', selectedPage);
-        const translatedArtboards = localStorage.getListOfTranslatedElements(selectedDocument, 'artboard');
-        artboards = artboards.filter(artboard => !translatedArtboards.includes(artboard.id));
 
         //removing obsolete tags
         const { screenshotsApi } = httpUtil.createClient();
