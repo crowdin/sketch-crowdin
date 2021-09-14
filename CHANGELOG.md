@@ -5,6 +5,20 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1]
+
+### Added
+
+- Added button to remove string from mass adding form ([#85](https://github.com/crowdin/sketch-crowdin/pull/85))
+- Added checkbox to push or not hidden strings in mass add string form ([#85](https://github.com/crowdin/sketch-crowdin/pull/85))
+- Preview/translate/upload for multiple selected artboards ([#85](https://github.com/crowdin/sketch-crowdin/pull/85))
+
+### Updated
+
+- Made string mode tab opened by default ([#85](https://github.com/crowdin/sketch-crowdin/pull/85))
+- Preview specific artboards now only in new page ([#85](https://github.com/crowdin/sketch-crowdin/pull/85))
+- Disable buttons when nothing is selected ([#85](https://github.com/crowdin/sketch-crowdin/pull/85))
+
 ## [2.4.0]
 
 ### Added
