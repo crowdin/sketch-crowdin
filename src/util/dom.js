@@ -240,6 +240,43 @@ function __findGroupFrameForText(textId, group, previousFrames) {
     }
 }
 
+function getText(text) {
+    const nsNumberToBool = (val) => val ? val.intValue() === 1 : false;
+    const fonts = __getCustomStyles(text, NSFontAttributeName, font => font.fontName());
+    const underlines = __getCustomStyles(text, NSUnderlineStyleAttributeName, nsNumberToBool);
+    const strikethroughs = __getCustomStyles(text, NSStrikethroughStyleAttributeName, nsNumberToBool);
+    //TODO implement
+}
+
+function __getCustomStyles(text, attr, valueExtractor) {
+    const attrStr = text.sketchObject.attributedStringValue();
+
+    let limitRange = NSMakeRange(0, attrStr.length())
+    const effectiveRange = MOPointer.alloc().init()
+
+    const res = []
+
+    while (limitRange.length > 0) {
+        const position = limitRange.location;
+        const e = attrStr.attribute_atIndex_longestEffectiveRange_inRange(
+            attr,
+            position,
+            effectiveRange,
+            limitRange
+        );
+        res.push({
+            value: valueExtractor(e),
+            location: effectiveRange.value().location,
+            length: effectiveRange.value().length,
+        });
+        limitRange = NSMakeRange(
+            NSMaxRange(effectiveRange.value()),
+            NSMaxRange(limitRange) - NSMaxRange(effectiveRange.value())
+        );
+    }
+    return res;
+}
+
 export {
     getSelectedArtboards,
     offsetArtboard,
