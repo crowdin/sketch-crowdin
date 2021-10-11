@@ -632,9 +632,20 @@ fieldset {
     }
 }
 
-.strings-reload {
+.strings-toolbar-icon {
     padding-top: 8px;
-    margin-left: -12px;
+    margin-left: -3px;
+    svg {
+        cursor: pointer;
+    }
+    svg.info-icon {
+        cursor: unset;
+    }
+}
+
+.string-upload-screenshots-icon {
+    cursor: pointer;
+    margin-right: -8px;
 }
 
 .form-control {
@@ -766,7 +777,7 @@ button .btn-icon {
 
 .strings-container {
     overflow-y: scroll;
-    max-height: 200px;
+    max-height: 350px;
     background-color: #ffffff;
     padding: 0;
 }
