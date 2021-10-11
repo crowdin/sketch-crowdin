@@ -50,11 +50,13 @@
     "cheerio": "^1.0.0-rc.3",
     "jquery": "3.5.1",
     "popper.js": "^1.14.3",
-    "sketch-module-web-view": "^3.4.1"
+    "sketch-module-web-view": "^3.4.1",
+    "jszip": "^3.7.1",
+    "@skpm/buffer": "0.1.4"
   },
   "devDependencies": {
     "@babel/polyfill": "^7.7.0",
-    "@skpm/builder": "0.7.11",
+    "@skpm/builder": "0.8.0",
     "node-sass": "6.0.1"
   }
 }

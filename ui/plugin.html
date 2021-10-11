@@ -691,13 +691,15 @@
 
     function pseudoLocalize() {
         const wholePage = $('#pseudo-localization-form').attr('pseudo-localization-whole-page');
-        const preset = $('#pseudo-localization-preset option:selected').val();
-        const lengthCorrection = Number($('#pseudo-localization-length-correction').val());
-        const characterTransformation = $('#pseudo-localization-character-transformation').val();
+        const lengthTransformation = Number($('#pseudo-localization-length-correction').val());
+        const charTransformation = $('#pseudo-localization-character-transformation').val();
         const prefix = $('#pseudo-localization-prefix').val();
         const suffix = $('#pseudo-localization-suffix').val();
-        console.log({ wholePage, preset, lengthCorrection, characterTransformation, prefix, suffix });
-        //TODO implement
+        const request = { wholePage, lengthTransformation, charTransformation, prefix, suffix };
+        showLoading();
+        window.postMessage('pseudoLocalize', request)
+            .then(cancelPseudoLocalization)
+            .finally(hideLoading);
     }
 
     //strings mode
