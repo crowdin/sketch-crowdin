@@ -124,7 +124,7 @@ async function pseudoLocalize(request) {
                 .map(fileName => zip.file(fileName).async('text'))
         );
         if (files.length === 0) {
-            throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(page.name));
+            throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(selectedPage.name));
         }
         const filesForEachLanguage = [{
             files,

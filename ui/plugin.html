@@ -425,7 +425,7 @@
                         </div>
                         <div class="button-holder d-flex flex-row">
                             <button crowdin-ui-text-label="pseudoLocalizationApplyButtonLabel" type="button"
-                                class="btn btn-primary btn-sm" onclick="pseudoLocalize();"></button>
+                                class="btn btn-secondary btn-sm" onclick="pseudoLocalize();"></button>
                             <button crowdin-ui-text-label="pseudoLocalizationCancelButtonLabel" type="button"
                                 class="btn btn-secondary btn-sm ml-2" onclick="cancelPseudoLocalization();"></button>
                         </div>
@@ -704,7 +704,8 @@
     function pseudoLocalize() {
         const wholePage = $('#pseudo-localization-form').attr('pseudo-localization-whole-page');
         const lengthTransformation = Number($('#pseudo-localization-length-correction').val());
-        const charTransformation = $('#pseudo-localization-character-transformation').val();
+        let charTransformation = $('#pseudo-localization-character-transformation').val();
+        charTransformation = charTransformation === 'notChosen' ? undefined : charTransformation;
         const prefix = $('#pseudo-localization-prefix').val();
         const suffix = $('#pseudo-localization-suffix').val();
         const request = { wholePage, lengthTransformation, charTransformation, prefix, suffix };
