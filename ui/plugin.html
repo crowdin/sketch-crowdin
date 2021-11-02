@@ -709,7 +709,7 @@
     }
 
     function pseudoLocalize() {
-        const wholePage = $('#pseudo-localization-form').attr('pseudo-localization-whole-page');
+        const wholePage = $('#pseudo-localization-form').attr('pseudo-localization-whole-page') === 'true';
         const lengthTransformation = Number($('#pseudo-localization-length-correction').val());
         let charTransformation = $('#pseudo-localization-character-transformation').val();
         charTransformation = charTransformation === 'notChosen' ? undefined : charTransformation;
