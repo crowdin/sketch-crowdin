@@ -3,7 +3,7 @@ import { getWebview } from 'sketch-module-web-view/remote';
 import { getProjects, getBranches, getLanguages, getStrings, getFiles, getLabels, getSourceLanguage } from './util/client';
 import { sendStrings } from './action/send-strings';
 import { useString, getSelectedText, getUsedStrings, deselectString } from './action/source-strings';
-import { translate } from './action/translate';
+import { translate, pseudoLocalize } from './action/translate';
 import { uploadScreenshots } from './action/upload-screenshots';
 import { stringsPreview } from './action/strings-preview';
 import { addString, deleteString, editString } from './action/manage-string';
@@ -78,6 +78,7 @@ export default function start() {
     browserWindow.webContents.on('deselectString', deselectString);
     browserWindow.webContents.on('stringsPreview', stringsPreview);
     browserWindow.webContents.on('getUsedStrings', getUsedStrings);
+    browserWindow.webContents.on('uploadScreenshots', uploadScreenshots);
     //string management
     browserWindow.webContents.on('getSelectedText', getSelectedText);
     browserWindow.webContents.on('addString', addString);
@@ -87,7 +88,8 @@ export default function start() {
     //translate
     browserWindow.webContents.on('sendStrings', sendStrings);
     browserWindow.webContents.on('translate', translate);
-    browserWindow.webContents.on('uploadScreenshots', uploadScreenshots);
+    browserWindow.webContents.on('pseudoLocalize', pseudoLocalize);
+
 
     //other
     browserWindow.webContents.on('isArtboardSelected', isArtboardSelected);

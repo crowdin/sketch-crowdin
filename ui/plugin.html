@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="../bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="../bootstrap-select/dist/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="../styles.css">
@@ -119,33 +120,53 @@
             <div class="container" id="strings-mode" style="display: none;">
                 <form>
                     <div class="form-group list-strings-holder mb-4" id="list-strings">
-                        <div>
-                            <button type="button" class="btn btn-secondary btn-sm btn-bottom float-right ml-2"
-                                onclick="openAddString();">
-                                <svg class="btn-icon" width="13" height="13" viewBox="0 0 13 13" fill="currentColor"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M7 1H6V6H1V7H6V12H7V7H12V6H7V1Z"
-                                        fill="currentColor" />
-                                </svg>
-                                <span crowdin-ui-text-label="addStringButton"></span>
-                            </button>
-                            <p class="form-text" crowdin-ui-text-label="useStringDetailsText">
-                            </p>
-                        </div>
                         <div class="row">
-                            <div class="col-11">
+                            <div class="col-8">
                                 <div class="search-wrapper">
                                     <input type="search" id="search-text" class="w-100" oninput="debounceSearch()"
                                         placeholder="Search">
                                 </div>
                             </div>
-                            <div class="col-1 strings-reload">
+                            <div class="col-1 strings-toolbar-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"
-                                    fill="currentColor" class="float-right" style="cursor: pointer;"
-                                    onclick="reloadStrings();">
+                                    fill="currentColor" class="float-right" onclick="reloadStrings();">
                                     <title crowdin-ui-text-label="stringsReloadButtonLabel"></title>
                                     <path fill-rule="evenodd"
                                         d="m8,1.5a6.491,6.491 0 0 0 -5.285,2.715l1.358,1.358a0.25,0.25 0 0 1 -0.177,0.427l-3.646,0a0.25,0.25 0 0 1 -0.25,-0.25l0,-3.646a0.25,0.25 0 0 1 0.427,-0.177l1.216,1.216a8,8 0 0 1 14.315,4.03a0.748,0.748 0 0 1 -0.668,0.83a0.75,0.75 0 0 1 -0.824,-0.676a6.501,6.501 0 0 0 -6.466,-5.827zm-7.288,6.504a0.75,0.75 0 0 1 0.822,0.67a6.501,6.501 0 0 0 11.751,3.111l-1.358,-1.358a0.25,0.25 0 0 1 0.177,-0.427l3.646,0a0.25,0.25 0 0 1 0.25,0.25l0,3.646a0.25,0.25 0 0 1 -0.427,0.177l-1.216,-1.216a8,8 0 0 1 -14.315,-4.03a0.75,0.75 0 0 1 0.67,-0.823z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div class="col-1">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="string-upload-screenshots-icon float-right" onclick="uploadScreenshots()">
+                                    <title crowdin-ui-text-label="uploadScreenshotsDetailsText"></title>
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="m16.26054,5.66424l-0.42299,0.39309l-2.69156,2.50169l0.84587,0.78618l1.67056,-1.55267l0,6.57972l1.19625,0l0,-6.57972l1.67044,1.55267l0.84587,-0.78618l-2.69156,-2.50169l-0.42287,-0.39309z"
+                                        fill="currentColor" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="m11.97754,11.55025l-2.47164,0l0,7.83379l3.01306,-2.71189l0.43699,-0.39331l0.43686,0.39331l7.90333,7.11336l1.80381,0l0,-12.23526l-2.47164,0l0,-1.1123l2.47164,0c0.68254,0 1.23582,0.49798 1.23582,1.1123l0,12.23526c0,0.61432 -0.55328,1.1123 -1.23582,1.1123l-13.59405,0c-0.68252,0 -1.23582,-0.49798 -1.23582,-1.1123l0,-12.23526c0,-0.61432 0.5533,-1.1123 1.23582,-1.1123l2.47164,0l0,1.1123zm-2.47164,12.23526l0,-2.82846l3.45005,-3.1052l6.59249,5.93366l-10.04254,0z"
+                                        fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="col-1 strings-toolbar-icon">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" onclick="openAddString()"
+                                    xmlns="http://www.w3.org/2000/svg" class="float-right">
+                                    <title crowdin-ui-text-label="addStringButton"></title>
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="m7.51819,1.534l0,13.13022l1.57233,0l0,-13.13022l-1.57233,0z"
+                                        fill="currentColor" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" transform="rotate(90 8.30435 8.09911)"
+                                        d="m7.51819,1.534l0,13.13022l1.57233,0l0,-13.13022l-1.57233,0z"
+                                        fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="col-1 strings-toolbar-icon">
+                                <svg xmlns="http: //www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"
+                                    class="float-right info-icon" fill="currentColor">
+                                    <title crowdin-ui-text-label="useStringDetailsText"></title>
+                                    <path fill-rule="evenodd"
+                                        d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z">
                                     </path>
                                 </svg>
                             </div>
@@ -275,64 +296,140 @@
                                 </div>
                             </div>
                         </fieldset>
-                        <fieldset>
-                            <label crowdin-ui-text-label="uploadScreenshotsLabel" class="fieldset-label"></label>
-                            <div class="form-group">
-                                <p crowdin-ui-text-label="uploadScreenshotsDetailsText" class="form-text"></p>
-                                <button crowdin-ui-text-label="uploadScreenshotsButtonLabel" type="button"
-                                    class="btn btn-secondary btn-sm mb-2" onclick="uploadScreenshots()"></button>
-                            </div>
-                        </fieldset>
                     </div>
                 </form>
             </div>
 
             <div class="container" id="translation" style="display: none;">
                 <form>
-                    <fieldset>
-                        <label crowdin-ui-text-label="sendTextsLabel" class="fieldset-label"></label>
-                        <div class="form-group">
-                            <label crowdin-ui-text-label="sendTextsForLabel"></label>
-                            <div class="form-row">
-                                <div class="col">
-                                    <button crowdin-ui-text-label="sendTextsForPageButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block" onclick="sendStrings(true)"></button>
-                                </div>
-                                <div class="col">
-                                    <button id="upload-artboard-btn"
-                                        crowdin-ui-text-label="sendTextsForArtboardButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block"
-                                        onclick="sendStrings(false)"></button>
+                    <div id="translation-view">
+                        <fieldset>
+                            <label crowdin-ui-text-label="sendTextsLabel" class="fieldset-label"></label>
+                            <div class="form-group">
+                                <label crowdin-ui-text-label="sendTextsForLabel"></label>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <button crowdin-ui-text-label="sendTextsForPageButtonLabel" type="button"
+                                            class="btn btn-secondary btn-sm btn-block"
+                                            onclick="sendStrings(true)"></button>
+                                    </div>
+                                    <div class="col">
+                                        <button id="upload-artboard-btn"
+                                            crowdin-ui-text-label="sendTextsForArtboardButtonLabel" type="button"
+                                            class="btn btn-secondary btn-sm btn-block"
+                                            onclick="sendStrings(false)"></button>
+                                    </div>
                                 </div>
                             </div>
+                        </fieldset>
+                        <fieldset>
+                            <label crowdin-ui-text-label="getTranslationsLabel" class="fieldset-label"></label>
+                            <div class="form-group inline-select d-flex flex-row">
+                                <label crowdin-ui-text-label="getTranslationsLanguageLabel"></label>
+                                <div class="inline-select-holder ml-2">
+                                    <select id="languages"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label crowdin-ui-text-label="uploadTranslationsLabelFor"></label>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <button crowdin-ui-text-label="uploadTranslationsForPageButtonLabel"
+                                            type="button" class="btn btn-secondary btn-sm btn-block"
+                                            onclick="translateComponent(true)"></button>
+                                    </div>
+                                    <div class="col">
+                                        <button id="translate-artboard-btn"
+                                            crowdin-ui-text-label="uploadTranslationsForArtboardButtonLabel"
+                                            type="button" class="btn btn-secondary btn-sm btn-block"
+                                            onclick="translateComponent(false)"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <label crowdin-ui-text-label="pseudoLocalizationLabel" class="fieldset-label"></label>
+                            <label class="fieldset-label"><abbr crowdin-ui-text-label="pseudoLocalizationLabel"
+                                    crowdin-ui-text-details="pseudoLocalizationDetails"></abbr></label>
+                            <div class="form-group">
+                                <label crowdin-ui-text-label="pseudoLocalizationLabelFor"></label>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <button crowdin-ui-text-label="pseudoLocalizationForPageButtonLabel"
+                                            type="button" class="btn btn-secondary btn-sm btn-block"
+                                            onclick="openPseudoLocalization(true)"></button>
+                                    </div>
+                                    <div class="col">
+                                        <button id="pseudo-localization-artboard-btn"
+                                            crowdin-ui-text-label="pseudoLocalizationForArtboardButtonLabel"
+                                            type="button" class="btn btn-secondary btn-sm btn-block"
+                                            onclick="openPseudoLocalization(false)"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <fieldset id="pseudo-localization-form" class="pseudo-localization-form" style="display: none;">
+                        <div class="form-group">
+                            <div class="inline-select d-flex flex-row">
+                                <label crowdin-ui-text-label="pseudoLocalizationPresetLabel"></label>
+                                <div class="inline-select-holder ml-2">
+                                    <select id="pseudo-localization-preset"
+                                        onchange="onPseudoLocalizationPresetChange()">
+                                        <option value="notChosen">Not chosen</option>
+                                        <option value="french">Improvised French</option>
+                                        <option value="cyrillic">Improvised Cyrillic</option>
+                                        <option value="chinese">Improvised Chinese</option>
+                                        <option value="arabic">Improvised Arabic</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label crowdin-ui-text-label="pseudoLocalizationLengthCorrectionLabel"></label>
+                            <p crowdin-ui-text-label="pseudoLocalizationLengthCorrectionText"
+                                class="form-text text-muted help-text">
+                            </p>
+                            <div class="form-row">
+                                <input min="-50" max="100" step="1" class="pr-0 pl-0 col-10" type="range"
+                                    id="pseudo-localization-length-correction" oninput="updateLengthCorrection(this.value);" />
+                                <label id="pseudo-localization-length-correction-value" class="col-2 mt-1"></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label crowdin-ui-text-label="pseudoLocalizationPrefixSuffixLabel"></label>
+                            <p crowdin-ui-text-label="pseudoLocalizationPrefixSuffixText"
+                                class="form-text text-muted help-text">
+                            </p>
+                            <div class="form-row">
+                                <input type="text" class="form-control col-5" id="pseudo-localization-prefix"
+                                    placeholder="Prefix" />
+                                <div class="col-1"></div>
+                                <input type="text" class="form-control col-5" id="pseudo-localization-suffix"
+                                    placeholder="Suffix" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label crowdin-ui-text-label="pseudoLocalizationCharacterTransformationLabel"></label>
+                            <p crowdin-ui-text-label="pseudoLocalizationCharacterTransformationText"
+                                class="form-text text-muted help-text">
+                            </p>
+                            <select id="pseudo-localization-character-transformation"
+                                onchange="onPseudoLocalizationCharacterTransformationChange()">
+                                <option value="notChosen">Not chosen</option>
+                                <option value="asian">Asian (A -> 诶)</option>
+                                <option value="cyrillic">Cyrillic (A -> Я)</option>
+                                <option value="european">European (A -> Å)</option>
+                                <option value="arabic">Arabic (A -> ئ)</option>
+                            </select>
+                        </div>
+                        <div class="button-holder d-flex flex-row">
+                            <button crowdin-ui-text-label="pseudoLocalizationApplyButtonLabel" type="button"
+                                class="btn btn-secondary btn-sm" onclick="pseudoLocalize();"></button>
+                            <button crowdin-ui-text-label="pseudoLocalizationCancelButtonLabel" type="button"
+                                class="btn btn-secondary btn-sm ml-2" onclick="cancelPseudoLocalization();"></button>
                         </div>
                     </fieldset>
-                    <fieldset>
-                        <label crowdin-ui-text-label="getTranslationsLabel" class="fieldset-label"></label>
-                        <div class="form-group inline-select d-flex flex-row">
-                            <label crowdin-ui-text-label="getTranslationsLanguageLabel"></label>
-                            <div class="inline-select-holder ml-2">
-                                <select id="languages"></select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label crowdin-ui-text-label="uploadTranslationsLabelFor"></label>
-                            <div class="form-row">
-                                <div class="col">
-                                    <button crowdin-ui-text-label="uploadTranslationsForPageButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block"
-                                        onclick="translateComponent(true)"></button>
-                                </div>
-                                <div class="col">
-                                    <button id="translate-artboard-btn"
-                                        crowdin-ui-text-label="uploadTranslationsForArtboardButtonLabel" type="button"
-                                        class="btn btn-secondary btn-sm btn-block"
-                                        onclick="translateComponent(false)"></button>
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
-
                 </form>
             </div>
 
@@ -386,6 +483,8 @@
             $('#string-preview-artboard-btn').attr('title', title);
             $('#translate-artboard-btn').attr('disabled', disabled);
             $('#translate-artboard-btn').attr('title', title);
+            $('#pseudo-localization-artboard-btn').attr('disabled', disabled);
+            $('#pseudo-localization-artboard-btn').attr('title', title);
             $('#upload-artboard-btn').attr('disabled', disabled);
             $('#upload-artboard-btn').attr('title', title);
         });
@@ -428,6 +527,7 @@
         switch (modal) {
             case 'strings-mode':
                 openStringsMode();
+                cancelPseudoLocalization();
                 break;
             case 'translation':
                 cancelEditString();
@@ -435,6 +535,7 @@
                 break;
             case 'settings':
                 cancelEditString();
+                cancelPseudoLocalization();
                 break;
         }
     }
@@ -547,6 +648,78 @@
     function sendStrings(wholePage) {
         showLoading();
         return window.postMessage('sendStrings', wholePage).finally(hideLoading);
+    }
+
+    function openPseudoLocalization(wholePage) {
+        $('#pseudo-localization-form').show();
+        $('#pseudo-localization-form').attr('pseudo-localization-whole-page', wholePage);
+        $('#translation-view').hide();
+        $('#pseudo-localization-form').show();
+    }
+
+    function cancelPseudoLocalization() {
+        $('#pseudo-localization-length-correction').val(0);
+        updateLengthCorrection(0);
+        $('#pseudo-localization-character-transformation').val('notChosen');
+        $('#pseudo-localization-preset').val('notChosen');
+        $('#pseudo-localization-prefix').val('');
+        $('#pseudo-localization-suffix').val('');
+        $('#translation-view').show();
+        $('#pseudo-localization-form').hide();
+    }
+
+    function onPseudoLocalizationPresetChange() {
+        const preset = $('#pseudo-localization-preset option:selected').val();
+        let lengthCorrection = 0;
+        let characterTransformation = 'notChosen';
+        switch (preset) {
+            case 'french':
+                characterTransformation = 'european';
+                break;
+            case 'cyrillic':
+                lengthCorrection = 25;
+                characterTransformation = 'cyrillic';
+                break;
+            case 'chinese':
+                lengthCorrection = -35;
+                characterTransformation = 'asian';
+                break;
+            case 'arabic':
+                lengthCorrection = -20;
+                characterTransformation = 'arabic';
+                break;
+        }
+        $('#pseudo-localization-length-correction').val(lengthCorrection);
+        updateLengthCorrection(lengthCorrection);
+        $('#pseudo-localization-character-transformation').val(characterTransformation);
+    }
+
+    function updateLengthCorrection(value) {
+        $('#pseudo-localization-length-correction-value').text(`${value}%`);
+    }
+
+    function onPseudoLocalizationCharacterTransformationChange() {
+        const preset = $('#pseudo-localization-preset option:selected').val();
+        if (preset !== 'notChosen') {
+            $('#pseudo-localization-length-correction').val(0);
+            updateLengthCorrection(0);
+            $('#pseudo-localization-character-transformation').val('notChosen');
+            $('#pseudo-localization-preset').val('notChosen');
+        }
+    }
+
+    function pseudoLocalize() {
+        const wholePage = $('#pseudo-localization-form').attr('pseudo-localization-whole-page') === 'true';
+        const lengthTransformation = Number($('#pseudo-localization-length-correction').val());
+        let charTransformation = $('#pseudo-localization-character-transformation').val();
+        charTransformation = charTransformation === 'notChosen' ? undefined : charTransformation;
+        const prefix = $('#pseudo-localization-prefix').val();
+        const suffix = $('#pseudo-localization-suffix').val();
+        const request = { wholePage, lengthTransformation, charTransformation, prefix, suffix };
+        showLoading();
+        window.postMessage('pseudoLocalize', request)
+            .then(cancelPseudoLocalization)
+            .finally(hideLoading);
     }
 
     //strings mode

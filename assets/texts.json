@@ -49,7 +49,10 @@
             "screenshotUploadingToCrowdin": "Sending screenshot for the %name% artboard",
             "screenshotUploadedToCrowdin": "Screenshot for the %name% artboard successfully pushed to Crowdin",
             "addingTagsToScreenshot": "Adding tags to screenshot for the %name% artboard",
-            "stringAdded": "String '%name%' successfully added to Crowdin"
+            "stringAdded": "String '%name%' successfully added to Crowdin",
+            "pseudoLocalizationBuildStarted": "Generating translations build for pseudo-localization",
+            "pseudoLocalizationBuildProgress": "Pseudo-localization build progress %progress% %",
+            "pseudoLocalizationBuildFinished": "Pseudo-localization build finished, downloading translations"
         }
     },
     "ui": {
@@ -76,7 +79,7 @@
             "connectToCrowdinButton": "Connect to Crowdin",
             "logoutButton": "Logout",
             "addStringButton": "Add String",
-            "useStringDetailsText": "Use source string for your text component in the design",
+            "useStringDetailsText": "Create clear multilingual user interfaces. Prototype with the real copy, send new strings for translation with the keys and screenshots. Preview translated mockups with the strings you’ve used.",
             "addStringStringLabel": "String",
             "addStringIdentifierLabel": "Identifier",
             "addStringMaxLengthLabel": "Translation Text Length Limit",
@@ -95,12 +98,12 @@
             "previewSelectedButtonLabel": "Artboard",
             "uploadScreenshotsLabel": "Upload Screenshots",
             "uploadScreenshotsDetailsText": "Send screenshots of the artboards within the selected page with the tagged source strings you've used",
-            "uploadScreenshotsButtonLabel": "Upload Screenshots",
             "sendTextsLabel": "Send Texts",
             "sendTextsForLabel": "Send texts for selected:",
             "sendTextsForPageButtonLabel": "Page",
             "sendTextsForArtboardButtonLabel": "Artboard",
             "getTranslationsLabel": "Get Translations",
+            "uploadTranslationsLabelFor": "Get translations for selected:",
             "getTranslationsLanguageLabel": "Language:",
             "uploadTranslationsForLabel": "Upload translations for selected:",
             "uploadTranslationsForPageButtonLabel": "Page",
@@ -108,7 +111,21 @@
             "loadingDialog": "Loading...",
             "allLanguagesOption": "All Languages",
             "noBranchOption": "Not specified",
-            "stringsReloadButtonLabel": "Fetch strings from Crowdin"
+            "stringsReloadButtonLabel": "Fetch strings from Crowdin",
+            "pseudoLocalizationLabel": "Pseudo-localization",
+            "pseudoLocalizationLabelFor": "Pseudo-localize selected:",
+            "pseudoLocalizationForPageButtonLabel": "Page",
+            "pseudoLocalizationForArtboardButtonLabel": "Artboard",
+            "pseudoLocalizationApplyButtonLabel": "Pseudo-Localize",
+            "pseudoLocalizationCancelButtonLabel": "Cancel",
+            "pseudoLocalizationPresetLabel": "Preset",
+            "pseudoLocalizationPresetText": "Select help text",
+            "pseudoLocalizationLengthCorrectionLabel": "Length Correction",
+            "pseudoLocalizationLengthCorrectionText": "Allows you to make strings longer or shorter to see whether your product's UI properly handles other languages. As translations in some languages can be longer or shorter than the source texts in your project.",
+            "pseudoLocalizationPrefixSuffixLabel": "Prefix/Suffix",
+            "pseudoLocalizationPrefixSuffixText": "Allows you to add special characters at the beginning and end of each string.",
+            "pseudoLocalizationCharacterTransformationLabel": "Character Transformation",
+            "pseudoLocalizationCharacterTransformationText": "Are foreign language character sets displayed correctly in your application? Character Transformation replaces English characters with easily identifiable accented versions, random Arabic symbols, or Chinese ideographs to make it obvious if there are some hard-coded strings in your application. This ensures that your application is ready to be localized into other languages (including right-to-left and left-to-right ones)."
         },
         "details": {
             "translationsDetails": "Generate multi-language creative assets like banners or social media graphics. Send designs for translation and upload translated copies back.",
@@ -117,7 +134,8 @@
             "addStringIdentifierDetails": "A unique identifier of this string. It helps to match source and translated texts in your application",
             "addStringMaxLengthDetails": "The maximum length of the translated text (0 — unlimited)",
             "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES.",
-            "addStringLabelDetails": "Specify labels for string(s) which then will be used in search or export functionality"
+            "addStringLabelDetails": "Specify labels for string(s) which then will be used in search or export functionality",
+            "pseudoLocalizationDetails": "Pseudo-localization is a way to test the readiness of the application to be translated. This process imitates how the application's UI will look with different languages and thus allows you to check whether the source strings should be modified before the project localization."
         },
         "validation": {
             "addStringEmptyString": "Please, insert the source string",
