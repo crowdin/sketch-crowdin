@@ -391,9 +391,9 @@
                                 class="form-text text-muted help-text">
                             </p>
                             <div class="form-row">
-                                <input min="-50" class="form-control col-4" type="number"
-                                    id="pseudo-localization-length-correction" />
-                                <span class="col-4 pt-1">%</span>
+                                <input min="-50" max="100" step="1" class="pr-0 pl-0 col-10" type="range"
+                                    id="pseudo-localization-length-correction" oninput="updateLengthCorrection(this.value);" />
+                                <label id="pseudo-localization-length-correction-value" class="col-2 mt-1"></label>
                             </div>
                         </div>
                         <div class="form-group">
@@ -659,6 +659,7 @@
 
     function cancelPseudoLocalization() {
         $('#pseudo-localization-length-correction').val(0);
+        updateLengthCorrection(0);
         $('#pseudo-localization-character-transformation').val('notChosen');
         $('#pseudo-localization-preset').val('notChosen');
         $('#pseudo-localization-prefix').val('');
@@ -689,13 +690,19 @@
                 break;
         }
         $('#pseudo-localization-length-correction').val(lengthCorrection);
+        updateLengthCorrection(lengthCorrection);
         $('#pseudo-localization-character-transformation').val(characterTransformation);
+    }
+
+    function updateLengthCorrection(value) {
+        $('#pseudo-localization-length-correction-value').text(`${value}%`);
     }
 
     function onPseudoLocalizationCharacterTransformationChange() {
         const preset = $('#pseudo-localization-preset option:selected').val();
         if (preset !== 'notChosen') {
             $('#pseudo-localization-length-correction').val(0);
+            updateLengthCorrection(0);
             $('#pseudo-localization-character-transformation').val('notChosen');
             $('#pseudo-localization-preset').val('notChosen');
         }
