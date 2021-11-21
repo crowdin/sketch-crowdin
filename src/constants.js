@@ -29,7 +29,8 @@ export const STRINGS_KEY_NAMING_OPTIONS = [
     { id: 13, name: 'artboard:element_name' },
     { id: 14, name: 'artboard::element_name' },
     { id: 15, name: 'artboard__element_name' },
-    { id: 16, name: 'element_name' }
+    { id: 16, name: 'element_name' },
+    { id: 17, name: 'Element text' }
 ];
 
 export const DEFAULT_STRINGS_KEY_NAMING_OPTION = 16;
