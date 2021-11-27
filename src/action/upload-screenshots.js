@@ -9,7 +9,7 @@ import { fetchStrings } from '../util/client';
 import { default as displayTexts } from '../../assets/texts.json';
 import { truncateLongText } from '../util/string';
 
-async function uploadScreenshots() {
+async function uploadScreenshots(stringIds) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         if (!selectedDocument) {
@@ -54,6 +54,9 @@ async function uploadScreenshots() {
         });
 
         const tempTags = [];
+        const workingArtboards = !!stringIds
+            ? tags.filter(t => stringIds.includes(t.stringId)).map(t => t.artboardId)
+            : [];
         tags = tags.filter(e => {
             if (e.pageId !== selectedPage.id) {
                 return !!selectedDocument.pages.find(p => p.id === e.pageId);
@@ -65,10 +68,12 @@ async function uploadScreenshots() {
             if (!!artboardText) {
                 const foundText = artboardText.texts.find(t => t.textId === e.id && t.type === e.type);
                 if (!!foundText) {
-                    tempTags.push({
-                        ...e,
-                        textElement: foundText
-                    });
+                    if (!stringsIds || stringIds.includes(e.stringId) || workingArtboards.includes(e.artboardId)) {
+                        tempTags.push({
+                            ...e,
+                            textElement: foundText
+                        });
+                    }
                 }
                 return !!foundText;
             }

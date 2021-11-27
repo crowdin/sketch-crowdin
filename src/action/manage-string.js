@@ -20,14 +20,26 @@ async function addString(req) {
 }
 
 async function editString(string) {
-    const { id, text } = string;
+    const { id, text, context, maxLength } = string;
     const callback = async (projectId) => {
         const { sourceStringsApi } = httpUtil.createClient();
-        const string = await sourceStringsApi.editString(projectId, id, [{
-            path: '/text',
-            value: text,
-            op: PatchOperation.REPLACE
-        }]);
+        const string = await sourceStringsApi.editString(projectId, id, [
+            {
+                path: '/text',
+                value: text,
+                op: PatchOperation.REPLACE
+            },
+            {
+                path: '/context',
+                value: context,
+                op: PatchOperation.REPLACE
+            },
+            {
+                path: '/maxLength',
+                value: maxLength,
+                op: PatchOperation.REPLACE
+            }
+        ]);
         const tags = localStorage.getTags(dom.getSelectedDocument());
         const stringTags = tags.filter(t => t.stringId === id);
         stringTags.forEach(tag => updateText(tag, text, !!string.data.identifier ? string.data.identifier : text));
