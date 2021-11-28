@@ -233,6 +233,10 @@
                                     crowdin-ui-text-details="addStringLabelDetails"></abbr></label>
                             <select class="form-control" id="string-labels" multiple size="8"></select>
                         </div>
+                        <div id="string-send-screenshots-container" class="form-group mt-2">
+                            <label crowdin-ui-text-label="addStringSendScreenshotsLabel"></label>
+                            <input type="checkbox" class="ml-1 mt-1" id="sendScreenshotsStrings" checked>
+                        </div>
                         <div id="string-push-hidden-container" class="form-group mt-2">
                             <label crowdin-ui-text-label="addStringAddHiddenLabel"></label>
                             <input type="checkbox" class="ml-1 mt-1" id="pushHiddenStrings" checked>
@@ -862,6 +866,7 @@
                 $('#string-file-container').hide();
                 $('#string-label-container').hide();
                 $('#string-push-hidden-container').hide();
+                $('#string-send-screenshots-container').hide();
                 $('#single-string-form').show();
                 $('#edit-string').show();
                 const id = Number(el.next().attr('int-id'));
@@ -896,6 +901,8 @@
             $('#string-label-container').show();
             $('#edit-string').show();
             if (selectedText.length === 0) {
+                $('#sendScreenshotsStrings').attr('disabled', 'true');
+                $('#sendScreenshotsStrings').prop('checked', false);
                 $('#string-text').val('');
                 $('#string-identifier').val('');
                 $('#string-max-length').val('');
@@ -903,13 +910,18 @@
                 $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
             } else if (selectedText.length === 1) {
+                $('#sendScreenshotsStrings').removeAttr('disabled');
+                $('#sendScreenshotsStrings').prop('checked', true);
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
                 $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
+                $('#string-send-screenshots-container').show();
             } else {
+                $('#sendScreenshotsStrings').removeAttr('disabled');
+                $('#sendScreenshotsStrings').prop('checked', true);
                 let rowsHtml = '';
                 let identifiers = (strings || []).map(s => s.identifier);
                 selectedText.forEach(e => {
@@ -942,6 +954,7 @@
                 $('#single-string-form').hide();
                 $('#multi-string-form').show();
                 $('#string-push-hidden-container').show();
+                $('#string-send-screenshots-container').show();
             }
             openedString = undefined;
             hideLoading();
@@ -1053,6 +1066,7 @@
 
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
+        const sendScreenshots = $('#sendScreenshotsStrings').prop('checked');
         if (selectedText.length > 1) {
             const pushHidden = $('#pushHiddenStrings').prop('checked');
             //adding multiple strings
@@ -1129,7 +1143,13 @@
             return Promise.all(promises)
                 .then(() => {
                     if (addedStrings.length > 0 && files.length === 1) {
-                        return window.postMessage('useString', addedStrings);
+                        return window
+                            .postMessage('useString', addedStrings)
+                            .then(() => {
+                                if (sendScreenshots) {
+                                    return window.postMessage('uploadScreenshots', addedStrings.map(e => e.id));
+                                }
+                            });
                     }
                 })
                 .then(() => {
@@ -1242,7 +1262,12 @@
                                 text,
                                 identifier,
                                 selectedText: selectedText[0]
-                            }]);
+                            }])
+                            .then(() => {
+                                if (sendScreenshots) {
+                                    return window.postMessage('uploadScreenshots', [id]);
+                                }
+                            });
                     }
                 })
                 .then(() => {
