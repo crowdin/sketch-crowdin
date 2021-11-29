@@ -185,7 +185,9 @@
                             <div class="form-group">
                                 <label><abbr crowdin-ui-text-label="addStringStringLabel"
                                         crowdin-ui-text-details="addStringStringDetails"></abbr></label>
-                                <textarea class="form-control" id="string-text" placeholder="text"></textarea>
+                                <label id="string-length-text" class="float-right" style="display: none;"></label>
+                                <textarea class="form-control" id="string-text" placeholder="text"
+                                    oninput="onStringTextInput()"></textarea>
                                 <div class="invalid-feedback" id="invalidString"></div>
                             </div>
                             <div class="form-group" id="edit-string-form-identifier-new">
@@ -861,6 +863,7 @@
                 $('#list-strings').hide();
                 $('#strings-preview').hide();
                 $('#edit-string-form').show();
+                $('#string-length-text').show();
                 $('#edit-string-form-identifier').show();
                 $('#multi-string-form').hide();
                 $('#string-file-container').hide();
@@ -878,7 +881,7 @@
                     $('#string-update-screenshot').prop('checked', true);
                 } else {
                     $('#string-update-screenshot').attr('disabled', 'true');
-                    $('#string-update-screenshot').attr('title', validationMessages.editStringNoLinks);
+                    $('#string-update-screenshot').parent().attr('title', validationMessages.editStringNoLinks);
                     $('#string-update-screenshot').prop('checked', false);
                 }
                 $('#string-text').val(string.text);
@@ -886,6 +889,7 @@
                 $('#string-context').val(string.context) || '';
                 $('#string-max-length').val(string.maxLength);
                 openedString = id;
+                onStringTextInput();
                 hideLoading();
             });
     }
@@ -1034,8 +1038,14 @@
         $('#invalidFile').text('');
         $('#string-labels').selectpicker('deselectAll');
         $('#edit-string-form').hide();
+        $('#string-length-text').hide();
         $('#edit-string-form-identifier').hide();
         selectedText.length = 0;
+    }
+
+    function onStringTextInput() {
+        const length = ($('#string-text').val() || '').length;
+        $('#string-length-text').text(`${length} character${length > 1 ? 's' : ''}`);
     }
 
     function deleteString() {
