@@ -245,8 +245,15 @@ function convertCrowdinStringsToStrings(crowdinStrings) {
                     text.other || '';
             }
             return {
-                text, id: e.id, fileId: e.fileId, identifier: e.identifier, context: e.context, branchId: e.branchId, labelIds: e.labelIds
-            }
+                text,
+                id: e.id,
+                fileId: e.fileId,
+                identifier: e.identifier,
+                context: e.context,
+                branchId: e.branchId,
+                labelIds: e.labelIds,
+                maxLength: e.maxLength,
+            };
         })
         .filter(e => e.text && e.text.length > 0);
 }

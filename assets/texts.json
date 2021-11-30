@@ -83,12 +83,15 @@
             "addStringStringLabel": "String",
             "addStringIdentifierLabel": "Identifier",
             "addStringMaxLengthLabel": "Translation Text Length Limit",
+            "addStringContextLabel": "Context",
+            "addStringUpdateScreenshotsLabel": "Update screenshots",
             "addStringFileLabel": "File",
             "addStringLabelLabel": "Label",
             "addStringSaveButtonLabel": "Save",
             "addStringCancelButtonLabel": "Cancel",
             "addStringDeleteButtonLabel": "Delete",
             "addStringAddHiddenLabel": "Push hidden elements",
+            "addStringSendScreenshotsLabel": "Send screenshots",
             "previewStringsInDuplicateLabel": "Preview Strings in Duplicate",
             "previewStringsInCurrentLabel": "Preview Strings in Current",
             "previewStringsWithLanguageLabel": "Create with language",
@@ -133,6 +136,7 @@
             "addStringStringDetails": "Fill in text string you'd like to add to the Crowdin project",
             "addStringIdentifierDetails": "A unique identifier of this string. It helps to match source and translated texts in your application",
             "addStringMaxLengthDetails": "The maximum length of the translated text (0 — unlimited)",
+            "addStringContextDetails": "Any contextual information that will help translators to understand the source text meaning",
             "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES.",
             "addStringLabelDetails": "Specify labels for string(s) which then will be used in search or export functionality",
             "pseudoLocalizationDetails": "Pseudo-localization is a way to test the readiness of the application to be translated. This process imitates how the application's UI will look with different languages and thus allows you to check whether the source strings should be modified before the project localization."
@@ -140,10 +144,12 @@
         "validation": {
             "addStringEmptyString": "Please, insert the source string",
             "addStringEmptyIdentifier": "Fill in the identifier for the source string",
+            "addStringEmptyContext": "Fill in the context for the source string",
             "addStringNotUniqueIdentifier": "Identifier should be unique",
             "addStringInvalidMaxLength": "Max length should be zero or positive integer",
             "addStringEmptyFile": "Select one or more source files to add the new string to",
-            "artboardNotSelected": "Please select at least one artboard"
+            "artboardNotSelected": "Please select at least one artboard",
+            "editStringNoLinks": "This string is not linked to any text in the design."
         },
         "custom": {
             "stringFilesSelectPlaceholder": "Select one or more source files",

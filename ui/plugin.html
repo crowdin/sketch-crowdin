@@ -177,28 +177,43 @@
                     </div>
                     <fieldset id="edit-string" class="edit-string-mode" style="display: none;">
                         <div id="single-string-form">
+                            <div id="edit-string-form-identifier" style="display: none;" class="form-group">
+                                <label><abbr crowdin-ui-text-details="addStringIdentifierDetails"
+                                        crowdin-ui-text-label="addStringIdentifierLabel"></abbr></label>
+                                <input class="form-control" placeholder="identifier" type="text" disabled>
+                            </div>
                             <div class="form-group">
                                 <label><abbr crowdin-ui-text-label="addStringStringLabel"
                                         crowdin-ui-text-details="addStringStringDetails"></abbr></label>
-                                <textarea class="form-control" id="string-text" placeholder="text"></textarea>
+                                <label id="string-length-text" class="float-right" style="display: none;"></label>
+                                <textarea class="form-control" id="string-text" placeholder="text"
+                                    oninput="onStringTextInput()"></textarea>
                                 <div class="invalid-feedback" id="invalidString"></div>
                             </div>
-                            <div id="new-string-form" style="display: none;">
-                                <div class="form-group">
-                                    <label><abbr crowdin-ui-text-details="addStringIdentifierDetails"
-                                            crowdin-ui-text-label="addStringIdentifierLabel"></abbr></label>
-                                    <input class="form-control" id="string-identifier" placeholder="identifier"
-                                        type="text">
-                                    <div class="invalid-feedback" id="invalidIdentifier"></div>
+                            <div class="form-group" id="edit-string-form-identifier-new">
+                                <label><abbr crowdin-ui-text-details="addStringIdentifierDetails"
+                                        crowdin-ui-text-label="addStringIdentifierLabel"></abbr></label>
+                                <input class="form-control" id="string-identifier" placeholder="identifier" type="text">
+                                <div class="invalid-feedback" id="invalidIdentifier"></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-8 col-form-label" for="string-max-length"><abbr
+                                        crowdin-ui-text-label="addStringMaxLengthLabel"
+                                        crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
+                                <div class="col-4">
+                                    <input min="0" type="number" class="form-control" id="string-max-length">
+                                    <div class="invalid-feedback" id="invalidMaxLength"></div>
                                 </div>
-                                <div class="form-group row">
-                                    <label class="col-8 col-form-label" for="string-max-length"><abbr
-                                            crowdin-ui-text-label="addStringMaxLengthLabel"
-                                            crowdin-ui-text-details="addStringMaxLengthDetails"></abbr></label>
-                                    <div class="col-4">
-                                        <input min="0" type="number" class="form-control" id="string-max-length">
-                                        <div class="invalid-feedback" id="invalidMaxLength"></div>
-                                    </div>
+                            </div>
+                            <div class="form-group" id="edit-string-form" style="display: none;">
+                                <label><abbr crowdin-ui-text-details="addStringContextDetails"
+                                        crowdin-ui-text-label="addStringContextLabel"></abbr></label>
+                                <input class="form-control" id="string-context" placeholder="context" type="text">
+                                <div class="invalid-feedback" id="invalidContext"></div>
+                                <div>
+                                    <label crowdin-ui-text-label="addStringUpdateScreenshotsLabel" class="mt-3 mb-3">
+                                    </label>
+                                    <input type="checkbox" class="ml-1" id="string-update-screenshot">
                                 </div>
                             </div>
                         </div>
@@ -219,6 +234,10 @@
                             <label for="string-labels"><abbr crowdin-ui-text-label="addStringLabelLabel"
                                     crowdin-ui-text-details="addStringLabelDetails"></abbr></label>
                             <select class="form-control" id="string-labels" multiple size="8"></select>
+                        </div>
+                        <div id="string-send-screenshots-container" class="form-group mt-2">
+                            <label crowdin-ui-text-label="addStringSendScreenshotsLabel"></label>
+                            <input type="checkbox" class="ml-1 mt-1" id="sendScreenshotsStrings" checked>
                         </div>
                         <div id="string-push-hidden-container" class="form-group mt-2">
                             <label crowdin-ui-text-label="addStringAddHiddenLabel"></label>
@@ -392,7 +411,8 @@
                             </p>
                             <div class="form-row">
                                 <input min="-50" max="100" step="1" class="pr-0 pl-0 col-10" type="range"
-                                    id="pseudo-localization-length-correction" oninput="updateLengthCorrection(this.value);" />
+                                    id="pseudo-localization-length-correction"
+                                    oninput="updateLengthCorrection(this.value);" />
                                 <label id="pseudo-localization-length-correction-value" class="col-2 mt-1"></label>
                             </div>
                         </div>
@@ -834,20 +854,44 @@
 
     function openEditString(element) {
         $('#string-delete-btn').show();
-        const el = $(element);
-        $('#list-strings').hide();
-        $('#strings-preview').hide();
-        $('#new-string-form').hide();
-        $('#multi-string-form').hide();
-        $('#string-file-container').hide();
-        $('#string-label-container').hide();
-        $('#string-push-hidden-container').hide();
-        $('#single-string-form').show();
-        $('#edit-string').show();
-        const text = el.next().text().trim();
-        const id = Number(el.next().attr('int-id'));
-        $('#string-text').val(text);
-        openedString = id;
+        showLoading();
+        window.postMessage('getUsedStrings')
+            .then((e) => {
+                const usedStrings = e[0];
+                const el = $(element);
+                $('#edit-string-form-identifier-new').hide();
+                $('#list-strings').hide();
+                $('#strings-preview').hide();
+                $('#edit-string-form').show();
+                $('#string-length-text').show();
+                $('#edit-string-form-identifier').show();
+                $('#multi-string-form').hide();
+                $('#string-file-container').hide();
+                $('#string-label-container').hide();
+                $('#string-push-hidden-container').hide();
+                $('#string-send-screenshots-container').hide();
+                $('#single-string-form').show();
+                $('#edit-string').show();
+                const id = Number(el.next().attr('int-id'));
+                const isUsed = usedStrings.includes(id);
+                const string = strings.find(str => str.id === id);
+                if (isUsed) {
+                    $('#string-update-screenshot').removeAttr('disabled');
+                    $('#string-update-screenshot').removeAttr('title');
+                    $('#string-update-screenshot').prop('checked', true);
+                } else {
+                    $('#string-update-screenshot').attr('disabled', 'true');
+                    $('#string-update-screenshot').parent().attr('title', validationMessages.editStringNoLinks);
+                    $('#string-update-screenshot').prop('checked', false);
+                }
+                $('#string-text').val(string.text);
+                $('#edit-string-form-identifier').find('input').val(string.identifier || '');
+                $('#string-context').val(string.context) || '';
+                $('#string-max-length').val(string.maxLength);
+                openedString = id;
+                onStringTextInput();
+                hideLoading();
+            });
     }
 
     function openAddString() {
@@ -857,11 +901,12 @@
             selectedText = e[0];
             $('#list-strings').hide();
             $('#strings-preview').hide();
-            $('#new-string-form').show();
             $('#string-file-container').show();
             $('#string-label-container').show();
             $('#edit-string').show();
             if (selectedText.length === 0) {
+                $('#sendScreenshotsStrings').attr('disabled', 'true');
+                $('#sendScreenshotsStrings').prop('checked', false);
                 $('#string-text').val('');
                 $('#string-identifier').val('');
                 $('#string-max-length').val('');
@@ -869,13 +914,18 @@
                 $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
             } else if (selectedText.length === 1) {
+                $('#sendScreenshotsStrings').removeAttr('disabled');
+                $('#sendScreenshotsStrings').prop('checked', true);
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
                 $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
+                $('#string-send-screenshots-container').show();
             } else {
+                $('#sendScreenshotsStrings').removeAttr('disabled');
+                $('#sendScreenshotsStrings').prop('checked', true);
                 let rowsHtml = '';
                 let identifiers = (strings || []).map(s => s.identifier);
                 selectedText.forEach(e => {
@@ -908,6 +958,7 @@
                 $('#single-string-form').hide();
                 $('#multi-string-form').show();
                 $('#string-push-hidden-container').show();
+                $('#string-send-screenshots-container').show();
             }
             openedString = undefined;
             hideLoading();
@@ -977,15 +1028,25 @@
     }
 
     function cancelEditString() {
+        $('#edit-string-form-identifier-new').show();
         $('#list-strings').show();
         $('#strings-preview').show();
         $('#edit-string').hide();
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidMaxLength').text('');
+        $('#invalidContext').text('');
         $('#invalidFile').text('');
         $('#string-labels').selectpicker('deselectAll');
+        $('#edit-string-form').hide();
+        $('#string-length-text').hide();
+        $('#edit-string-form-identifier').hide();
         selectedText.length = 0;
+    }
+
+    function onStringTextInput() {
+        const length = ($('#string-text').val() || '').length;
+        $('#string-length-text').text(`${length} character${length > 1 ? 's' : ''}`);
     }
 
     function deleteString() {
@@ -1016,6 +1077,7 @@
 
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
+        const sendScreenshots = $('#sendScreenshotsStrings').prop('checked');
         if (selectedText.length > 1) {
             const pushHidden = $('#pushHiddenStrings').prop('checked');
             //adding multiple strings
@@ -1077,6 +1139,7 @@
                                         fileId: Number($(file).val()),
                                         identifier: str.identifier,
                                         context: str.identifier,
+                                        maxLength: 0,
                                         labelIds
                                     });
                                     addedStrings.push({
@@ -1091,7 +1154,13 @@
             return Promise.all(promises)
                 .then(() => {
                     if (addedStrings.length > 0 && files.length === 1) {
-                        return window.postMessage('useString', addedStrings);
+                        return window
+                            .postMessage('useString', addedStrings)
+                            .then(() => {
+                                if (sendScreenshots) {
+                                    return window.postMessage('uploadScreenshots', addedStrings.map(e => e.id));
+                                }
+                            });
                     }
                 })
                 .then(() => {
@@ -1103,33 +1172,57 @@
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidMaxLength').text('');
+        $('#invalidContext').text('');
         $('#invalidFile').text('');
         const text = $('#string-text').val();
+        const maxLength = Number($('#string-max-length').val());
         if (!text || text.length === '') {
             $('#invalidString').text(validationMessages.addStringEmptyString || 'Invalid');
             return;
         }
+        if (!$('#string-max-length')[0].validity.valid) {
+            $('#invalidMaxLength').text(validationMessages.addStringInvalidMaxLength || 'Invalid');
+            return;
+        }
         if (openedString) {
+            const context = $('#string-context').val();
+            const updateScreenshots = $('#string-update-screenshot').prop('checked');
+            if (!context || context.length === '') {
+                $('#invalidContext').text(validationMessages.addStringEmptyContext || 'Invalid');
+                return;
+            }
             //editing string
             showLoading();
-            return window.postMessage('editString', { id: openedString, text })
+            return window
+                .postMessage('editString', {
+                    id: openedString,
+                    text,
+                    context,
+                    maxLength,
+                })
                 .then(e => {
                     if (!e[0].error) {
                         strings = strings.map(s => {
                             if (s.id === openedString) {
                                 s.text = text;
+                                s.context = context;
+                                s.maxLength = maxLength;
                             }
                             return s;
                         });
-                        cancelEditString();
-                        return search();
+                        const promise = updateScreenshots
+                            ? window.postMessage('uploadScreenshots', [openedString])
+                            : Promise.resolve();
+                        return promise.finally(() => {
+                            cancelEditString();
+                            return search();
+                        });
                     }
                 })
                 .finally(hideLoading);
         } else {
             //adding single string
             const identifier = $('#string-identifier').val();
-            const maxLength = Number($('#string-max-length').val());
             const files = $('#string-files option:selected').toArray();
             const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             if (!identifier || identifier.length === '') {
@@ -1138,10 +1231,6 @@
             }
             if (identifiers.some(i => i === identifier)) {
                 $('#invalidIdentifier').text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
-                return;
-            }
-            if (!$('#string-max-length')[0].validity.valid) {
-                $('#invalidMaxLength').text(validationMessages.addStringInvalidMaxLength || 'Invalid');
                 return;
             }
             if (files.length === 0) {
@@ -1167,6 +1256,7 @@
                                 fileId: Number($(file).val()),
                                 identifier: identifier,
                                 context: identifier,
+                                maxLength,
                                 labelIds
                             });
                             return id;
@@ -1183,7 +1273,12 @@
                                 text,
                                 identifier,
                                 selectedText: selectedText[0]
-                            }]);
+                            }])
+                            .then(() => {
+                                if (sendScreenshots) {
+                                    return window.postMessage('uploadScreenshots', [id]);
+                                }
+                            });
                     }
                 })
                 .then(() => {
