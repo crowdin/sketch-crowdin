@@ -5,6 +5,20 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0]
+
+### Added
+
+- New key naming pattern - Element name ([#92](https://github.com/crowdin/sketch-crowdin/pull/92))
+
+### Updated
+
+- Edit string form updates ([#93](https://github.com/crowdin/sketch-crowdin/pull/93))
+  - possibility to edit context and max length
+  - update screenshots for updated string
+- Add string form update ([#93](https://github.com/crowdin/sketch-crowdin/pull/93))
+  - added checkbox to update screenshots
+
 ## [2.5.0]
 
 ### Added

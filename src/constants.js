@@ -11,7 +11,7 @@ export const KEY_NAMING_PATTERN = `${KEY_PREFIX}-key-naming`;
 export const SYMBOL_TYPE = 'symbol-override';
 export const TEXT_TYPE = 'text';
 
-export const PLUGIN_VERSION = '2.5.0';
+export const PLUGIN_VERSION = '2.6.0';
 
 export const STRINGS_KEY_NAMING_OPTIONS = [
     { id: 1, name: 'Artboard.Group.Element_name', },
