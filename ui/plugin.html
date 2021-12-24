@@ -235,13 +235,17 @@
                                     crowdin-ui-text-details="addStringLabelDetails"></abbr></label>
                             <select class="form-control" id="string-labels" multiple size="8"></select>
                         </div>
-                        <div id="string-send-screenshots-container" class="form-group mt-2">
+                        <div id="string-send-screenshots-container" class="form-group mb-1">
                             <label crowdin-ui-text-label="addStringSendScreenshotsLabel"></label>
                             <input type="checkbox" class="ml-1 mt-1" id="sendScreenshotsStrings" checked>
                         </div>
-                        <div id="string-push-hidden-container" class="form-group mt-2">
+                        <div id="string-push-hidden-container" class="form-group mb-1">
                             <label crowdin-ui-text-label="addStringAddHiddenLabel"></label>
                             <input type="checkbox" class="ml-1 mt-1" id="pushHiddenStrings" checked>
+                        </div>
+                        <div id="string-link-duplicate-container" class="form-group mb-1">
+                            <label crowdin-ui-text-label="addStringLinkDuplicateLabel"></label>
+                            <input type="checkbox" class="ml-1 mt-1" id="linkDuplicateStrings" checked>
                         </div>
                         <div class="button-holder d-flex flex-row">
                             <button crowdin-ui-text-label="addStringSaveButtonLabel" type="button"
@@ -862,14 +866,15 @@
                 $('#edit-string-form-identifier-new').hide();
                 $('#list-strings').hide();
                 $('#strings-preview').hide();
-                $('#edit-string-form').show();
-                $('#string-length-text').show();
-                $('#edit-string-form-identifier').show();
                 $('#multi-string-form').hide();
                 $('#string-file-container').hide();
                 $('#string-label-container').hide();
                 $('#string-push-hidden-container').hide();
                 $('#string-send-screenshots-container').hide();
+                $('#string-link-duplicate-container').hide();
+                $('#edit-string-form').show();
+                $('#string-length-text').show();
+                $('#edit-string-form-identifier').show();
                 $('#single-string-form').show();
                 $('#edit-string').show();
                 const id = Number(el.next().attr('int-id'));
@@ -901,31 +906,37 @@
             selectedText = e[0];
             $('#list-strings').hide();
             $('#strings-preview').hide();
+            $('#string-push-hidden-container').hide();
             $('#string-file-container').show();
             $('#string-label-container').show();
+            $('#string-link-duplicate-container').show();
             $('#edit-string').show();
             if (selectedText.length === 0) {
+                //no text selected just a new Crowdin string
+                $('#string-link-duplicate-container').hide();
                 $('#sendScreenshotsStrings').attr('disabled', 'true');
                 $('#sendScreenshotsStrings').prop('checked', false);
                 $('#string-text').val('');
                 $('#string-identifier').val('');
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
-                $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
             } else if (selectedText.length === 1) {
+                //one text selected
                 $('#sendScreenshotsStrings').removeAttr('disabled');
                 $('#sendScreenshotsStrings').prop('checked', true);
+                $('#linkDuplicateStrings').prop('checked', true);
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
-                $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
                 $('#string-send-screenshots-container').show();
             } else {
+                //multiple texts selected
                 $('#sendScreenshotsStrings').removeAttr('disabled');
                 $('#sendScreenshotsStrings').prop('checked', true);
+                $('#linkDuplicateStrings').prop('checked', true);
                 let rowsHtml = '';
                 let identifiers = (strings || []).map(s => s.identifier);
                 selectedText.forEach(e => {
@@ -1078,6 +1089,8 @@
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
         const sendScreenshots = $('#sendScreenshotsStrings').prop('checked');
+        //TODO use this flag
+        const linkDuplicated = $('#linkDuplicateStrings').prop('checked');
         if (selectedText.length > 1) {
             const pushHidden = $('#pushHiddenStrings').prop('checked');
             //adding multiple strings
