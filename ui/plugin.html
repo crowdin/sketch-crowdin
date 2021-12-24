@@ -1089,7 +1089,6 @@
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
         const sendScreenshots = $('#sendScreenshotsStrings').prop('checked');
-        //TODO use this flag
         const linkDuplicated = $('#linkDuplicateStrings').prop('checked');
         if (selectedText.length > 1) {
             const pushHidden = $('#pushHiddenStrings').prop('checked');
@@ -1137,6 +1136,19 @@
             const promises = files.map(file => {
                 return newStrings.reduce((acc, str) => {
                     return acc.then(() => {
+                        if (linkDuplicated) {
+                            const existingString = strings.find(s => s.text === str.text);
+                            if (existingString) {
+                                addedStrings.push({
+                                    id: existingString.id,
+                                    identifier: existingString.identifier,
+                                    selectedText: str.selectedText,
+                                    text: existingString.text,
+                                    existing: true
+                                });
+                                return;
+                            }
+                        }
                         return window
                             .postMessage('addString', {
                                 text: str.text,
@@ -1157,6 +1169,7 @@
                                     });
                                     addedStrings.push({
                                         id: e[0].data.id,
+                                        existing: false,
                                         ...str
                                     });
                                 }
@@ -1166,12 +1179,13 @@
             });
             return Promise.all(promises)
                 .then(() => {
-                    if (addedStrings.length > 0 && files.length === 1) {
+                    const stringsToProcess = addedStrings.filter(newString => newString.existing || files.length === 1);
+                    if (stringsToProcess.length > 0) {
                         return window
-                            .postMessage('useString', addedStrings)
+                            .postMessage('useString', stringsToProcess)
                             .then(() => {
                                 if (sendScreenshots) {
-                                    return window.postMessage('uploadScreenshots', addedStrings.map(e => e.id));
+                                    return window.postMessage('uploadScreenshots', stringsToProcess.map(e => e.id));
                                 }
                             });
                     }
@@ -1251,6 +1265,29 @@
                 return;
             }
             showLoading();
+            if (linkDuplicated && selectedText.length > 0) {
+                const existingString = strings.find(s => s.text === text);
+                if (existingString) {
+                    return window
+                        .postMessage('useString', [{
+                            id: existingString.id,
+                            text,
+                            identifier: existingString.identifier,
+                            selectedText: selectedText[0]
+                        }])
+                        .then(() => {
+                            if (sendScreenshots) {
+                                return window.postMessage('uploadScreenshots', [existingString.id]);
+                            }
+                        })
+                        .then(() => {
+                            cancelEditString();
+                            return search();
+                        })
+                        .finally(hideLoading);
+
+                }
+            }
             const promises = files.map(file => {
                 const req = {
                     text,

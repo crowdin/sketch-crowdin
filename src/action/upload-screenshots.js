@@ -68,7 +68,7 @@ async function uploadScreenshots(stringIds) {
             if (!!artboardText) {
                 const foundText = artboardText.texts.find(t => t.textId === e.id && t.type === e.type);
                 if (!!foundText) {
-                    if (!stringsIds || stringIds.includes(e.stringId) || workingArtboards.includes(e.artboardId)) {
+                    if (!stringsIds || stringsIds.includes(e.stringId) || workingArtboards.includes(e.artboardId)) {
                         tempTags.push({
                             ...e,
                             textElement: foundText
