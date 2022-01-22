@@ -771,6 +771,17 @@
         }
     }
 
+    $('#string-files').on('changed.bs.select', onAddStringFileSelect);
+ 
+    function onAddStringFileSelect() {
+        const selectedFiles = $('#string-files option:selected').toArray().length;
+        if (selectedFiles > 1) {
+            $('#linkDuplicateStrings').attr('disabled', 'true');
+        } else {
+            $('#linkDuplicateStrings').removeAttr('disabled');
+        }
+    }
+
     function useString(e) {
         showLoading();
         const id = Number($(e).attr('int-id'));
@@ -925,7 +936,8 @@
                 //one text selected
                 $('#sendScreenshotsStrings').removeAttr('disabled');
                 $('#sendScreenshotsStrings').prop('checked', true);
-                $('#linkDuplicateStrings').prop('checked', true);
+                $('#linkDuplicateStrings').removeAttr('disabled');
+                $('#linkDuplicateStrings').prop('checked', false);
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
                 $('#string-max-length').val('');
@@ -936,7 +948,8 @@
                 //multiple texts selected
                 $('#sendScreenshotsStrings').removeAttr('disabled');
                 $('#sendScreenshotsStrings').prop('checked', true);
-                $('#linkDuplicateStrings').prop('checked', true);
+                $('#linkDuplicateStrings').removeAttr('disabled');
+                $('#linkDuplicateStrings').prop('checked', false);
                 let rowsHtml = '';
                 let identifiers = (strings || []).map(s => s.identifier);
                 selectedText.forEach(e => {
