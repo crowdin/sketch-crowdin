@@ -938,6 +938,7 @@
                 $('#sendScreenshotsStrings').prop('checked', true);
                 $('#linkDuplicateStrings').removeAttr('disabled');
                 $('#linkDuplicateStrings').prop('checked', false);
+                onAddStringFileSelect();
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
                 $('#string-max-length').val('');
@@ -950,6 +951,7 @@
                 $('#sendScreenshotsStrings').prop('checked', true);
                 $('#linkDuplicateStrings').removeAttr('disabled');
                 $('#linkDuplicateStrings').prop('checked', false);
+                onAddStringFileSelect();
                 let rowsHtml = '';
                 let identifiers = (strings || []).map(s => s.identifier);
                 selectedText.forEach(e => {
