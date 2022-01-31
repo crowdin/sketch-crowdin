@@ -235,13 +235,17 @@
                                     crowdin-ui-text-details="addStringLabelDetails"></abbr></label>
                             <select class="form-control" id="string-labels" multiple size="8"></select>
                         </div>
-                        <div id="string-send-screenshots-container" class="form-group mt-2">
+                        <div id="string-send-screenshots-container" class="form-group mb-1">
                             <label crowdin-ui-text-label="addStringSendScreenshotsLabel"></label>
                             <input type="checkbox" class="ml-1 mt-1" id="sendScreenshotsStrings" checked>
                         </div>
-                        <div id="string-push-hidden-container" class="form-group mt-2">
+                        <div id="string-push-hidden-container" class="form-group mb-1">
                             <label crowdin-ui-text-label="addStringAddHiddenLabel"></label>
                             <input type="checkbox" class="ml-1 mt-1" id="pushHiddenStrings" checked>
+                        </div>
+                        <div id="string-link-duplicate-container" class="form-group mb-1">
+                            <label crowdin-ui-text-label="addStringLinkDuplicateLabel"></label>
+                            <input type="checkbox" class="ml-1 mt-1" id="linkDuplicateStrings" checked>
                         </div>
                         <div class="button-holder d-flex flex-row">
                             <button crowdin-ui-text-label="addStringSaveButtonLabel" type="button"
@@ -474,7 +478,7 @@
 
 <script>
 
-    const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties', 'xliff'];
+    const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties', 'xliff', 'arb'];
 
     var openedModal;
 
@@ -767,6 +771,17 @@
         }
     }
 
+    $('#string-files').on('changed.bs.select', onAddStringFileSelect);
+ 
+    function onAddStringFileSelect() {
+        const selectedFiles = $('#string-files option:selected').toArray().length;
+        if (selectedFiles > 1) {
+            $('#linkDuplicateStrings').attr('disabled', 'true');
+        } else {
+            $('#linkDuplicateStrings').removeAttr('disabled');
+        }
+    }
+
     function useString(e) {
         showLoading();
         const id = Number($(e).attr('int-id'));
@@ -862,14 +877,15 @@
                 $('#edit-string-form-identifier-new').hide();
                 $('#list-strings').hide();
                 $('#strings-preview').hide();
-                $('#edit-string-form').show();
-                $('#string-length-text').show();
-                $('#edit-string-form-identifier').show();
                 $('#multi-string-form').hide();
                 $('#string-file-container').hide();
                 $('#string-label-container').hide();
                 $('#string-push-hidden-container').hide();
                 $('#string-send-screenshots-container').hide();
+                $('#string-link-duplicate-container').hide();
+                $('#edit-string-form').show();
+                $('#string-length-text').show();
+                $('#edit-string-form-identifier').show();
                 $('#single-string-form').show();
                 $('#edit-string').show();
                 const id = Number(el.next().attr('int-id'));
@@ -901,31 +917,41 @@
             selectedText = e[0];
             $('#list-strings').hide();
             $('#strings-preview').hide();
+            $('#string-push-hidden-container').hide();
             $('#string-file-container').show();
             $('#string-label-container').show();
+            $('#string-link-duplicate-container').show();
             $('#edit-string').show();
             if (selectedText.length === 0) {
+                //no text selected just a new Crowdin string
+                $('#string-link-duplicate-container').hide();
                 $('#sendScreenshotsStrings').attr('disabled', 'true');
                 $('#sendScreenshotsStrings').prop('checked', false);
                 $('#string-text').val('');
                 $('#string-identifier').val('');
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
-                $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
             } else if (selectedText.length === 1) {
+                //one text selected
                 $('#sendScreenshotsStrings').removeAttr('disabled');
                 $('#sendScreenshotsStrings').prop('checked', true);
+                $('#linkDuplicateStrings').removeAttr('disabled');
+                $('#linkDuplicateStrings').prop('checked', false);
+                onAddStringFileSelect();
                 $('#string-text').val(selectedText[0].text);
                 $('#string-identifier').val(generateIdentifier(selectedText[0], (strings || []).map(s => s.identifier)));
                 $('#string-max-length').val('');
                 $('#multi-string-form').hide();
-                $('#string-push-hidden-container').hide();
                 $('#single-string-form').show();
                 $('#string-send-screenshots-container').show();
             } else {
+                //multiple texts selected
                 $('#sendScreenshotsStrings').removeAttr('disabled');
                 $('#sendScreenshotsStrings').prop('checked', true);
+                $('#linkDuplicateStrings').removeAttr('disabled');
+                $('#linkDuplicateStrings').prop('checked', false);
+                onAddStringFileSelect();
                 let rowsHtml = '';
                 let identifiers = (strings || []).map(s => s.identifier);
                 selectedText.forEach(e => {
@@ -1078,6 +1104,7 @@
     function saveString() {
         const identifiers = (strings || []).map(s => s.identifier);
         const sendScreenshots = $('#sendScreenshotsStrings').prop('checked');
+        const linkDuplicated = $('#linkDuplicateStrings').prop('checked');
         if (selectedText.length > 1) {
             const pushHidden = $('#pushHiddenStrings').prop('checked');
             //adding multiple strings
@@ -1124,6 +1151,19 @@
             const promises = files.map(file => {
                 return newStrings.reduce((acc, str) => {
                     return acc.then(() => {
+                        if (linkDuplicated) {
+                            const existingString = strings.find(s => s.text === str.text);
+                            if (existingString) {
+                                addedStrings.push({
+                                    id: existingString.id,
+                                    identifier: existingString.identifier,
+                                    selectedText: str.selectedText,
+                                    text: existingString.text,
+                                    existing: true
+                                });
+                                return;
+                            }
+                        }
                         return window
                             .postMessage('addString', {
                                 text: str.text,
@@ -1144,6 +1184,7 @@
                                     });
                                     addedStrings.push({
                                         id: e[0].data.id,
+                                        existing: false,
                                         ...str
                                     });
                                 }
@@ -1153,12 +1194,13 @@
             });
             return Promise.all(promises)
                 .then(() => {
-                    if (addedStrings.length > 0 && files.length === 1) {
+                    const stringsToProcess = addedStrings.filter(newString => newString.existing || files.length === 1);
+                    if (stringsToProcess.length > 0) {
                         return window
-                            .postMessage('useString', addedStrings)
+                            .postMessage('useString', stringsToProcess)
                             .then(() => {
                                 if (sendScreenshots) {
-                                    return window.postMessage('uploadScreenshots', addedStrings.map(e => e.id));
+                                    return window.postMessage('uploadScreenshots', stringsToProcess.map(e => e.id));
                                 }
                             });
                     }
@@ -1238,6 +1280,29 @@
                 return;
             }
             showLoading();
+            if (linkDuplicated && selectedText.length > 0) {
+                const existingString = strings.find(s => s.text === text);
+                if (existingString) {
+                    return window
+                        .postMessage('useString', [{
+                            id: existingString.id,
+                            text,
+                            identifier: existingString.identifier,
+                            selectedText: selectedText[0]
+                        }])
+                        .then(() => {
+                            if (sendScreenshots) {
+                                return window.postMessage('uploadScreenshots', [existingString.id]);
+                            }
+                        })
+                        .then(() => {
+                            cancelEditString();
+                            return search();
+                        })
+                        .finally(hideLoading);
+
+                }
+            }
             const promises = files.map(file => {
                 const req = {
                     text,
