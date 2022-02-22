@@ -97,8 +97,15 @@ function saveCredentials(creds) {
     if (creds.token !== initValue) {
         settings.setSettingForKey(ACCESS_TOKEN_KEY, creds.token);
     }
-    settings.setSettingForKey(ORGANIZATION, creds.organization);
+    settings.setSettingForKey(ORGANIZATION, extractCrowdinOrganization(creds.organization));
     ui.message(displayTexts.notifications.info.credentialsSaved);
+}
+
+function extractCrowdinOrganization(value) {
+    if (value) {
+        const match = value.match(/([\w\d\-]+)(\.crowdin\.com|$)/);
+        return match ? match[1] : value;
+    }
 }
 
 function saveProject(projectId) {
