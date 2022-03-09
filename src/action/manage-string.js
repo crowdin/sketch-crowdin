@@ -20,7 +20,7 @@ async function addString(req) {
 }
 
 async function editString(string) {
-    const { id, text, context, maxLength } = string;
+    const { id, text, context, maxLength, identifier } = string;
     const callback = async (projectId) => {
         const { sourceStringsApi } = httpUtil.createClient();
         const string = await sourceStringsApi.editString(projectId, id, [
@@ -37,6 +37,11 @@ async function editString(string) {
             {
                 path: '/maxLength',
                 value: maxLength,
+                op: PatchOperation.REPLACE
+            },
+            {
+                path: '/identifier',
+                value: identifier,
                 op: PatchOperation.REPLACE
             }
         ]);

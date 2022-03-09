@@ -180,7 +180,7 @@
                             <div id="edit-string-form-identifier" style="display: none;" class="form-group">
                                 <label><abbr crowdin-ui-text-details="addStringIdentifierDetails"
                                         crowdin-ui-text-label="addStringIdentifierLabel"></abbr></label>
-                                <input class="form-control" placeholder="identifier" type="text" disabled>
+                                <input class="form-control" placeholder="identifier" id="edit-string-identifier" type="text">
                             </div>
                             <div class="form-group">
                                 <label><abbr crowdin-ui-text-label="addStringStringLabel"
@@ -1228,6 +1228,7 @@
         }
         if (openedString) {
             const context = $('#string-context').val();
+            const identifier = $('#edit-string-identifier').val();
             const updateScreenshots = $('#string-update-screenshot').prop('checked');
             if (!context || context.length === '') {
                 $('#invalidContext').text(validationMessages.addStringEmptyContext || 'Invalid');
@@ -1241,6 +1242,7 @@
                     text,
                     context,
                     maxLength,
+                    identifier
                 })
                 .then(e => {
                     if (!e[0].error) {
@@ -1249,6 +1251,7 @@
                                 s.text = text;
                                 s.context = context;
                                 s.maxLength = maxLength;
+                                s.identifier = identifier;
                             }
                             return s;
                         });
