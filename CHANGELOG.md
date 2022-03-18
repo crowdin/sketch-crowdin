@@ -5,6 +5,17 @@ All notable changes to the Crowdin Sketch Plugin extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.2]
+
+### Added
+
+- Ability to edit string identifier ([#103](https://github.com/crowdin/sketch-crowdin/pull/103))
+
+### Updated
+
+- Improved organization name handling ([#102](https://github.com/crowdin/sketch-crowdin/pull/102))
+- Dependencies update ([#101](https://github.com/crowdin/sketch-crowdin/pull/101))
+
 ## [2.6.1]
 
 ### Added
