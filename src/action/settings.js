@@ -19,6 +19,10 @@ function contactUs() {
     NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://crowdin.com/contacts"));
 }
 
+function fileFormats() {
+    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://support.crowdin.com/files-management/#string-editing"));
+}
+
 function getCredentials() {
     let token = settings.settingForKey(ACCESS_TOKEN_KEY);
     if (!!token && token.length > 3) {
@@ -172,5 +176,6 @@ export {
     saveProject,
     saveBranch,
     logout,
-    isArtboardSelected
+    isArtboardSelected,
+    fileFormats
 };

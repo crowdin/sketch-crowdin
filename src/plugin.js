@@ -21,7 +21,8 @@ import {
     getKeyPatternOptions,
     saveKeyPatternOption,
     logout,
-    isArtboardSelected
+    isArtboardSelected,
+    fileFormats
 } from './action/settings';
 
 const identifier = 'crowdin';
@@ -79,6 +80,7 @@ export default function start() {
     browserWindow.webContents.on('stringsPreview', stringsPreview);
     browserWindow.webContents.on('getUsedStrings', getUsedStrings);
     browserWindow.webContents.on('uploadScreenshots', uploadScreenshots);
+    browserWindow.webContents.on('fileFormats', fileFormats);
     //string management
     browserWindow.webContents.on('getSelectedText', getSelectedText);
     browserWindow.webContents.on('addString', addString);

@@ -579,6 +579,10 @@
         window.postMessage('contactUs');
     }
 
+    function textFormatsClick() {
+        window.postMessage('fileFormats');
+    }
+
     function openTranslationsTab() {
         if (!languages) {
             showLoading();
@@ -1123,7 +1127,9 @@
             const files = $('#string-files option:selected').toArray();
             const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             if (files.length === 0) {
-                $('#invalidFile').text(`${validationMessages.addStringEmptyFile} ${editableFileTypes.join(",")}`  || 'Invalid');
+                const linToFormats = `<a crowdin-ui-text-label="contactUsTab" class="link small" href="#" onclick="textFormatsClick()">text format</a>`
+                $('#invalidFile').text(`${validationMessages.addStringEmptyFile} ` || 'Invalid ');
+                $('#invalidFile').append(linToFormats)
                 return;
             }
             const newStrings = [];
@@ -1290,7 +1296,9 @@
                 return;
             }
             if (files.length === 0) {
-                $('#invalidFile').text(`${validationMessages.addStringEmptyFile} ${editableFileTypes.join(", ")}` || 'Invalid');
+                const linToFormats = `<a crowdin-ui-text-label="contactUsTab" class="link small" href="#" onclick="textFormatsClick()">files formats</a>`
+                $('#invalidFile').text(`${validationMessages.addStringEmptyFile} ` || 'Invalid ');
+                $('#invalidFile').append(linToFormats)
                 return;
             }
             showLoading();
