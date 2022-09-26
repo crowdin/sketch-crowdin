@@ -478,10 +478,21 @@
 
 <script>
 
-    const editableFileTypes = ['csv', 'resx', 'json', 'android', 'macosx', 'strings', 'properties', 'xliff', 'arb'];
+    const editableFileTypes = [  
+        "csv",
+        "resx",
+        "json",
+        "android",
+        "macosx",
+        "strings",
+        "properties",
+        "xliff",
+        "arb",
+        "gettext",
+        "yaml"
+    ];
 
     var openedModal;
-
     //initialization of the settings modal
     showLoading();
     getCredentials()
@@ -1112,7 +1123,7 @@
             const files = $('#string-files option:selected').toArray();
             const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             if (files.length === 0) {
-                $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
+                $('#invalidFile').text(`${validationMessages.addStringEmptyFile} ${editableFileTypes.join(",")}`  || 'Invalid');
                 return;
             }
             const newStrings = [];
@@ -1279,7 +1290,7 @@
                 return;
             }
             if (files.length === 0) {
-                $('#invalidFile').text(validationMessages.addStringEmptyFile || 'Invalid');
+                $('#invalidFile').text(`${validationMessages.addStringEmptyFile} ${editableFileTypes.join(", ")}` || 'Invalid');
                 return;
             }
             showLoading();
