@@ -1290,8 +1290,7 @@
                 return;
             }
             if (files.length === 0) {
-                const linToFormats = `<a crowdin-ui-text-label="contactUsTab" class="link small" href="#" onclick="textFormatsClick()">files formats</a>`
-                $('#invalidFile').text(`${validationMessages.addStringEmptyFile} ` || 'Invalid ');
+                const linToFormats = `<div>${validationMessages.addStringEmptyFile} <a crowdin-ui-text-label="contactUsTab" href="#" onclick="textFormatsClick()">files formats</a> only`
                 $('#invalidFile').append(linToFormats)
                 return;
             }
@@ -1493,7 +1492,7 @@
                     if(!supportedFiles.length) {
                         $('#string-files').replaceWith(`
                             <p>
-                                ${validationMessages.addStringEmptyFile} <a crowdin-ui-text-label="contactUsTab" class="link small" href="#" onclick="textFormatsClick()">text format</a>
+                                ${validationMessages.addStringEmptyFile} <a crowdin-ui-text-label="contactUsTab" href="#" onclick="textFormatsClick()">text format</a> only
                             </p>
                         `)
                         return

@@ -148,7 +148,7 @@
             "addStringEmptyContext": "Fill in the context for the source string",
             "addStringNotUniqueIdentifier": "Identifier should be unique",
             "addStringInvalidMaxLength": "Max length should be zero or positive integer",
-            "addStringEmptyFile": "Not found files with correct extension",
+            "addStringEmptyFile": "Source strings adding is available for",
             "artboardNotSelected": "Please select at least one artboard",
             "editStringNoLinks": "This string is not linked to any text in the design."
         },
