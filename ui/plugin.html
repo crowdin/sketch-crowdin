@@ -1289,11 +1289,6 @@
                 $('#invalidIdentifier').text(validationMessages.addStringNotUniqueIdentifier || 'Invalid');
                 return;
             }
-            if (files.length === 0) {
-                const linToFormats = `<div>${validationMessages.addStringEmptyFile} <a crowdin-ui-text-label="contactUsTab" href="#" onclick="textFormatsClick()">files formats</a> only`
-                $('#invalidFile').append(linToFormats)
-                return;
-            }
             showLoading();
             if (linkDuplicated && selectedText.length > 0) {
                 const existingString = strings.find(s => s.text === text);
