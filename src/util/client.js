@@ -12,7 +12,7 @@ async function getProjects() {
         }
         ui.message(displayTexts.notifications.info.loadingProjects);
         const { projectsGroupsApi } = createClient();
-        const projects = await projectsGroupsApi.withFetchAll().listProjects(undefined, true);
+        const projects = await projectsGroupsApi.withFetchAll().listProjects(null, 1);
         if (projects.data.length === 0) {
             throw displayTexts.notifications.warning.noProjects;
         }
