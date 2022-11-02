@@ -9,10 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
-- Get list of projects only with manager access (#109)
-- Add text message instead of empty files select (#111)
-- Make strings tab first (#107)
-- Dependencies update (#105, #106, #108, #110)
+- Get list of projects only with manager access ([#109](https://github.com/crowdin/sketch-crowdin/pull/109))
+- Add text message instead of empty files select ([#111](https://github.com/crowdin/sketch-crowdin/pull/111))
+- Make strings tab first ([#107](https://github.com/crowdin/sketch-crowdin/pull/107))
+- Dependencies update ([#105](https://github.com/crowdin/sketch-crowdin/pull/105), [#106](https://github.com/crowdin/sketch-crowdin/pull/106), [#108](https://github.com/crowdin/sketch-crowdin/pull/108), [#110](https://github.com/crowdin/sketch-crowdin/pull/110))
 
 ## [2.6.2]
 
