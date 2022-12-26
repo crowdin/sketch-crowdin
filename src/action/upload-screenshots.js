@@ -140,7 +140,7 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
     const screenshotNameWithExtension = `${screenshotName}.png`;
     const storageRecord = await uploadStorageApi.addStorage(screenshotNameWithExtension, b.slice(b.byteOffset, b.byteOffset + b.byteLength));
 
-    let screenshot = screenshots.data.find(sc => sc.data.name === screenshotName);
+    let screenshot = screenshots.data.find(sc => sc.data.name === screenshotNameWithExtension);
 
     if (!screenshot) {
         screenshot = await screenshotsApi.addScreenshot(projectId, {
