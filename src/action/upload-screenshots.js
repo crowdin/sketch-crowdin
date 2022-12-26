@@ -137,19 +137,20 @@ async function sendTagsGroup(tagsGroup, page, projectId, screenshots) {
     ui.message(displayTexts.notifications.info.screenshotUploadingToCrowdin.replace('%name%', truncateLongText(artboard.name)));
     const { screenshotsApi, uploadStorageApi } = httpUtil.createClient();
     const screenshotName = __buildScreenshotName(artboard.id, page.id);
-    const storageRecord = await uploadStorageApi.addStorage(`${screenshotName}.png`, b.slice(b.byteOffset, b.byteOffset + b.byteLength));
+    const screenshotNameWithExtension = `${screenshotName}.png`;
+    const storageRecord = await uploadStorageApi.addStorage(screenshotNameWithExtension, b.slice(b.byteOffset, b.byteOffset + b.byteLength));
 
     let screenshot = screenshots.data.find(sc => sc.data.name === screenshotName);
 
     if (!screenshot) {
         screenshot = await screenshotsApi.addScreenshot(projectId, {
             storageId: storageRecord.data.id,
-            name: screenshotName
+            name: screenshotNameWithExtension
         });
     } else {
         screenshot = await screenshotsApi.updateScreenshot(projectId, screenshot.data.id, {
             storageId: storageRecord.data.id,
-            name: screenshotName
+            name: screenshotNameWithExtension
         });
     }
     const screenshotId = screenshot.data.id;
