@@ -22,7 +22,10 @@ import {
     saveKeyPatternOption,
     logout,
     isArtboardSelected,
-    fileFormats
+    fileFormats,
+    saveCustomKeyPattern,
+    getSearchHelperList,
+    getCustomKeyPattern
 } from './action/settings';
 
 const identifier = 'crowdin';
@@ -63,6 +66,9 @@ export default function start() {
     browserWindow.webContents.on('saveContentSegmentation', saveContentSegmentation);
     browserWindow.webContents.on('getKeyPatternOptions', getKeyPatternOptions);
     browserWindow.webContents.on('saveKeyPatternOption', saveKeyPatternOption);
+    browserWindow.webContents.on('saveCustomKeyPatternOption', saveCustomKeyPattern);
+    browserWindow.webContents.on('getSearchHelperList', getSearchHelperList);
+    browserWindow.webContents.on('getCustomKeyPattern', getCustomKeyPattern);
     browserWindow.webContents.on('logout', logout);
 
     //data

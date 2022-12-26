@@ -32,6 +32,7 @@
             "overrideTranslationsSaved": "Override translations flag updated",
             "contentSegmentationSaved": "Content segmentation flag updated",
             "stringsKeyNamingSaved": "Key naming pattern option updated",
+            "stringsCustomKeyNamingSaved": "Key naming pattern option updated",
             "credentialsSaved": "Credentials saved",
             "stringsUploadedToCrowdin": "Strings were successfully pushed to Crowdin. You can now either pre-translate them via Machine Translation engines or invite translators to your Crowdin project",
             "creatingNewDirectory": "Creating new directory",
@@ -129,7 +130,8 @@
             "pseudoLocalizationPrefixSuffixLabel": "Prefix/Suffix",
             "pseudoLocalizationPrefixSuffixText": "Allows you to add special characters at the beginning and end of each string.",
             "pseudoLocalizationCharacterTransformationLabel": "Character Transformation",
-            "pseudoLocalizationCharacterTransformationText": "Are foreign language character sets displayed correctly in your application? Character Transformation replaces English characters with easily identifiable accented versions, random Arabic symbols, or Chinese ideographs to make it obvious if there are some hard-coded strings in your application. This ensures that your application is ready to be localized into other languages (including right-to-left and left-to-right ones)."
+            "pseudoLocalizationCharacterTransformationText": "Are foreign language character sets displayed correctly in your application? Character Transformation replaces English characters with easily identifiable accented versions, random Arabic symbols, or Chinese ideographs to make it obvious if there are some hard-coded strings in your application. This ensures that your application is ready to be localized into other languages (including right-to-left and left-to-right ones).",
+            "customKeyNamingPattern": "Custom Key Naming Pattern"
         },
         "details": {
             "translationsDetails": "Generate multi-language creative assets like banners or social media graphics. Send designs for translation and upload translated copies back.",
