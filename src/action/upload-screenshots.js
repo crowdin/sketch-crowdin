@@ -3,13 +3,13 @@ import ui from 'sketch/ui';
 import settings from 'sketch/settings';
 import * as httpUtil from '../util/http';
 import * as localStorage from '../util/local-storage';
-import { getTextElementsInArtboard } from '../util/dom';
+import { getTextElementsInArtboard, getSelectedArtboards } from '../util/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
 import { fetchStrings } from '../util/client';
 import { default as displayTexts } from '../../assets/texts.json';
 import { truncateLongText } from '../util/string';
 
-async function uploadScreenshots(stringIds) {
+async function uploadScreenshots(stringIds, avoidSelectedArtboards) {
     try {
         const selectedDocument = dom.getSelectedDocument();
         if (!selectedDocument) {
@@ -26,6 +26,12 @@ async function uploadScreenshots(stringIds) {
         }
         if (!projectId) {
             throw displayTexts.notifications.warning.selectProject;
+        }
+
+        const selectedArtboards = getSelectedArtboards(selectedPage)
+
+        if(!avoidSelectedArtboards && selectedArtboards.length === 0) {
+            throw displayTexts.notifications.warning.pleaseSelectArtboards; 
         }
 
         let tags = localStorage.getTags(selectedDocument);
@@ -46,18 +52,22 @@ async function uploadScreenshots(stringIds) {
 
         tags = tags.filter(t => stringsIds.includes(t.stringId));
 
-        const artboardsTexts = artboards.map(e => {
+        const artboardsTexts = avoidSelectedArtboards ? artboards.map(e => {
             return {
                 artboard: e,
                 texts: getTextElementsInArtboard(e)
             }
-        });
-
+        }): selectedArtboards.map(e => {
+            return {
+                artboard: e,
+                texts: getTextElementsInArtboard(e)
+            }
+        })
         const tempTags = [];
         const workingArtboards = !!stringIds
             ? tags.filter(t => stringIds.includes(t.stringId)).map(t => t.artboardId)
             : [];
-        tags = tags.filter(e => {
+            tags = tags.filter(e => {
             if (e.pageId !== selectedPage.id) {
                 return !!selectedDocument.pages.find(p => p.id === e.pageId);
             }
@@ -79,6 +89,10 @@ async function uploadScreenshots(stringIds) {
             }
             return false;
         });
+
+        if (!tempTags.length) {
+            throw displayTexts.notifications.warning.noLinkedStrings; 
+        }
 
         const groupedTags = tempTags.reduce((accumulator, tag) => {
             if (!accumulator[`artboard_${tag.artboardId}`]) {
