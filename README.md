@@ -1,4 +1,4 @@
-[<p align='center'><img src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' data-canonical-src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' width='200' height='200' align='center'/></p>](https://crowdin.com)
+[<p align='center'><img src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' data-canonical-src='https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png' width='150' height='150' align='center'/></p>](https://crowdin.com)
 
 # Crowdin plugin for Sketch
 
@@ -11,7 +11,7 @@
 This plugin lets you connect your [Sketch](https://www.sketch.com/) and [Crowdin](https://crowdin.com/) projects together.
 Localize the UI and review your design within different languages before programming starts.
 Send the whole page or separate artboards for translation to Crowdin in a click and fetch translations back to Sketch. Preview and customize the translated copy directly in Sketch. 
-Also it gives ability to use source strings from Crowdin in your Sketch project and upload artborad screenshots. 
+Also, it gives ability to use source strings from Crowdin in your Sketch project and upload artborad screenshots.
 
 [<p align='center'><img src='https://github.com/crowdin/sketch-crowdin/blob/master/images/sketch.gif' width='700'/></p>](https://blog.crowdin.com/2019/12/02/crowdin-for-sketch-plugin-design-for-a-global-audience/)
 
@@ -40,11 +40,11 @@ We are happy to accept contributions to the Crowdin Sketch plugin. To contribute
 1. Fork the repository on GitHub.
 2. Decide which code you want to submit. Commit your changes and push to the new branch.
 3. Ensure that your code adheres to standard conventions, as used in the rest of the library.
-4. Submit a pull request with your patch on Github.
+4. Submit a pull request with your patch on GitHub.
 
 ### Seeking Assistance
 
-If you find any problems or would like to suggest a feature, please feel free to file an issue on Github at [Issues Page](https://github.com/crowdin/sketch-crowdin/issues).
+If you find any problems or would like to suggest a feature, please feel free to file an issue on GitHub at [Issues Page](https://github.com/crowdin/sketch-crowdin/issues).
 
 Need help working with Crowdin Sketch plugin or have any questions? [Contact](https://crowdin.com/contacts) Customer Success Service.
 
