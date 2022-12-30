@@ -530,8 +530,8 @@ p {
     color: var(--labelSecondary) !important;
 }
 
-.custom-naming-helper-list {
-    background-color: #222222;
+#custom-naming-helper-list {
+    background-color: var(--buttonSecondaryBGColor);
     padding: 16px 8px;
     border-radius: 2px;
     margin: 0;
@@ -539,18 +539,12 @@ p {
     overflow-x: overlay;
     overflow-y: auto;
     width: 100%;
+    position: absolute;
     p {
         cursor: pointer;
         margin-bottom: 8px;
-        &:hover {
-            background-color: var(--opaqueBackgroundColor);
-            color: var(--primary);
-        }
+        color: var(--labelPrimary);
     }
-}
-
-#custom-naming-helper-list {
-    background-color: #222222;
 }
 
 .help-text {

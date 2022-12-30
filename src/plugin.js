@@ -33,7 +33,7 @@ const identifier = 'crowdin';
 export default function start() {
 
     //set to true for local development
-    const devTools = false;
+    const devTools = true;
 
     const options = {
         identifier,

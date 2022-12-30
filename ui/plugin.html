@@ -102,12 +102,12 @@
                                 <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
                                 </p>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="position: relative">
                                 <label crowdin-ui-text-label="customKeyNamingPattern"></label>
                                 <input type="text" class="form-control" id="customKeyNamingPattern"
-                                oninput="saveCustomKeyNaming()" disabled placeholder="e.g. [%Artboard].[%group].[%element_name]">
-                                    <div id="custom-naming-helper-list" class="custom-naming-helper-list">
-                                    </div>
+                                    onchange="saveCustomKeyNaming()" oninput="handleHelperList()" disabled placeholder="e.g. [%Artboard].[%group].[%element_name]">
+                                <div id="custom-naming-helper-list" class="custom-naming-helper-list">
+                                </div>
                                 <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
                                 </p>
                             </div>
@@ -500,6 +500,8 @@
         "yaml"
     ];
 
+    const CUSTOM_KEY_NAMING_PATTERN  = "Custom key naming pattern";
+
     let openedModal;
     //initialization of the settings modal
     showLoading();
@@ -580,8 +582,13 @@
             case 'settings':
                 cancelEditString();
                 cancelPseudoLocalization();
+                openSettingsTab();
                 break;
         }
+    }
+
+    function openSettingsTab() {
+        $('#custom-naming-helper-list').hide()
     }
 
     function contactUsClick() {
@@ -682,24 +689,28 @@
 
     function saveKeyNamingOption() {
         const text = $('#stringsKeyNaming option:selected').text();
-        $('#customKeyNamingPattern').attr('disabled', text != "Custom key naming pattern");
+        $('#customKeyNamingPattern').attr('disabled', text != CUSTOM_KEY_NAMING_PATTERN);
         const option = Number($('#stringsKeyNaming option:selected').val());
         return window.postMessage('saveKeyPatternOption', option);
     }
 
     function saveCustomKeyNaming() {
         const text = $('#customKeyNamingPattern').val();
-        window.postMessage("getSearchHelperList", text).then(renderCustomNamingHelpers)
         return window.postMessage('saveCustomKeyPatternOption', text);
+    }
+
+    function handleHelperList() {
+        const text = $('#customKeyNamingPattern').val();
+        window.postMessage("getSearchHelperList", text).then(renderCustomNamingHelpers);
     }
 
     function onClikToHelperText(el) {
         const customKeyInputValue = $('#customKeyNamingPattern').val();
         const lastIndex = customKeyInputValue.lastIndexOf("[%");
-        const substring = customKeyInputValue.substring(0, lastIndex + 2) + `${$(el).text()}]`
-        $('#customKeyNamingPattern').val(substring)
-        window.postMessage('saveCustomKeyPatternOption', substring)
-        $('#custom-naming-helper-list').hide()
+        const substring = customKeyInputValue.substring(0, lastIndex + 2) + `${$(el).text()}]`;
+        $('#customKeyNamingPattern').val(substring);
+        window.postMessage('saveCustomKeyPatternOption', substring);
+        $('#custom-naming-helper-list').hide();
 
     }
 
@@ -1057,7 +1068,7 @@
         const artboardNameUpperCase = capitalizeFirstLetter(artboardName);
         const groupNameUpperCase = capitalizeFirstLetter(groupName);
         const elementNameUpperCase = capitalizeFirstLetter(elementName);
-        const identifier = smartReplace(pattern,customKeyPattern, {
+        const identifier = smartReplace(pattern, customKeyPattern, {
             'Artboard': artboardNameUpperCase,
             'artboard': artboardName,
             'Group': groupNameUpperCase,
@@ -1081,11 +1092,11 @@
     }
 
     function smartReplace(pattern,customPattern, obj) {
-        if (pattern === 'Custom key naming pattern') {
+        if (pattern === CUSTOM_KEY_NAMING_PATTERN) {
             const patterns = Object.keys(obj);
             patterns.forEach((el) => {
                 if (customPattern.indexOf(`[%${el}]`) !== -1) {
-                customPattern = customPattern.replace(`[%${el}]`, obj[el]);
+                    customPattern = customPattern.replace(`[%${el}]`, obj[el]);
                 }
             });
             return customPattern;
@@ -1455,7 +1466,7 @@
                 const options = info[0];
                 const html = options.map(o => {
                     if (o.selected) {
-                        if(o.name === 'Custom key naming pattern'){
+                        if(o.name === CUSTOM_KEY_NAMING_PATTERN){
                             $('#customKeyNamingPattern').attr('disabled', false);
                         }
                         return `<option value="${o.id}" selected>${o.name}</option>`;
@@ -1470,7 +1481,6 @@
     function getCustomKeyPatternValue() {
         return window.postMessage('getCustomKeyPattern')
             .then(value => {
-                console.log("value", value)
                 $('#customKeyNamingPattern').val(value)
             });
     }
