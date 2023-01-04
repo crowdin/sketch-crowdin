@@ -67,7 +67,7 @@ async function uploadScreenshots(stringIds, avoidSelectedArtboards) {
         const workingArtboards = !!stringIds
             ? tags.filter(t => stringIds.includes(t.stringId)).map(t => t.artboardId)
             : [];
-            tags = tags.filter(e => {
+        tags = tags.filter(e => {
             if (e.pageId !== selectedPage.id) {
                 return !!selectedDocument.pages.find(p => p.id === e.pageId);
             }
