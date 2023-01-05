@@ -1091,12 +1091,12 @@
         return uniqueIdentifier;
     }
 
-    function smartReplace(pattern,customPattern, obj) {
+    function smartReplace(pattern, customPattern, obj) {
         if (pattern === CUSTOM_KEY_NAMING_PATTERN) {
             const patterns = Object.keys(obj);
             patterns.forEach((el) => {
                 if (customPattern.indexOf(`[%${el}]`) !== -1) {
-                    customPattern = customPattern.replace(`[%${el}]`, obj[el]);
+                    customPattern = customPattern.replaceAll(`[%${el}]`, obj[el]);
                 }
             });
             return customPattern;
