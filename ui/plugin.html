@@ -879,7 +879,7 @@
 
     function uploadScreenshots() {
         showLoading();
-        return window.postMessage('uploadScreenshots').finally(hideLoading);
+        return window.postMessage('uploadScreenshots', undefined, false).finally(hideLoading);
     }
 
     function stringsPreview(wholePage) {
@@ -1274,7 +1274,7 @@
                             .postMessage('useString', stringsToProcess)
                             .then(() => {
                                 if (sendScreenshots) {
-                                    return window.postMessage('uploadScreenshots', stringsToProcess.map(e => e.id));
+                                    return window.postMessage('uploadScreenshots', stringsToProcess.map(e => e.id), true);
                                 }
                             });
                     }
@@ -1330,7 +1330,7 @@
                             return s;
                         });
                         const promise = updateScreenshots
-                            ? window.postMessage('uploadScreenshots', [openedString])
+                            ? window.postMessage('uploadScreenshots', [openedString], true)
                             : Promise.resolve();
                         return promise.finally(() => {
                             cancelEditString();
@@ -1365,7 +1365,7 @@
                         }])
                         .then(() => {
                             if (sendScreenshots) {
-                                return window.postMessage('uploadScreenshots', [existingString.id]);
+                                return window.postMessage('uploadScreenshots', [existingString.id], true);
                             }
                         })
                         .then(() => {
@@ -1414,7 +1414,7 @@
                             }])
                             .then(() => {
                                 if (sendScreenshots) {
-                                    return window.postMessage('uploadScreenshots', [id]);
+                                    return window.postMessage('uploadScreenshots', [id], true);
                                 }
                             });
                     }
