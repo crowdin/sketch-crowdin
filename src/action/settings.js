@@ -1,6 +1,7 @@
 import ui from 'sketch/ui';
 import dom from 'sketch/dom';
 import settings from 'sketch/settings';
+import { capitalize, snakeCase } from 'lodash';
 import {
     ACCESS_TOKEN_KEY,
     PROJECT_ID,
@@ -10,7 +11,8 @@ import {
     DEFAULT_STRINGS_KEY_NAMING_OPTION,
     KEY_NAMING_PATTERN,
     STRINGS_KEY_NAMING_OPTIONS,
-    BRANCH_ID
+    BRANCH_ID,
+    CUSTOM_KEY_NAMING_PATTERN
 } from '../constants';
 import { default as displayTexts } from '../../assets/texts.json';
 import * as domUtil from '../util/dom';
@@ -91,6 +93,39 @@ function saveKeyPatternOption(value) {
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), KEY_NAMING_PATTERN, value);
     ui.message(displayTexts.notifications.info.stringsKeyNamingSaved);
 }
+
+function saveCustomKeyPattern(value) {
+    settings.setSettingForKey(CUSTOM_KEY_NAMING_PATTERN, value);
+    ui.message(displayTexts.notifications.info.stringsCustomKeyNamingSaved);
+}
+
+function getCustomKeyPattern() {
+    const customKey = settings.settingForKey(CUSTOM_KEY_NAMING_PATTERN);
+    return customKey
+}
+
+const keyNaming = {
+    artboard: ({ page }) => `${snakeCase(page)}`,
+    Artboard: ({ page }) => `${capitalize(snakeCase(page))}`,
+    group: ({ frame }) => `${snakeCase(frame)}`,
+    Group: ({ frame }) => `${capitalize(snakeCase(frame))}`,
+    element_name: ({ element }) => `${snakeCase(element)}`,
+    Element_name: ({ element }) => `${capitalize(snakeCase(element))}`,
+  };
+
+const getSearchHelperList = (value) => {
+    let substring = null;
+    const helpers = [];
+    Object.keys(keyNaming).forEach((el) => {
+      const lastIndex = value.lastIndexOf("[%");
+      substring = lastIndex === -1 ? null : value.substring(lastIndex + 2, value.length);
+      if (el.indexOf(substring) !== -1) {
+        helpers.push(el);
+      }
+    });
+  
+    return helpers;
+  };
 
 function saveCredentials(creds) {
     const token = settings.settingForKey(ACCESS_TOKEN_KEY);
@@ -177,5 +212,8 @@ export {
     saveBranch,
     logout,
     isArtboardSelected,
-    fileFormats
+    fileFormats,
+    saveCustomKeyPattern,
+    getSearchHelperList,
+    getCustomKeyPattern
 };

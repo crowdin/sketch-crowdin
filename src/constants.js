@@ -7,6 +7,7 @@ export const BRANCH_ID = `${KEY_PREFIX}-branch-id`;
 export const OVERRIDE_TRANSLATIONS = `${KEY_PREFIX}-override-translations`;
 export const CONTENT_SEGMENTATION = `${KEY_PREFIX}-content-segmentation`;
 export const KEY_NAMING_PATTERN = `${KEY_PREFIX}-key-naming`;
+export const CUSTOM_KEY_NAMING_PATTERN = `${KEY_PREFIX}-custom-key-naming`;
 
 export const SYMBOL_TYPE = 'symbol-override';
 export const TEXT_TYPE = 'text';
@@ -30,7 +31,8 @@ export const STRINGS_KEY_NAMING_OPTIONS = [
     { id: 14, name: 'artboard::element_name' },
     { id: 15, name: 'artboard__element_name' },
     { id: 16, name: 'element_name' },
-    { id: 17, name: 'Element text' }
+    { id: 17, name: 'Element text' },
+    { id: 18, name: 'Custom key naming pattern' }
 ];
 
 export const DEFAULT_STRINGS_KEY_NAMING_OPTION = 16;

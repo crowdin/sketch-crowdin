@@ -102,6 +102,15 @@
                                 <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
                                 </p>
                             </div>
+                            <div class="form-group" style="position: relative">
+                                <label crowdin-ui-text-label="customKeyNamingPattern"></label>
+                                <input type="text" class="form-control" id="customKeyNamingPattern"
+                                    onchange="saveCustomKeyNaming()" oninput="handleHelperList()" disabled placeholder="e.g. [%Artboard].[%group].[%element_name]">
+                                <div id="custom-naming-helper-list" class="custom-naming-helper-list">
+                                </div>
+                                <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
+                                </p>
+                            </div>
                             <div class="form-group">
                                 <div class="inline-select d-flex flex-row">
                                     <label crowdin-ui-text-label="selectBranchLabel"></label>
@@ -477,7 +486,6 @@
 </body>
 
 <script>
-
     const editableFileTypes = [  
         "csv",
         "resx",
@@ -492,13 +500,16 @@
         "yaml"
     ];
 
-    var openedModal;
+    const CUSTOM_KEY_NAMING_PATTERN  = "Custom key naming pattern";
+
+    let openedModal;
     //initialization of the settings modal
     showLoading();
     getCredentials()
         .then(getOverrideTranslations)
         .then(getContentSegmentation)
         .then(getKeyNamingOptions)
+        .then(getCustomKeyPatternValue)
         .then(getProjects)
         .then(getBranches)
         .finally(() => {
@@ -525,18 +536,18 @@
         });
     }, 100);
 
-    var validationMessages = {};
-    var allLanguagesOption;
-    var noBranchOption;
+    let validationMessages = {};
+    let allLanguagesOption;
+    let noBranchOption;
 
-    var projectsInfo;
-    var sourceLanguage;
-    var languages;
-    var strings;
-    var files;
-    var labels;
-    var openedString;
-    var selectedText = [];
+    let projectsInfo;
+    let sourceLanguage;
+    let languages;
+    let strings;
+    let files;
+    let labels;
+    let openedString;
+    let selectedText = [];
 
     //basic functions
 
@@ -571,8 +582,13 @@
             case 'settings':
                 cancelEditString();
                 cancelPseudoLocalization();
+                openSettingsTab();
                 break;
         }
+    }
+
+    function openSettingsTab() {
+        $('#custom-naming-helper-list').hide()
     }
 
     function contactUsClick() {
@@ -672,8 +688,45 @@
     }
 
     function saveKeyNamingOption() {
+        const text = $('#stringsKeyNaming option:selected').text();
+        $('#customKeyNamingPattern').attr('disabled', text != CUSTOM_KEY_NAMING_PATTERN);
         const option = Number($('#stringsKeyNaming option:selected').val());
         return window.postMessage('saveKeyPatternOption', option);
+    }
+
+    function saveCustomKeyNaming() {
+        const text = $('#customKeyNamingPattern').val();
+        return window.postMessage('saveCustomKeyPatternOption', text);
+    }
+
+    function handleHelperList() {
+        const text = $('#customKeyNamingPattern').val();
+        window.postMessage("getSearchHelperList", text).then(renderCustomNamingHelpers);
+    }
+
+    function onClikToHelperText(el) {
+        const customKeyInputValue = $('#customKeyNamingPattern').val();
+        const lastIndex = customKeyInputValue.lastIndexOf("[%");
+        const substring = customKeyInputValue.substring(0, lastIndex + 2) + `${$(el).text()}]`;
+        $('#customKeyNamingPattern').val(substring);
+        window.postMessage('saveCustomKeyPatternOption', substring);
+        $('#custom-naming-helper-list').hide();
+
+    }
+
+    function renderCustomNamingHelpers (options) {
+        if(!options[0].length) {
+            $('#custom-naming-helper-list').hide()
+            return
+        }
+        $("#custom-naming-helper-list").empty()
+        $('#custom-naming-helper-list').show()
+        options[0].forEach(el => {
+            if(el) {
+                const listItem = `<p onclick="onClikToHelperText(this)">${el}<p>`
+                $('#custom-naming-helper-list').append(listItem);
+            }
+        })
     }
 
     //translation
@@ -1008,13 +1061,14 @@
 
     function generateIdentifier(selectedTextElement, identifiers) {
         const pattern = $('#stringsKeyNaming option:selected').text();
+        const customKeyPattern = $('#customKeyNamingPattern').val();
         const artboardName = selectedTextElement.artboard.toLowerCase();
         const groupName = selectedTextElement.group.toLowerCase();
         const elementName = selectedTextElement.elementName.toLowerCase();
         const artboardNameUpperCase = capitalizeFirstLetter(artboardName);
         const groupNameUpperCase = capitalizeFirstLetter(groupName);
         const elementNameUpperCase = capitalizeFirstLetter(elementName);
-        const identifier = smartReplace(pattern, {
+        const identifier = smartReplace(pattern, customKeyPattern, {
             'Artboard': artboardNameUpperCase,
             'artboard': artboardName,
             'Group': groupNameUpperCase,
@@ -1037,7 +1091,16 @@
         return uniqueIdentifier;
     }
 
-    function smartReplace(pattern, obj) {
+    function smartReplace(pattern, customPattern, obj) {
+        if (pattern === CUSTOM_KEY_NAMING_PATTERN) {
+            const patterns = Object.keys(obj);
+            patterns.forEach((el) => {
+                if (customPattern.indexOf(`[%${el}]`) !== -1) {
+                    customPattern = customPattern.replaceAll(`[%${el}]`, obj[el]);
+                }
+            });
+            return customPattern;
+        }
         const replacing = {};
         for (let x in obj) {
             if (pattern.indexOf(x) > -1) {
@@ -1403,12 +1466,22 @@
                 const options = info[0];
                 const html = options.map(o => {
                     if (o.selected) {
+                        if(o.name === CUSTOM_KEY_NAMING_PATTERN){
+                            $('#customKeyNamingPattern').attr('disabled', false);
+                        }
                         return `<option value="${o.id}" selected>${o.name}</option>`;
                     } else {
                         return `<option value="${o.id}">${o.name}</option>`;
                     }
                 }).join('');
                 $('#stringsKeyNaming').find('option').remove().end().append(html);
+            });
+    }
+
+    function getCustomKeyPatternValue() {
+        return window.postMessage('getCustomKeyPattern')
+            .then(value => {
+                $('#customKeyNamingPattern').val(value)
             });
     }
 
@@ -1550,8 +1623,8 @@
     function getBranches() {
         return window.postMessage('getBranches')
             .then(res => {
-                var resp = res[0];
-                var selectedBranch = resp.selectedBranchId;
+                let resp = res[0];
+                let selectedBranch = resp.selectedBranchId;
                 let options = `<option value="-1" ${selectedBranch < 0 ? 'selected' : ''}>${noBranchOption || ''}</option>`;
                 options += resp.branches
                     .map(br => {
@@ -1565,7 +1638,7 @@
             });
     }
 
-    var searchTimer;
+    let searchTimer;
     function debounceSearch() {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(search, 700);

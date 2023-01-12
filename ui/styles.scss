@@ -530,6 +530,23 @@ p {
     color: var(--labelSecondary) !important;
 }
 
+#custom-naming-helper-list {
+    background-color: var(--buttonSecondaryBGColor);
+    padding: 16px 8px;
+    border-radius: 2px;
+    margin: 0;
+    z-index: 1000;
+    overflow-x: overlay;
+    overflow-y: auto;
+    width: 100%;
+    position: absolute;
+    p {
+        cursor: pointer;
+        margin-bottom: 8px;
+        color: var(--labelPrimary);
+    }
+}
+
 .help-text {
     font-size: 0.75rem;
     line-height: 1.25;
