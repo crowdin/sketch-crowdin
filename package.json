@@ -51,7 +51,7 @@
     "jquery": "3.5.1",
     "popper.js": "^1.14.3",
     "sketch-module-web-view": "^3.4.1",
-    "jszip": "^3.7.1",
+    "jszip": "^3.8.0",
     "@skpm/buffer": "0.1.4"
   },
   "devDependencies": {
