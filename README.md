@@ -2,7 +2,7 @@
 
 # Crowdin plugin for Sketch
 
-[![Build Status](https://dev.azure.com/crowdin/sketch-plugin/_apis/build/status/Build?branchName=master)](https://dev.azure.com/crowdin/sketch-plugin/_build?definitionId=25&branchName=master)
+[![Build](https://github.com/crowdin/sketch-crowdin/actions/workflows/build.yml/badge.svg)](https://github.com/crowdin/sketch-crowdin/actions/workflows/build.yml)
 [![GitHub All Releases](https://img.shields.io/github/downloads/crowdin/sketch-crowdin/total?cacheSeconds=1800)](https://github.com/crowdin/sketch-crowdin/releases)
 [![GitHub Releases](https://img.shields.io/github/downloads/crowdin/sketch-crowdin/latest/total?cacheSeconds=1800)](https://github.com/crowdin/sketch-crowdin/releases/latest)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/crowdin/sketch-crowdin?cacheSeconds=5000)](https://github.com/crowdin/sketch-crowdin/releases/latest)
