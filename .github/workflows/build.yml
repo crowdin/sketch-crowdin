@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+  push:
+    branches:
+      - '*'
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - 'CODE_OF_CONDUCT.md'
+      - 'CONTRIBUTING.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Build
+        run: npm run build
+
+      - name: Create a zip
+        run: zip sketch-crowdin.sketchplugin.zip sketch-crowdin.sketchplugin
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sketch-crowdin.sketchplugin
+          path: sketch-crowdin.sketchplugin.zip
