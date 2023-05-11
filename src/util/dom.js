@@ -9,7 +9,7 @@ function getSelectedText(page) {
     const selectedTexts = [];
     const artboards = dom.find('Artboard, [selected=true]', page);
     const findTexts = (parent, onlySelected) => {
-        const symbols = dom.find(`SymbolInstance${onlySelected ? ', [selected=true]' : ''}`, parent);
+        const symbols = dom.find(`SymbolInstance`, parent);
         const texts = dom.find(`Text${onlySelected ? ', [selected=true]' : ''}`, parent);
         symbols.forEach(symbol =>
             symbol.overrides
