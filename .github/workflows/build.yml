@@ -32,7 +32,7 @@ jobs:
         run: npm run build
 
       - name: Create a zip
-        run: zip sketch-crowdin.sketchplugin.zip sketch-crowdin.sketchplugin
+        run: zip -r sketch-crowdin.sketchplugin.zip sketch-crowdin.sketchplugin
 
       - uses: actions/upload-artifact@v3
         with:

@@ -23,7 +23,7 @@ jobs:
         run: npm run build
 
       - name: Create a zip
-        run: zip sketch-crowdin.sketchplugin.zip sketch-crowdin.sketchplugin
+        run: zip -r sketch-crowdin.sketchplugin.zip sketch-crowdin.sketchplugin
 
       - name: Upload asset
         uses: softprops/action-gh-release@v1
