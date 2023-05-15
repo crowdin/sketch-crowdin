@@ -88,5 +88,8 @@
         <item>
             <enclosure url="https://github.com/crowdin/sketch-crowdin/releases/download/2.7.0/sketch-crowdin.sketchplugin.zip" sparkle:version="2.7.0"/>
         </item>
+        <item>
+            <enclosure url="https://github.com/crowdin/sketch-crowdin/releases/download/2.7.1/sketch-crowdin.sketchplugin.zip" sparkle:version="2.7.1"/>
+        </item>
     </channel>
 </rss>
