@@ -44,14 +44,14 @@
     "sass-dev": "node-sass ui/styles.scss sketch-crowdin.sketchplugin/Contents/Resources/styles.css"
   },
   "dependencies": {
-    "@crowdin/crowdin-api-client": "1.12.4",
+    "@crowdin/crowdin-api-client": "1.24.0",
     "bootstrap": "4.5.0",
     "bootstrap-select": "^1.13.18",
-    "cheerio": "^1.0.0-rc.3",
-    "jquery": "3.5.1",
+    "cheerio": "1.0.0-rc.10",
+    "jquery": "3.7.1",
     "popper.js": "^1.14.3",
-    "sketch-module-web-view": "^3.4.1",
-    "jszip": "^3.8.0",
+    "sketch-module-web-view": "^3.5.1",
+    "jszip": "^3.10.1",
     "@skpm/buffer": "0.1.4"
   },
   "devDependencies": {
