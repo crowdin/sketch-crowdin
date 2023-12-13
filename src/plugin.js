@@ -37,8 +37,8 @@ export default function start() {
 
     const options = {
         identifier,
-        width: 400,
-        height: 760,
+        width: 500,
+        height: 600,
         hidesOnDeactivate: true,
         remembersWindowFrame: true,
         alwaysOnTop: true,

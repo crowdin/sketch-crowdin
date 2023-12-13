@@ -70,13 +70,13 @@
             "contentSegmentationLabel": "Content segmentation",
             "stringsKeyNamingLabel": "Key naming pattern:",
             "connectionDetailsLabel": "Crowdin Credentials",
+            "projectConfigurationLabel": "Project Configuration",
             "advancedSettingsLabel": "Advanced Settings",
-            "tokenLabel": "Personal Access Token:",
+            "tokenLabel": "Personal Access Token",
             "tokenDetailsText": "You can generate it in your Crowdin Account Settings",
             "overrideTranslationsText": "Override existing translated pages and artboards and keep only the latest version for each language",
             "contentSegmentationText": "Defines whether to split long texts into smaller text segments when sending texts to Crowdin",
             "stringsKeyNamingText": "Pattern which will be used to autocomplete string identifier if it was added from design",
-            "branchText": "Specify the branch for content synchronization. Work on branches to localize different product versions",
             "organizationLabel": "Organization",
             "organizationDetailsText": "Fill in your organization domain name (for Crowdin Enterprise only)",
             "connectToCrowdinButton": "Connect to Crowdin",
@@ -144,7 +144,8 @@
             "addStringContextDetails": "Any contextual information that will help translators to understand the source text meaning",
             "addStringFileDetails": "Select an editable source file from the Crowdin project. You can add source strings only to existing files. Supported formats: CSV, RESX, JSON, Android XML, iOS strings, PROPERTIES, XLIFF, ARB.",
             "addStringLabelDetails": "Specify labels for string(s) which then will be used in search or export functionality",
-            "pseudoLocalizationDetails": "Pseudo-localization is a way to test the readiness of the application to be translated. This process imitates how the application's UI will look with different languages and thus allows you to check whether the source strings should be modified before the project localization."
+            "pseudoLocalizationDetails": "Pseudo-localization is a way to test the readiness of the application to be translated. This process imitates how the application's UI will look with different languages and thus allows you to check whether the source strings should be modified before the project localization.",
+            "branchDetails": "Specify the branch for content synchronization. Work on branches to localize different product versions"
         },
         "validation": {
             "addStringEmptyString": "Please, insert the source string",
