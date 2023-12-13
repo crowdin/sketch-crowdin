@@ -44,7 +44,7 @@ async function translate(languageId, wholePage) {
             if (!directory) {
                 throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(selectedPage.name));
             }
-            const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, undefined, directory.data.id);
+            const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, { branchId: undefined, directoryId: directory.data.id });
             if (projectFiles.data.length === 0) {
                 throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(page.name));
             }

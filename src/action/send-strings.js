@@ -70,7 +70,7 @@ async function uploadStrings(page, selectedArtboards) {
         });
     }
 
-    const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, undefined, directory.data.id);
+    const projectFiles = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, { branchId: undefined, directoryId: directory.data.id });
     const artboards = selectedArtboards || dom.find('Artboard', page);
     const promises = artboards
         .map(artboard => uploadArtboard(uploadStorageApi, sourceFilesApi, projectFiles, page, artboard, projectId, directory.data.id));

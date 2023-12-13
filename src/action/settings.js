@@ -5,6 +5,7 @@ import { capitalize, snakeCase } from 'lodash';
 import {
     ACCESS_TOKEN_KEY,
     PROJECT_ID,
+    PROJECT_TYPE,
     ORGANIZATION,
     OVERRIDE_TRANSLATIONS,
     CONTENT_SEGMENTATION,
@@ -144,12 +145,15 @@ function extractCrowdinOrganization(value) {
     }
 }
 
-function saveProject(projectId) {
+function saveProject(projectId, projectType) {
     if (!dom.getSelectedDocument()) {
         ui.message(displayTexts.notifications.warning.selectDocument);
         return;
     }
+
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, projectId);
+    settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_TYPE, projectType);
+
     if (!!projectId) {
         ui.message(displayTexts.notifications.info.projectSaved);
     }
@@ -161,7 +165,7 @@ function saveBranch(branchId) {
         return;
     }
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), BRANCH_ID, branchId);
-    if (!!branchId) {
+    if (!!branchId && branchId !== -1) {
         ui.message(displayTexts.notifications.info.branchSaved);
     }
 }
@@ -174,6 +178,7 @@ function logout() {
     settings.setSettingForKey(ORGANIZATION, undefined);
     settings.setSettingForKey(ACCESS_TOKEN_KEY, undefined);
     settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_ID, undefined);
+    settings.setDocumentSettingForKey(dom.getSelectedDocument(), PROJECT_TYPE, undefined);
 }
 
 function isArtboardSelected() {
