@@ -65,6 +65,25 @@ Before sending your pull requests, make sure you followed the list below:
 
 #### Development
 
+First, clone this repository.
+
+Once you cloned the repository, install the dependencies and build the plugin:
+
+```console
+npm install
+npm run build
+```
+
+Tip: Rebuild the plugin automatically after making changes by running `npm run watch` instead.
+
+Then you need to recreate the symlink using this command:
+
+```console
+cd ~/Desktop/Projects/Sketch/YourPluginDirectory && ./node_modules/.bin/skpm-link
+```
+
+The first path is wherever your build directory is located.
+
 To inspect and debug the UI part of the plugin, *Right-Click* on any UI element, then click *Inspect Element*.
 
 To debug the JS code, open the `plugin.js` file, set the `devTools` variable to `true`, open terminal, navigate to the current project directory and run the following command:
