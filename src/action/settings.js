@@ -27,9 +27,6 @@ function fileFormats() {
 
 function getCredentials() {
     let token = settings.settingForKey(ACCESS_TOKEN_KEY);
-    if (!!token && token.length > 3) {
-        token = token.substring(0, 3) + '...';
-    }
     const organization = settings.settingForKey(ORGANIZATION);
     return { token, organization };
 }

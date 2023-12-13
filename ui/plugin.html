@@ -39,17 +39,11 @@
         <main role="main">
             <div class="container" id="settings" style="display: none;">
                 <form>
-                    <div class="form-group inline-select d-flex flex-row">
-                        <label crowdin-ui-text-label="selectProjectLabel"></label>
-                        <div class="inline-select-holder ml-2">
-                            <select id="projects" onchange="onUpdateProject()"></select>
-                        </div>
-                    </div>
                     <fieldset class="mt-4">
                         <label crowdin-ui-text-label="connectionDetailsLabel" class="fieldset-label"></label>
                         <div class="form-group">
                             <label crowdin-ui-text-label="tokenLabel"></label>
-                            <input type="text" class="form-control" id="token"
+                            <input type="password" class="form-control" id="token"
                                 onchange="$('#connect-btn').attr('disabled', false);">
                             <p crowdin-ui-text-label="tokenDetailsText" class="form-text text-muted help-text mb-3">
                             </p>
@@ -64,6 +58,25 @@
                                 class="btn btn-primary btn-sm" onclick="saveCredentials()"></button>
                             <button id="logout-btn" crowdin-ui-text-label="logoutButton" type="button"
                                 class="btn btn-secondary btn-sm float-right" onclick="logout()"></button>
+                        </div>
+                    </fieldset>
+                    <fieldset class="mt-4">
+                        <label crowdin-ui-text-label="projectConfigurationLabel" class="fieldset-label"></label>
+                        <div class="form-group inline-select d-flex flex-row">
+                            <label crowdin-ui-text-label="selectProjectLabel"></label>
+                            <div class="inline-select-holder ml-2">
+                                <select id="projects" onchange="onUpdateProject()"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="inline-select d-flex flex-row">
+                                <label>
+                                    <abbr crowdin-ui-text-label="selectBranchLabel" crowdin-ui-text-details="branchDetails"></abbr>
+                                </label>
+                                <div class="inline-select-holder ml-2">
+                                    <select id="branches" onchange="saveBranch().then(clearStorage)"></select>
+                                </div>
+                            </div>
                         </div>
                     </fieldset>
                     <fieldset class="mt-4">
@@ -109,16 +122,6 @@
                                 <div id="custom-naming-helper-list" class="custom-naming-helper-list">
                                 </div>
                                 <p crowdin-ui-text-label="stringsKeyNamingText" class="form-text text-muted help-text">
-                                </p>
-                            </div>
-                            <div class="form-group">
-                                <div class="inline-select d-flex flex-row">
-                                    <label crowdin-ui-text-label="selectBranchLabel"></label>
-                                    <div class="inline-select-holder ml-2">
-                                        <select id="branches" onchange="saveBranch().then(clearStorage)"></select>
-                                    </div>
-                                </div>
-                                <p crowdin-ui-text-label="branchText" class="form-text text-muted help-text">
                                 </p>
                             </div>
                         </div>
