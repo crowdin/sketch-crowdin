@@ -3,7 +3,6 @@ import settings from 'sketch/settings';
 import dom from 'sketch/dom';
 import { PROJECT_ID, ACCESS_TOKEN_KEY } from '../constants';
 import * as httpUtil from '../util/http';
-import { PatchOperation } from '@crowdin/crowdin-api-client';
 import { default as displayTexts } from '../../assets/texts.json';
 import { truncateLongText } from '../util/string';
 import * as localStorage from '../util/local-storage';
@@ -27,22 +26,22 @@ async function editString(string) {
             {
                 path: '/text',
                 value: text,
-                op: PatchOperation.REPLACE
+                op: 'replace'
             },
             {
                 path: '/context',
                 value: context,
-                op: PatchOperation.REPLACE
+                op: 'replace'
             },
             {
                 path: '/maxLength',
                 value: maxLength,
-                op: PatchOperation.REPLACE
+                op: 'replace'
             },
             {
                 path: '/identifier',
                 value: identifier,
-                op: PatchOperation.REPLACE
+                op: 'replace'
             }
         ]);
         const tags = localStorage.getTags(dom.getSelectedDocument());
