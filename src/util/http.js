@@ -1,6 +1,6 @@
 import ui from 'sketch/ui';
 import settings from 'sketch/settings';
-import crowdin, { HttpClientType } from '@crowdin/crowdin-api-client';
+import crowdin from '@crowdin/crowdin-api-client';
 import { ACCESS_TOKEN_KEY, ORGANIZATION, PLUGIN_VERSION } from '../constants';
 import { default as displayTexts } from '../../assets/texts.json';
 import { truncateLongText } from './string';
@@ -18,7 +18,7 @@ function createClient() {
             organization
         },
         {
-            httpClientType: HttpClientType.FETCH,
+            httpClientType: 'fetch',
             userAgent: `crowdin-sketch-plugin/${PLUGIN_VERSION} sketch/${sketchVersion}`
         }
     );
