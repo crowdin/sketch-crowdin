@@ -1254,15 +1254,18 @@
         const identifiers = (strings || []).map(s => s.identifier);
         const sendScreenshots = $('#sendScreenshotsStrings').prop('checked');
         const linkDuplicated = $('#linkDuplicateStrings').prop('checked');
+        const files = isStringsBased() ? [selectedBranch] : $('#string-files option:selected').toArray();
+        const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
 
         if (selectedText.length > 1) {
             // adding multiple strings
             $('#multi-string-form div.form-group .invalid-feedback').text('');
+
             const pushHidden = $('#pushHiddenStrings').prop('checked');
-            const files = $('#string-files option:selected').toArray();
-            const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
+
             const newStrings = [];
             const rows = $('#multi-string-form div.form-group div.form-row');
+
             for (let i = 0; i < rows.length; i++) {
                 const row = $(rows[i]);
                 if (!row.is(':visible')) {
@@ -1294,7 +1297,6 @@
             }
             showLoading();
             const addedStrings = [];
-            // TODO: files
             const promises = files.map(file => {
                 return newStrings.reduce((acc, str) => {
                     return acc.then(() => {
@@ -1311,24 +1313,38 @@
                                 return;
                             }
                         }
-                        return window
-                            .postMessage('addString', {
-                                text: str.text,
-                                identifier: str.identifier,
-                                fileId: Number($(file).val()),
-                                labelIds: labelIds.length > 0 ? labelIds : undefined
-                            })
+
+                        let req = {
+                          text: str.text,
+                          identifier: str.identifier,
+                          labelIds: labelIds.length > 0 ? labelIds : undefined
+                        };
+
+                        if (isStringsBased()) {
+                            req.branchId = selectedBranch;
+                        } else {
+                            req.fileId = Number($(file).val());
+                        }
+
+                        return window.postMessage('addString', req)
                             .then(e => {
                                 if (!e[0].error) {
-                                    strings.push({
-                                        id: e[0].data.id,
-                                        text: str.text,
-                                        fileId: Number($(file).val()),
-                                        identifier: str.identifier,
-                                        context: str.identifier,
-                                        maxLength: 0,
-                                        labelIds
-                                    });
+                                    let string = {
+                                      id: e[0].data.id,
+                                      text: str.text,
+                                      identifier: str.identifier,
+                                      context: str.identifier,
+                                      maxLength: 0,
+                                      labelIds
+                                    };
+
+                                    if (isStringsBased()) {
+                                      string.branchId = selectedBranch;
+                                    } else {
+                                      string.fileId = Number($(file).val());
+                                    }
+
+                                    strings.push(string);
                                     addedStrings.push({
                                         id: e[0].data.id,
                                         existing: false,
@@ -1341,7 +1357,6 @@
             });
             return Promise.all(promises)
                 .then(() => {
-                    // TODO: files
                     const stringsToProcess = addedStrings.filter(newString => newString.existing || files.length === 1);
                     if (stringsToProcess.length > 0) {
                         return window
@@ -1359,6 +1374,7 @@
                 })
                 .finally(hideLoading);
         }
+
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidMaxLength').text('');
@@ -1374,6 +1390,7 @@
             $('#invalidMaxLength').text(validationMessages.addStringInvalidMaxLength || 'Invalid');
             return;
         }
+
         if (openedString) {
             const context = $('#string-context').val();
             const identifier = $('#edit-string-identifier').val();
@@ -1416,9 +1433,6 @@
         } else {
             //adding single string
             const identifier = $('#string-identifier').val();
-            // TODO: files
-            const files = $('#string-files option:selected').toArray();
-            const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             if (!identifier || identifier.length === '') {
                 $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                 return;
@@ -1452,28 +1466,40 @@
                 }
             }
 
-            // TODO: files
             const promises = files.map(file => {
-                const req = {
+                let req = {
                     text,
                     identifier,
                     maxLength: $('#string-max-length').val().length === 0 ? undefined : maxLength,
-                    fileId: Number($(file).val()),
                     labelIds: labelIds.length > 0 ? labelIds : undefined
                 };
+
+                if (isStringsBased()) {
+                    req.branchId = selectedBranch;
+                } else {
+                    req.fileId = Number($(file).val());
+                }
+
                 return window.postMessage('addString', req)
                     .then(e => {
                         if (!e[0].error) {
                             const id = e[0].data.id;
-                            strings.push({
-                                id,
-                                text: text,
-                                fileId: Number($(file).val()),
-                                identifier: identifier,
-                                context: identifier,
-                                maxLength,
-                                labelIds
-                            });
+                            let string = {
+                              id,
+                              text: text,
+                              identifier: identifier,
+                              context: identifier,
+                              maxLength,
+                              labelIds
+                            };
+
+                            if (isStringsBased()) {
+                                string.branchId = selectedBranch;
+                            } else {
+                                string.fileId = Number($(file).val());
+                            }
+
+                            strings.push(string);
                             return id;
                         }
                     });
@@ -1483,7 +1509,6 @@
                 .then((ids) => {
                     const id = ids.find(id => !!id);
 
-                    // TODO: files
                     if (selectedText.length > 0 && files.length === 1) {
                         return window
                             .postMessage('useString', [{
