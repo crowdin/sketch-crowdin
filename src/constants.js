@@ -3,6 +3,7 @@ const KEY_PREFIX = 'crowdin';
 export const ACCESS_TOKEN_KEY = `${KEY_PREFIX}-access-token`;
 export const ORGANIZATION = `${KEY_PREFIX}-organization`;
 export const PROJECT_ID = `${KEY_PREFIX}-project-id`;
+export const PROJECT_TYPE = `${KEY_PREFIX}-project-type`;
 export const BRANCH_ID = `${KEY_PREFIX}-branch-id`;
 export const OVERRIDE_TRANSLATIONS = `${KEY_PREFIX}-override-translations`;
 export const CONTENT_SEGMENTATION = `${KEY_PREFIX}-content-segmentation`;

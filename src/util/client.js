@@ -12,22 +12,27 @@ async function getProjects() {
         }
         ui.message(displayTexts.notifications.info.loadingProjects);
         const { projectsGroupsApi } = createClient();
-        const projects = await projectsGroupsApi.withFetchAll().listProjects({hasManagerAccess: 1});
+        const projects = await projectsGroupsApi.withFetchAll().listProjects({ hasManagerAccess: 1 });
         if (projects.data.length === 0) {
             throw displayTexts.notifications.warning.noProjects;
         }
+
         let projectId = settings.documentSettingForKey(dom.getSelectedDocument(), PROJECT_ID);
+
         if (!!projectId) {
             projectId = parseInt(projectId);
         } else {
             projectId = projects.data.length > 0 ? projects.data[0].data.id : null;
         }
+
         return {
             selectedProjectId: projectId,
+            selectedProjectType: projects.data.find(p => p.data.id === projectId).data.type,
             projects: projects.data.map(p => {
                 return {
                     id: p.data.id,
-                    name: p.data.name
+                    name: p.data.name,
+                    type: p.data.type
                 };
             })
         }
@@ -136,8 +141,10 @@ async function getFiles() {
         let branchId = settings.documentSettingForKey(dom.getSelectedDocument(), BRANCH_ID);
         branchId = !!branchId && branchId > 0 ? branchId : undefined;
         ui.message(displayTexts.notifications.info.loadingFiles);
+
         const { sourceFilesApi } = createClient();
-        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, branchId, undefined, undefined, undefined, true);
+        const files = await sourceFilesApi.withFetchAll().listProjectFiles(projectId, { branchId: branchId, recursion: true});
+
         return files.data
             .map(e => e.data)
             .sort(sortFiles)

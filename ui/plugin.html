@@ -338,6 +338,7 @@
             <div class="container" id="translation" style="display: none;">
                 <form>
                     <div id="translation-view">
+                        <p class="form-text text-muted help-text" crowdin-ui-text-label="pagesDescription"></p>
                         <fieldset>
                             <label crowdin-ui-text-label="sendTextsLabel" class="fieldset-label"></label>
                             <div class="form-group">
@@ -675,7 +676,9 @@
 
     function saveProject() {
         const projectId = $('#projects option:selected').val();
-        return window.postMessage('saveProject', projectId);
+        const projectType = projectsInfo.projects.filter(p => p.id === Number(projectId))[0].type;
+
+        return window.postMessage('saveProject', projectId, projectType);
     }
 
     function saveBranch() {
@@ -1500,7 +1503,6 @@
                 res();
             });
         }
-
     }
 
     function getProjects() {
