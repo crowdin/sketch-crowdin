@@ -1252,10 +1252,11 @@
         const identifiers = (strings || []).map(s => s.identifier);
         const sendScreenshots = $('#sendScreenshotsStrings').prop('checked');
         const linkDuplicated = $('#linkDuplicateStrings').prop('checked');
+
         if (selectedText.length > 1) {
-            const pushHidden = $('#pushHiddenStrings').prop('checked');
-            //adding multiple strings
+            // adding multiple strings
             $('#multi-string-form div.form-group .invalid-feedback').text('');
+            const pushHidden = $('#pushHiddenStrings').prop('checked');
             const files = $('#string-files option:selected').toArray();
             const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             const newStrings = [];
@@ -1291,6 +1292,7 @@
             }
             showLoading();
             const addedStrings = [];
+            // TODO: files
             const promises = files.map(file => {
                 return newStrings.reduce((acc, str) => {
                     return acc.then(() => {
@@ -1337,6 +1339,7 @@
             });
             return Promise.all(promises)
                 .then(() => {
+                    // TODO: files
                     const stringsToProcess = addedStrings.filter(newString => newString.existing || files.length === 1);
                     if (stringsToProcess.length > 0) {
                         return window
@@ -1411,6 +1414,7 @@
         } else {
             //adding single string
             const identifier = $('#string-identifier').val();
+            // TODO: files
             const files = $('#string-files option:selected').toArray();
             const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             if (!identifier || identifier.length === '') {
@@ -1445,6 +1449,8 @@
 
                 }
             }
+
+            // TODO: files
             const promises = files.map(file => {
                 const req = {
                     text,
@@ -1467,12 +1473,15 @@
                                 labelIds
                             });
                             return id;
-                        };
+                        }
                     });
             });
+
             return Promise.all(promises)
                 .then((ids) => {
                     const id = ids.find(id => !!id);
+
+                    // TODO: files
                     if (selectedText.length > 0 && files.length === 1) {
                         return window
                             .postMessage('useString', [{
