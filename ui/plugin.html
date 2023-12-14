@@ -96,7 +96,7 @@
                                     class="form-text text-muted help-text">
                                 </p>
                             </div>
-                            <div class="form-group mb-3">
+                            <div id="content-segmentation-block" class="form-group mb-3">
                                 <div>
                                     <label crowdin-ui-text-label="contentSegmentationLabel" class="mb-0">
                                     </label>
@@ -672,6 +672,7 @@
     function stringsBasedProjectElementsVisibility() {
         $('#translation-nav').hide();
         $('#select-branch-error').hide();
+        $('#content-segmentation-block').hide();
 
         if (selectedBranch === -1) {
             $('#select-branch-error').show();
@@ -681,6 +682,7 @@
     function filesBasedProjectElementsVisibility() {
         $('#translation-nav').show();
         $('#select-branch-error').hide();
+        $('#content-segmentation-block').show();
     }
     // <!--</editor-fold>-->
 
