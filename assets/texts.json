@@ -66,6 +66,7 @@
             "contactUsTab": "Contact Us",
             "selectProjectLabel": "Project:",
             "selectBranchLabel": "Branch:",
+            "selectBranchError": "Please select a branch. Required for string based projects",
             "overrideTranslationsLabel": "Override existing translations",
             "contentSegmentationLabel": "Content segmentation",
             "stringsKeyNamingLabel": "Key naming pattern:",

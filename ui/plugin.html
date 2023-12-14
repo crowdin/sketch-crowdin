@@ -74,10 +74,13 @@
                                     <abbr crowdin-ui-text-label="selectBranchLabel" crowdin-ui-text-details="branchDetails"></abbr>
                                 </label>
                                 <div class="inline-select-holder ml-2">
-                                    <select id="branches" onchange="saveBranch().then(clearStorage)"></select>
+                                    <select id="branches" onchange="saveBranch().then(adjustToProjectType).then(clearStorage)"></select>
                                 </div>
                             </div>
                         </div>
+                        <p id="select-branch-error" crowdin-ui-text-label="selectBranchError"
+                           class="form-text help-text text-error" style="display: none;">
+                        </p>
                     </fieldset>
                     <fieldset class="mt-4">
                         <label crowdin-ui-text-label="advancedSettingsLabel" class="fieldset-label"></label>
@@ -236,7 +239,7 @@
                             </div>
                             <div class="strings-holder"></div>
                         </div>
-                        <div id="string-file-container" class="form-group mt-2">
+                        <div id="string-file-container" class="form-group mt-2" style="display: none;">
                             <label for="string-files"><abbr crowdin-ui-text-label="addStringFileLabel"
                                     crowdin-ui-text-details="addStringFileDetails"></abbr></label>
                             <select class="form-control" id="string-files" multiple size="8"></select>
@@ -490,10 +493,11 @@
 </body>
 
 <script>
-    const editableFileTypes = [  
+    const editableFileTypes = [
         "csv",
         "resx",
         "json",
+        "i18next_json",
         "android",
         "macosx",
         "strings",
@@ -502,7 +506,7 @@
         "arb",
         "gettext",
         "yaml",
-        'xlsx'
+        "xlsx"
     ];
 
     const CUSTOM_KEY_NAMING_PATTERN  = "Custom key naming pattern";
@@ -521,7 +525,17 @@
         .finally(() => {
             if (projectsInfo && projectsInfo.projects && projectsInfo.projects.length > 0) {
                 adjustToProjectType();
-                openModal('strings-mode');
+
+                if (isStringsBased()) {
+                  if (selectedBranch !== -1) {
+                    openModal('strings-mode');
+                  } else {
+                    openModal('settings');
+                  }
+                } else {
+                  openModal('strings-mode');
+                }
+                hideLoading();
             } else {
                 openModal('settings');
                 hideLoading();
@@ -549,6 +563,7 @@
 
     let projectsInfo;
     let sourceLanguage;
+    let selectedBranch;
     let languages;
     let strings;
     let files;
@@ -569,9 +584,13 @@
     }
 
     function openModal(modal) {
-        if (openedModal === modal) {
+        if (
+          openedModal === modal
+          || (isStringsBased() && selectedBranch === -1 && modal === 'strings-mode')
+        ) {
             return;
         }
+
         $(`#${openedModal}`).hide();
         $(`#${openedModal}-nav`).removeClass('active');
         $(`#${modal}`).show();
@@ -615,7 +634,7 @@
     }
 
     function openStringsMode() {
-        if (!sourceLanguage || !strings || !files || !languages || !labels) {
+        if (!sourceLanguage || !strings || (!files && !isStringsBased()) || !languages || !labels) {
             showLoading();
             return getFiles()
                 .then(getSourceLanguage)
@@ -644,18 +663,24 @@
 
     function adjustToProjectType() {
         if (isStringsBased()) {
-            hideElementsForStringsBasedProject();
+            stringsBasedProjectElementsVisibility();
         } else {
-            showElementsForFilesBasedProject();
+            filesBasedProjectElementsVisibility();
         }
     }
 
-    function hideElementsForStringsBasedProject() {
+    function stringsBasedProjectElementsVisibility() {
         $('#translation-nav').hide();
+        $('#select-branch-error').hide();
+
+        if (selectedBranch === -1) {
+            $('#select-branch-error').show();
+        }
     }
 
-    function showElementsForFilesBasedProject() {
+    function filesBasedProjectElementsVisibility() {
         $('#translation-nav').show();
+        $('#select-branch-error').hide();
     }
     // <!--</editor-fold>-->
 
@@ -681,6 +706,7 @@
             .then(saveProject)
             .then(getBranches)
             .then(saveBranch)
+            .then(adjustToProjectType)
             .then(clearStorage)
             .finally(hideLoading);
     }
@@ -712,6 +738,7 @@
 
     function saveBranch() {
         const branchId = Number($('#branches option:selected').val());
+        selectedBranch = branchId;
         return window.postMessage('saveBranch', branchId);
     }
 
@@ -740,7 +767,7 @@
         window.postMessage("getSearchHelperList", text).then(renderCustomNamingHelpers);
     }
 
-    function onClikToHelperText(el) {
+    function onClickToHelperText(el) {
         const customKeyInputValue = $('#customKeyNamingPattern').val();
         const lastIndex = customKeyInputValue.lastIndexOf("[%");
         const substring = customKeyInputValue.substring(0, lastIndex + 2) + `${$(el).text()}]`;
@@ -759,7 +786,7 @@
         $('#custom-naming-helper-list').show()
         options[0].forEach(el => {
             if(el) {
-                const listItem = `<p onclick="onClikToHelperText(this)">${el}<p>`
+                const listItem = `<p onclick="onClickToHelperText(this)">${el}<p>`
                 $('#custom-naming-helper-list').append(listItem);
             }
         })
@@ -1019,13 +1046,19 @@
         showLoading();
         window.postMessage('getSelectedText').then((e) => {
             selectedText = e[0];
+
             $('#list-strings').hide();
             $('#strings-preview').hide();
             $('#string-push-hidden-container').hide();
-            $('#string-file-container').show();
+
+            if (!isStringsBased()) {
+              $('#string-file-container').show();
+            }
+
             $('#string-label-container').show();
             $('#string-link-duplicate-container').show();
             $('#edit-string').show();
+
             if (selectedText.length === 0) {
                 //no text selected just a new Crowdin string
                 $('#string-link-duplicate-container').hide();
@@ -1659,7 +1692,7 @@
         return window.postMessage('getBranches')
             .then(res => {
                 let resp = res[0];
-                let selectedBranch = resp.selectedBranchId;
+                selectedBranch = resp.selectedBranchId;
                 let options = `<option value="-1" ${selectedBranch < 0 ? 'selected' : ''}>${noBranchOption || ''}</option>`;
                 options += resp.branches
                     .map(br => {
