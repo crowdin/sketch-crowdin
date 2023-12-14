@@ -508,7 +508,8 @@
     const CUSTOM_KEY_NAMING_PATTERN  = "Custom key naming pattern";
 
     let openedModal;
-    //initialization of the settings modal
+
+    // <!--<editor-fold desc="Initialization">-->
     showLoading();
     getCredentials()
         .then(getOverrideTranslations)
@@ -519,6 +520,7 @@
         .then(getBranches)
         .finally(() => {
             if (projectsInfo && projectsInfo.projects && projectsInfo.projects.length > 0) {
+                adjustToProjectType();
                 openModal('strings-mode');
             } else {
                 openModal('settings');
@@ -553,9 +555,9 @@
     let labels;
     let openedString;
     let selectedText = [];
+    // <!--</editor-fold>-->
 
-    //basic functions
-
+    // <!--<editor-fold desc="Basic functions">-->
     function clearStorage() {
         sourceLanguage = undefined;
         strings = undefined;
@@ -633,9 +635,31 @@
         $('#spinner').hide();
         $('#modalFade').hide();
     }
+    // <!--</editor-fold>-->
 
-    //settings
+    // <!--<editor-fold desc="Strings Based projects">-->
+    function isStringsBased() {
+        return projectsInfo.selectedProjectType === 1;
+    }
 
+    function adjustToProjectType() {
+        if (isStringsBased()) {
+            hideElementsForStringsBasedProject();
+        } else {
+            showElementsForFilesBasedProject();
+        }
+    }
+
+    function hideElementsForStringsBasedProject() {
+        $('#translation-nav').hide();
+    }
+
+    function showElementsForFilesBasedProject() {
+        $('#translation-nav').show();
+    }
+    // <!--</editor-fold>-->
+
+    // <!--<editor-fold desc="Settings">-->
     function getCredentials() {
         return window.postMessage('getCredentials').then(creds => {
             $('#organization').val(creds[0].organization);
@@ -677,6 +701,11 @@
     function saveProject() {
         const projectId = $('#projects option:selected').val();
         const projectType = projectsInfo.projects.filter(p => p.id === Number(projectId))[0].type;
+
+        projectsInfo.selectedProjectId = projectId;
+        projectsInfo.selectedProjectType = projectType;
+
+        adjustToProjectType();
 
         return window.postMessage('saveProject', projectId, projectType);
     }
@@ -735,9 +764,9 @@
             }
         })
     }
+    // <!--</editor-fold>-->
 
-    //translation
-
+    // <!--<editor-fold desc="Pages section">-->
     function translateComponent(wholePage) {
         showLoading();
         const languageId = $('#languages option:selected').val();
@@ -820,9 +849,9 @@
             .then(cancelPseudoLocalization)
             .finally(hideLoading);
     }
+    // <!--</editor-fold>-->
 
-    //strings mode
-
+    // <!--<editor-fold desc="Strings section">-->
     function onPreviewModeChange() {
         const previewMode = $('#preview-mode-option option:selected').val();
         onPreviewModeSubOptionChange(true);
@@ -939,9 +968,9 @@
             .then(getStrings)
             .finally(hideLoading);
     }
+    // <!--</editor-fold>-->
 
-    //strings management
-
+    // <!--<editor-fold desc="Strings management">-->
     function openEditString(element) {
         $('#string-delete-btn').show();
         showLoading();
@@ -1454,9 +1483,9 @@
             $(e.prevAll('svg[checkicon]')[0]).attr('opacity', '0.0');
         }
     }
+    // <!--</editor-fold>-->
 
-    //data loading functions
-
+    // <!--<editor-fold desc="Data loading functions">-->
     function getOverrideTranslations() {
         return window.postMessage('getOverrideTranslations')
             .then(msg => $('#overrideTranslations').prop('checked', !!msg[0].overrideTranslations));
@@ -1558,35 +1587,35 @@
     }
 
     function getFiles() {
-        if (!files) {
-            return window.postMessage('getFiles')
-                .then(res => {
-                    files = res[0];
-                    const supportedFiles = files.filter(file => editableFileTypes.includes(file.type));
-                    if(!supportedFiles.length) {
-                        $('#string-files').replaceWith(`
-                            <p>
-                                ${validationMessages.addStringEmptyFile} <a crowdin-ui-text-label="contactUsTab" href="#" onclick="textFormatsClick()">selected formats</a> only
-                            </p>
-                        `)
-                        return
-                    }
-                    const options = supportedFiles
-                        .map(file => {
-                            return `<option value="${file.id}"></option>`;
-                        }).join('');
-                    $('#string-files').find('option').remove().end().append(options);
-                    supportedFiles.forEach(file => {
-                        //adding text here via "text" method to avoid issues with strings which contain html tags
-                        $('#string-files').find(`option[value=${file.id}]`).text(file.name);
-                    });
-                    $('#string-files').selectpicker('refresh');
-                });
-        } else {
-            return new Promise((res, rej) => {
-                res();
-            });
+        if (isStringsBased() || files) {
+          return new Promise((res, rej) => {
+            res();
+          });
         }
+
+        return window.postMessage('getFiles')
+            .then(res => {
+                files = res[0];
+                const supportedFiles = files.filter(file => editableFileTypes.includes(file.type));
+                if(!supportedFiles.length) {
+                    $('#string-files').replaceWith(`
+                        <p>
+                            ${validationMessages.addStringEmptyFile} <a crowdin-ui-text-label="contactUsTab" href="#" onclick="textFormatsClick()">selected formats</a> only
+                        </p>
+                    `)
+                    return
+                }
+                const options = supportedFiles
+                    .map(file => {
+                        return `<option value="${file.id}"></option>`;
+                    }).join('');
+                $('#string-files').find('option').remove().end().append(options);
+                supportedFiles.forEach(file => {
+                    //adding text here via "text" method to avoid issues with strings which contain html tags
+                    $('#string-files').find(`option[value=${file.id}]`).text(file.name);
+                });
+                $('#string-files').selectpicker('refresh');
+            });
     }
 
     function getLabels() {
@@ -1643,6 +1672,7 @@
                 });
             });
     }
+    // <!--</editor-fold>-->
 
     let searchTimer;
     function debounceSearch() {
@@ -1691,14 +1721,16 @@
                 (str.labelIds && str.labelIds.length > 0 && labels.filter(l => str.labelIds.includes(l.id)).some(l => l.title.toLowerCase().includes(text)))
             );
         const limited = filteredStrings.length > 1000 ? filteredStrings.slice(0, 1000) : filteredStrings;
+
         return window.postMessage('getUsedStrings')
             .then((e) => {
                 const usedStrings = e[0];
                 const texts = limited.map(str => {
                     const isUsed = usedStrings.includes(str.id);
-                    const file = files.find(f => f.id === str.fileId);
-                    const editable = file && editableFileTypes.includes(file.type);
+                    const file = files && files.find(f => f.id === str.fileId);
+                    const editable = file && editableFileTypes.includes(file.type) || isStringsBased();
                     const infoIcon = infoIconTemplate.replace('%str-info-icon-identifier%', `str-info-icon-${str.id}`);
+
                     return `
                         ${isUsed ? checkIcon : checkIconBlank}${infoIcon}${editable ? editIcon : ''}
                         <p
@@ -1712,13 +1744,20 @@
                     `;
                 });
                 $('#strings-container').find('p, svg').remove().end().append(texts);
+
                 limited.forEach(str => {
                     //adding text here via "text" method to avoid issues with strings which contain html tags
-                    const file = files.find(f => f.id === str.fileId);
-                    let infoText = `Context:\n${str.context}\n\nIdentifier:\n${str.identifier ? str.identifier : str.text}\n\nFile:\n${file ? file.name : ''}`;
+                    let infoText = `Identifier:\n${str.identifier ? str.identifier : str.text}\n\nContext:\n${str.context}`;
+                    const file = files && files.find(f => f.id === str.fileId);
+
+                    if (file) {
+                        infoText += `\n\nFile:\n${file.name}`;
+                    }
+
                     if (str.labelIds && str.labelIds.length > 0) {
                         infoText += `\n\nLabels:\n${labels.filter(l => str.labelIds.includes(l.id)).map(l => l.title).join(',')}`;
                     }
+
                     $('#strings-container').find(`p[int-id=${str.id}]`).text(str.text);
                     $('#strings-container').find(`svg[id=str-info-icon-${str.id}`).find('title').text(infoText);
                 });
