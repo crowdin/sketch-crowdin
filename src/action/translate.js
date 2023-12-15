@@ -39,7 +39,7 @@ async function translate(languageId, wholePage) {
         }
 
         try {
-            const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId, branchId);
+            const directories = await sourceFilesApi.withFetchAll().listProjectDirectories(projectId, { branchId: branchId});
             const directory = directories.data.find(d => d.data.name === getDirectoryName(selectedPage));
             if (!directory) {
                 throw displayTexts.notifications.warning.noTranslationsForPage.replace('%name%', truncateLongText(selectedPage.name));

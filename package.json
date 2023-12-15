@@ -45,18 +45,18 @@
   },
   "dependencies": {
     "@crowdin/crowdin-api-client": "1.28.2",
+    "@skpm/buffer": "0.1.4",
     "bootstrap": "4.5.0",
     "bootstrap-select": "^1.13.18",
-    "cheerio": "1.0.0-rc.10",
     "jquery": "3.7.1",
-    "popper.js": "^1.14.3",
-    "sketch-module-web-view": "^3.5.1",
     "jszip": "^3.10.1",
-    "@skpm/buffer": "0.1.4"
+    "node-html-parser": "^6.1.11",
+    "popper.js": "^1.14.3",
+    "sketch-module-web-view": "^3.5.1"
   },
   "devDependencies": {
     "@babel/polyfill": "^7.7.0",
-    "@skpm/builder": "0.8.0",
-    "node-sass": "7.0.3"
+    "@skpm/builder": "0.9.5",
+    "node-sass": "9.0.0"
   }
 }

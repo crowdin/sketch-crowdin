@@ -552,6 +552,10 @@ p {
     line-height: 1.25;
 }
 
+.text-error {
+    color: var(--systemRed) !important;
+}
+
 .bordered {
     border: var(--borderRule);
 }

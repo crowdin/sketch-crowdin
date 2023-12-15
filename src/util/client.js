@@ -276,8 +276,10 @@ async function getLabels() {
         }
         ui.message(displayTexts.notifications.info.loadingLabels);
         const { labelsApi } = createClient();
-        const languages = await labelsApi.withFetchAll().listLabels(projectId);
-        return languages.data
+        const labels = await labelsApi.withFetchAll().listLabels(projectId);
+
+        return labels.data
+            .filter(l => !l.data.isSystem)
             .map(l => {
                 return {
                     id: l.data.id,

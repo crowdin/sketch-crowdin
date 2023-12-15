@@ -74,10 +74,13 @@
                                     <abbr crowdin-ui-text-label="selectBranchLabel" crowdin-ui-text-details="branchDetails"></abbr>
                                 </label>
                                 <div class="inline-select-holder ml-2">
-                                    <select id="branches" onchange="saveBranch().then(clearStorage)"></select>
+                                    <select id="branches" onchange="saveBranch().then(adjustToProjectType).then(clearStorage)"></select>
                                 </div>
                             </div>
                         </div>
+                        <p id="select-branch-error" crowdin-ui-text-label="selectBranchError"
+                           class="form-text help-text text-error" style="display: none;">
+                        </p>
                     </fieldset>
                     <fieldset class="mt-4">
                         <label crowdin-ui-text-label="advancedSettingsLabel" class="fieldset-label"></label>
@@ -93,7 +96,7 @@
                                     class="form-text text-muted help-text">
                                 </p>
                             </div>
-                            <div class="form-group mb-3">
+                            <div id="content-segmentation-block" class="form-group mb-3">
                                 <div>
                                     <label crowdin-ui-text-label="contentSegmentationLabel" class="mb-0">
                                     </label>
@@ -236,7 +239,7 @@
                             </div>
                             <div class="strings-holder"></div>
                         </div>
-                        <div id="string-file-container" class="form-group mt-2">
+                        <div id="string-file-container" class="form-group mt-2" style="display: none;">
                             <label for="string-files"><abbr crowdin-ui-text-label="addStringFileLabel"
                                     crowdin-ui-text-details="addStringFileDetails"></abbr></label>
                             <select class="form-control" id="string-files" multiple size="8"></select>
@@ -490,10 +493,11 @@
 </body>
 
 <script>
-    const editableFileTypes = [  
+    const editableFileTypes = [
         "csv",
         "resx",
         "json",
+        "i18next_json",
         "android",
         "macosx",
         "strings",
@@ -502,13 +506,14 @@
         "arb",
         "gettext",
         "yaml",
-        'xlsx'
+        "xlsx"
     ];
 
     const CUSTOM_KEY_NAMING_PATTERN  = "Custom key naming pattern";
 
     let openedModal;
-    //initialization of the settings modal
+
+    // <!--<editor-fold desc="Initialization">-->
     showLoading();
     getCredentials()
         .then(getOverrideTranslations)
@@ -519,7 +524,18 @@
         .then(getBranches)
         .finally(() => {
             if (projectsInfo && projectsInfo.projects && projectsInfo.projects.length > 0) {
-                openModal('strings-mode');
+                adjustToProjectType();
+
+                if (isStringsBased()) {
+                  if (selectedBranch !== -1) {
+                    openModal('strings-mode');
+                  } else {
+                    openModal('settings');
+                  }
+                } else {
+                  openModal('strings-mode');
+                }
+                hideLoading();
             } else {
                 openModal('settings');
                 hideLoading();
@@ -547,15 +563,16 @@
 
     let projectsInfo;
     let sourceLanguage;
+    let selectedBranch;
     let languages;
     let strings;
     let files;
     let labels;
     let openedString;
     let selectedText = [];
+    // <!--</editor-fold>-->
 
-    //basic functions
-
+    // <!--<editor-fold desc="Basic functions">-->
     function clearStorage() {
         sourceLanguage = undefined;
         strings = undefined;
@@ -567,9 +584,13 @@
     }
 
     function openModal(modal) {
-        if (openedModal === modal) {
+        if (
+          openedModal === modal
+          || (isStringsBased() && selectedBranch === -1 && modal === 'strings-mode')
+        ) {
             return;
         }
+
         $(`#${openedModal}`).hide();
         $(`#${openedModal}-nav`).removeClass('active');
         $(`#${modal}`).show();
@@ -613,7 +634,7 @@
     }
 
     function openStringsMode() {
-        if (!sourceLanguage || !strings || !files || !languages || !labels) {
+        if (!sourceLanguage || !strings || (!files && !isStringsBased()) || !languages || !labels) {
             showLoading();
             return getFiles()
                 .then(getSourceLanguage)
@@ -633,9 +654,39 @@
         $('#spinner').hide();
         $('#modalFade').hide();
     }
+    // <!--</editor-fold>-->
 
-    //settings
+    // <!--<editor-fold desc="Strings Based projects">-->
+    function isStringsBased() {
+        return projectsInfo.selectedProjectType === 1;
+    }
 
+    function adjustToProjectType() {
+        if (isStringsBased()) {
+            stringsBasedProjectElementsVisibility();
+        } else {
+            filesBasedProjectElementsVisibility();
+        }
+    }
+
+    function stringsBasedProjectElementsVisibility() {
+        $('#translation-nav').hide();
+        $('#select-branch-error').hide();
+        $('#content-segmentation-block').hide();
+
+        if (selectedBranch === -1) {
+            $('#select-branch-error').show();
+        }
+    }
+
+    function filesBasedProjectElementsVisibility() {
+        $('#translation-nav').show();
+        $('#select-branch-error').hide();
+        $('#content-segmentation-block').show();
+    }
+    // <!--</editor-fold>-->
+
+    // <!--<editor-fold desc="Settings">-->
     function getCredentials() {
         return window.postMessage('getCredentials').then(creds => {
             $('#organization').val(creds[0].organization);
@@ -657,6 +708,7 @@
             .then(saveProject)
             .then(getBranches)
             .then(saveBranch)
+            .then(adjustToProjectType)
             .then(clearStorage)
             .finally(hideLoading);
     }
@@ -678,11 +730,17 @@
         const projectId = $('#projects option:selected').val();
         const projectType = projectsInfo.projects.filter(p => p.id === Number(projectId))[0].type;
 
+        projectsInfo.selectedProjectId = projectId;
+        projectsInfo.selectedProjectType = projectType;
+
+        adjustToProjectType();
+
         return window.postMessage('saveProject', projectId, projectType);
     }
 
     function saveBranch() {
         const branchId = Number($('#branches option:selected').val());
+        selectedBranch = branchId;
         return window.postMessage('saveBranch', branchId);
     }
 
@@ -711,7 +769,7 @@
         window.postMessage("getSearchHelperList", text).then(renderCustomNamingHelpers);
     }
 
-    function onClikToHelperText(el) {
+    function onClickToHelperText(el) {
         const customKeyInputValue = $('#customKeyNamingPattern').val();
         const lastIndex = customKeyInputValue.lastIndexOf("[%");
         const substring = customKeyInputValue.substring(0, lastIndex + 2) + `${$(el).text()}]`;
@@ -730,14 +788,14 @@
         $('#custom-naming-helper-list').show()
         options[0].forEach(el => {
             if(el) {
-                const listItem = `<p onclick="onClikToHelperText(this)">${el}<p>`
+                const listItem = `<p onclick="onClickToHelperText(this)">${el}<p>`
                 $('#custom-naming-helper-list').append(listItem);
             }
         })
     }
+    // <!--</editor-fold>-->
 
-    //translation
-
+    // <!--<editor-fold desc="Pages section">-->
     function translateComponent(wholePage) {
         showLoading();
         const languageId = $('#languages option:selected').val();
@@ -820,9 +878,9 @@
             .then(cancelPseudoLocalization)
             .finally(hideLoading);
     }
+    // <!--</editor-fold>-->
 
-    //strings mode
-
+    // <!--<editor-fold desc="Strings section">-->
     function onPreviewModeChange() {
         const previewMode = $('#preview-mode-option option:selected').val();
         onPreviewModeSubOptionChange(true);
@@ -939,9 +997,9 @@
             .then(getStrings)
             .finally(hideLoading);
     }
+    // <!--</editor-fold>-->
 
-    //strings management
-
+    // <!--<editor-fold desc="Strings management">-->
     function openEditString(element) {
         $('#string-delete-btn').show();
         showLoading();
@@ -990,13 +1048,19 @@
         showLoading();
         window.postMessage('getSelectedText').then((e) => {
             selectedText = e[0];
+
             $('#list-strings').hide();
             $('#strings-preview').hide();
             $('#string-push-hidden-container').hide();
-            $('#string-file-container').show();
+
+            if (!isStringsBased()) {
+              $('#string-file-container').show();
+            }
+
             $('#string-label-container').show();
             $('#string-link-duplicate-container').show();
             $('#edit-string').show();
+
             if (selectedText.length === 0) {
                 //no text selected just a new Crowdin string
                 $('#string-link-duplicate-container').hide();
@@ -1190,14 +1254,18 @@
         const identifiers = (strings || []).map(s => s.identifier);
         const sendScreenshots = $('#sendScreenshotsStrings').prop('checked');
         const linkDuplicated = $('#linkDuplicateStrings').prop('checked');
+        const files = isStringsBased() ? [selectedBranch] : $('#string-files option:selected').toArray();
+        const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
+
         if (selectedText.length > 1) {
-            const pushHidden = $('#pushHiddenStrings').prop('checked');
-            //adding multiple strings
+            // adding multiple strings
             $('#multi-string-form div.form-group .invalid-feedback').text('');
-            const files = $('#string-files option:selected').toArray();
-            const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
+
+            const pushHidden = $('#pushHiddenStrings').prop('checked');
+
             const newStrings = [];
             const rows = $('#multi-string-form div.form-group div.form-row');
+
             for (let i = 0; i < rows.length; i++) {
                 const row = $(rows[i]);
                 if (!row.is(':visible')) {
@@ -1245,24 +1313,38 @@
                                 return;
                             }
                         }
-                        return window
-                            .postMessage('addString', {
-                                text: str.text,
-                                identifier: str.identifier,
-                                fileId: Number($(file).val()),
-                                labelIds: labelIds.length > 0 ? labelIds : undefined
-                            })
+
+                        let req = {
+                          text: str.text,
+                          identifier: str.identifier,
+                          labelIds: labelIds.length > 0 ? labelIds : undefined
+                        };
+
+                        if (isStringsBased()) {
+                            req.branchId = selectedBranch;
+                        } else {
+                            req.fileId = Number($(file).val());
+                        }
+
+                        return window.postMessage('addString', req)
                             .then(e => {
                                 if (!e[0].error) {
-                                    strings.push({
-                                        id: e[0].data.id,
-                                        text: str.text,
-                                        fileId: Number($(file).val()),
-                                        identifier: str.identifier,
-                                        context: str.identifier,
-                                        maxLength: 0,
-                                        labelIds
-                                    });
+                                    let string = {
+                                      id: e[0].data.id,
+                                      text: str.text,
+                                      identifier: str.identifier,
+                                      context: str.identifier,
+                                      maxLength: 0,
+                                      labelIds
+                                    };
+
+                                    if (isStringsBased()) {
+                                      string.branchId = selectedBranch;
+                                    } else {
+                                      string.fileId = Number($(file).val());
+                                    }
+
+                                    strings.push(string);
                                     addedStrings.push({
                                         id: e[0].data.id,
                                         existing: false,
@@ -1292,6 +1374,7 @@
                 })
                 .finally(hideLoading);
         }
+
         $('#invalidString').text('');
         $('#invalidIdentifier').text('');
         $('#invalidMaxLength').text('');
@@ -1307,6 +1390,7 @@
             $('#invalidMaxLength').text(validationMessages.addStringInvalidMaxLength || 'Invalid');
             return;
         }
+
         if (openedString) {
             const context = $('#string-context').val();
             const identifier = $('#edit-string-identifier').val();
@@ -1349,8 +1433,6 @@
         } else {
             //adding single string
             const identifier = $('#string-identifier').val();
-            const files = $('#string-files option:selected').toArray();
-            const labelIds = $('#string-labels option:selected').toArray().map(l => Number($(l).val()));
             if (!identifier || identifier.length === '') {
                 $('#invalidIdentifier').text(validationMessages.addStringEmptyIdentifier || 'Invalid');
                 return;
@@ -1383,34 +1465,50 @@
 
                 }
             }
+
             const promises = files.map(file => {
-                const req = {
+                let req = {
                     text,
                     identifier,
                     maxLength: $('#string-max-length').val().length === 0 ? undefined : maxLength,
-                    fileId: Number($(file).val()),
                     labelIds: labelIds.length > 0 ? labelIds : undefined
                 };
+
+                if (isStringsBased()) {
+                    req.branchId = selectedBranch;
+                } else {
+                    req.fileId = Number($(file).val());
+                }
+
                 return window.postMessage('addString', req)
                     .then(e => {
                         if (!e[0].error) {
                             const id = e[0].data.id;
-                            strings.push({
-                                id,
-                                text: text,
-                                fileId: Number($(file).val()),
-                                identifier: identifier,
-                                context: identifier,
-                                maxLength,
-                                labelIds
-                            });
+                            let string = {
+                              id,
+                              text: text,
+                              identifier: identifier,
+                              context: identifier,
+                              maxLength,
+                              labelIds
+                            };
+
+                            if (isStringsBased()) {
+                                string.branchId = selectedBranch;
+                            } else {
+                                string.fileId = Number($(file).val());
+                            }
+
+                            strings.push(string);
                             return id;
-                        };
+                        }
                     });
             });
+
             return Promise.all(promises)
                 .then((ids) => {
                     const id = ids.find(id => !!id);
+
                     if (selectedText.length > 0 && files.length === 1) {
                         return window
                             .postMessage('useString', [{
@@ -1454,9 +1552,9 @@
             $(e.prevAll('svg[checkicon]')[0]).attr('opacity', '0.0');
         }
     }
+    // <!--</editor-fold>-->
 
-    //data loading functions
-
+    // <!--<editor-fold desc="Data loading functions">-->
     function getOverrideTranslations() {
         return window.postMessage('getOverrideTranslations')
             .then(msg => $('#overrideTranslations').prop('checked', !!msg[0].overrideTranslations));
@@ -1558,35 +1656,35 @@
     }
 
     function getFiles() {
-        if (!files) {
-            return window.postMessage('getFiles')
-                .then(res => {
-                    files = res[0];
-                    const supportedFiles = files.filter(file => editableFileTypes.includes(file.type));
-                    if(!supportedFiles.length) {
-                        $('#string-files').replaceWith(`
-                            <p>
-                                ${validationMessages.addStringEmptyFile} <a crowdin-ui-text-label="contactUsTab" href="#" onclick="textFormatsClick()">selected formats</a> only
-                            </p>
-                        `)
-                        return
-                    }
-                    const options = supportedFiles
-                        .map(file => {
-                            return `<option value="${file.id}"></option>`;
-                        }).join('');
-                    $('#string-files').find('option').remove().end().append(options);
-                    supportedFiles.forEach(file => {
-                        //adding text here via "text" method to avoid issues with strings which contain html tags
-                        $('#string-files').find(`option[value=${file.id}]`).text(file.name);
-                    });
-                    $('#string-files').selectpicker('refresh');
-                });
-        } else {
-            return new Promise((res, rej) => {
-                res();
-            });
+        if (isStringsBased() || files) {
+          return new Promise((res, rej) => {
+            res();
+          });
         }
+
+        return window.postMessage('getFiles')
+            .then(res => {
+                files = res[0];
+                const supportedFiles = files.filter(file => editableFileTypes.includes(file.type));
+                if(!supportedFiles.length) {
+                    $('#string-files').replaceWith(`
+                        <p>
+                            ${validationMessages.addStringEmptyFile} <a crowdin-ui-text-label="contactUsTab" href="#" onclick="textFormatsClick()">selected formats</a> only
+                        </p>
+                    `)
+                    return
+                }
+                const options = supportedFiles
+                    .map(file => {
+                        return `<option value="${file.id}"></option>`;
+                    }).join('');
+                $('#string-files').find('option').remove().end().append(options);
+                supportedFiles.forEach(file => {
+                    //adding text here via "text" method to avoid issues with strings which contain html tags
+                    $('#string-files').find(`option[value=${file.id}]`).text(file.name);
+                });
+                $('#string-files').selectpicker('refresh');
+            });
     }
 
     function getLabels() {
@@ -1630,7 +1728,7 @@
         return window.postMessage('getBranches')
             .then(res => {
                 let resp = res[0];
-                let selectedBranch = resp.selectedBranchId;
+                selectedBranch = resp.selectedBranchId;
                 let options = `<option value="-1" ${selectedBranch < 0 ? 'selected' : ''}>${noBranchOption || ''}</option>`;
                 options += resp.branches
                     .map(br => {
@@ -1643,6 +1741,7 @@
                 });
             });
     }
+    // <!--</editor-fold>-->
 
     let searchTimer;
     function debounceSearch() {
@@ -1691,14 +1790,16 @@
                 (str.labelIds && str.labelIds.length > 0 && labels.filter(l => str.labelIds.includes(l.id)).some(l => l.title.toLowerCase().includes(text)))
             );
         const limited = filteredStrings.length > 1000 ? filteredStrings.slice(0, 1000) : filteredStrings;
+
         return window.postMessage('getUsedStrings')
             .then((e) => {
                 const usedStrings = e[0];
                 const texts = limited.map(str => {
                     const isUsed = usedStrings.includes(str.id);
-                    const file = files.find(f => f.id === str.fileId);
-                    const editable = file && editableFileTypes.includes(file.type);
+                    const file = files && files.find(f => f.id === str.fileId);
+                    const editable = file && editableFileTypes.includes(file.type) || isStringsBased();
                     const infoIcon = infoIconTemplate.replace('%str-info-icon-identifier%', `str-info-icon-${str.id}`);
+
                     return `
                         ${isUsed ? checkIcon : checkIconBlank}${infoIcon}${editable ? editIcon : ''}
                         <p
@@ -1712,13 +1813,20 @@
                     `;
                 });
                 $('#strings-container').find('p, svg').remove().end().append(texts);
+
                 limited.forEach(str => {
                     //adding text here via "text" method to avoid issues with strings which contain html tags
-                    const file = files.find(f => f.id === str.fileId);
-                    let infoText = `Context:\n${str.context}\n\nIdentifier:\n${str.identifier ? str.identifier : str.text}\n\nFile:\n${file ? file.name : ''}`;
+                    let infoText = `Identifier:\n${str.identifier ? str.identifier : str.text}\n\nContext:\n${str.context}`;
+                    const file = files && files.find(f => f.id === str.fileId);
+
+                    if (file) {
+                        infoText += `\n\nFile:\n${file.name}`;
+                    }
+
                     if (str.labelIds && str.labelIds.length > 0) {
                         infoText += `\n\nLabels:\n${labels.filter(l => str.labelIds.includes(l.id)).map(l => l.title).join(',')}`;
                     }
+
                     $('#strings-container').find(`p[int-id=${str.id}]`).text(str.text);
                     $('#strings-container').find(`svg[id=str-info-icon-${str.id}`).find('title').text(infoText);
                 });
