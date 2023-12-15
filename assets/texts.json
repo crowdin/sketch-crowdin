@@ -106,7 +106,7 @@
             "previewSelectedButtonLabel": "Artboard",
             "uploadScreenshotsLabel": "Upload Screenshots",
             "uploadScreenshotsDetailsText": "Send screenshots of the artboards within the selected page with the tagged source strings you've used",
-            "pagesDescription": "Translate marketing visuals, like social media banners, brochures, and more. Send ready pages for translation to Crowdin and upload translated copies back to Figma for further customizations.",
+            "pagesDescription": "Translate marketing visuals, like social media banners, brochures, and more. Send ready pages for translation to Crowdin and upload translated copies back to Sketch for further customizations.",
             "sendTextsLabel": "Send Texts",
             "sendTextsForLabel": "Send texts for selected:",
             "sendTextsForPageButtonLabel": "Page",

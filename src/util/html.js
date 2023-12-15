@@ -1,5 +1,5 @@
 import dom from 'sketch/dom';
-import cheerio from 'cheerio';
+import { parse } from 'node-html-parser';
 import * as domUtil from './dom';
 import { SYMBOL_TYPE, TEXT_TYPE } from '../constants';
 
@@ -88,17 +88,20 @@ function convertArtboardToHtml(page, artboard) {
 }
 
 function parseHtmlForText(html) {
-    const $ = cheerio.load(html);
-    const strings = $('div[id]');
+    const root = parse(html);
+    const strings = root.querySelectorAll('div[id]');
+
     let result = [];
     for (let i = 0; i < strings.length; i++) {
         const string = strings[i];
+
         result.push({
-            id: string.attribs.id,
-            text: cheerio.text($(string)),
-            type: string.attribs.stype || TEXT_TYPE
+            id: string.id,
+            text: string.rawText,
+            type: string.getAttribute('stype') || TEXT_TYPE
         });
     }
+
     return result;
 }
 
