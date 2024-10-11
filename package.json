@@ -46,7 +46,7 @@
   "dependencies": {
     "@crowdin/crowdin-api-client": "1.28.2",
     "@skpm/buffer": "0.1.4",
-    "bootstrap": "4.5.0",
+    "bootstrap": "5.3.3",
     "bootstrap-select": "^1.13.18",
     "jquery": "3.7.1",
     "jszip": "^3.10.1",
