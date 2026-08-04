@@ -789,8 +789,7 @@
         $('#custom-naming-helper-list').show()
         options[0].forEach(el => {
             if(el) {
-                const listItem = `<p onclick="onClickToHelperText(this)">${el}<p>`
-                $('#custom-naming-helper-list').append(listItem);
+                $('<p onclick="onClickToHelperText(this)"></p>').text(el).appendTo('#custom-naming-helper-list');
             }
         })
     }
@@ -1093,22 +1092,24 @@
                 $('#linkDuplicateStrings').prop('checked', false);
                 onAddStringFileSelect();
                 let rowsHtml = '';
+                const rowItems = [];
                 let identifiers = (strings || []).map(s => s.identifier);
                 selectedText.forEach(e => {
                     const identifier = generateIdentifier(e, identifiers);
                     identifiers.push(identifier);
+                    rowItems.push({ identifier, text: e.text });
                     rowsHtml += `
-                    <div class="form-row" id="mass-adding-string-${identifier}">
+                    <div class="form-row">
                         <div class="col-6">
-                            <textarea class="form-control" placeholder="text">${e.text}</textarea>
+                            <textarea class="form-control" placeholder="text"></textarea>
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="col-5 max-width-40">
-                            <input type="text" class="form-control" placeholder="identifier" value="${identifier}">
+                            <input type="text" class="form-control" placeholder="identifier">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="col-1">
-                            <svg onclick="removeStringFromForm('${identifier}')" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="string-row-delete">
+                            <svg onclick="removeStringFromForm(this)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="string-row-delete">
                                 <g>
                                 <rect transform="rotate(45 7.74139 8.43104)" height="1" width="10" y="7.93104" x="2.74139" stroke="null"  fill="currentColor"/>
                                 <rect transform="rotate(-45 7.82759 8.17242)" height="1" width="10" y="7.67242" x="2.82759" stroke="null" fill="currentColor"/>
@@ -1121,6 +1122,12 @@
                 const html = `<div class="form-group">${rowsHtml}</div>`;
                 $('#multi-string-form .strings-holder').empty();
                 $('#multi-string-form .strings-holder').append(html);
+                const $rows = $('#multi-string-form .strings-holder .form-row');
+                rowItems.forEach((item, i) => {
+                    const $row = $($rows[i]);
+                    $row.find('textarea').val(item.text);
+                    $row.find('input').val(item.identifier);
+                });
                 $('#single-string-form').hide();
                 $('#multi-string-form').show();
                 $('#string-push-hidden-container').show();
@@ -1242,8 +1249,8 @@
         }
     }
 
-    function removeStringFromForm(identifier) {
-        $(`[id="mass-adding-string-${identifier}"]`).hide();
+    function removeStringFromForm(el) {
+        $(el).closest('.form-row').hide();
         const rows = $('#multi-string-form div.form-group div.form-row');
         const removed = rows.toArray().filter(e => !$(e).is(':visible'));
         if (selectedText.length - 1 === removed.length) {
