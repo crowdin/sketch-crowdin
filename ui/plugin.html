@@ -2,6 +2,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
     <link rel="stylesheet" href="../bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="../bootstrap-select/dist/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="../styles.css">
@@ -1807,7 +1808,6 @@
                             onclick="useString(this)"
                             ${isUsed ? 'oncontextmenu="deselectString(this);return false;"' : ''}
                             int-id="${str.id}"
-                            ${!!str.identifier ? `str-id="${str.identifier}"` : ''}
                         >
                         </p>
                     `;
@@ -1827,7 +1827,7 @@
                         infoText += `\n\nLabels:\n${labels.filter(l => str.labelIds.includes(l.id)).map(l => l.title).join(',')}`;
                     }
 
-                    $('#strings-container').find(`p[int-id=${str.id}]`).text(str.text);
+                    $('#strings-container').find(`p[int-id=${str.id}]`).text(str.text).attr('str-id', str.identifier || null);
                     $('#strings-container').find(`svg[id=str-info-icon-${str.id}`).find('title').text(infoText);
                 });
             });
